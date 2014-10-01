@@ -10,8 +10,7 @@ is not a full programming language. Basically, you specify properties of your ex
 program to shuffle and display your items and record the results.
 
 I am still getting it set up to work with PsiTurk, but you can test out your JSON file and Speriment's behavior in your browser.
-You just need an HTML page with script tags for Speriment's dependencies: JQuery and underscore.js, Speriment itself: speriment.js, and
-your JSON file.
+Just swap out "test/sampleJSON.json" with your JSON file name in the file viewpage.html, and then open that html file in your browser.
 
 ###What kinds of experiments can Speriment run?
 Here are a few things Speriment can handle:
