@@ -10,8 +10,8 @@ training_experiment = {"blocks": [
 
             ]},
             {"id": "testing1", "pages": [
-                {"id": "te1", "text": "Which is bigger, the sun or the moon?", "freetext": true, "options": [{"id": "sunormoon", "correct": "sun"}]},
-                {"id": "tr2", "text": "Which is yummier?", "answer": "The answer was pizza, OBVIOUSLY.", "options": [
+                {"id": "te1", "text": "You made it to the test: Which is bigger, the sun or the moon?", "freetext": true, "options": [{"id": "sunormoon", "correct": "sun"}]},
+                {"id": "tr2", "text": "You made it to the test: Which is yummier?", "answer": "The answer was pizza, OBVIOUSLY.", "options": [
                     {"id": "pizza", "text": "Pizza", "correct": true},
                     {"id": "broccoli", "text": "Broccoli", "correct": false}
                 ]}
@@ -37,7 +37,7 @@ training_experiment = {"blocks": [
                 ]}
             ]},
             {"id": "testing2", "pages": [
-                {"id": "te3", "text": "Which of the following are dwarves?", "exclusive": false, "options": [
+                {"id": "te3", "text": "You made it to the test: Which of the following are dwarves?", "exclusive": false, "options": [
                     {"id": "h", "text": "Happy"},
                     {"id": "d", "text": "Doc"},
                     {"id": "s", "text": "Sleepy"},
@@ -47,14 +47,14 @@ training_experiment = {"blocks": [
                     {"id": "dp", "text": "Dopey"},
                     {"id": "sh", "text": "Shaq"}
                 ]},
-                {"id": "te4", "text": "Which of the following are nutritious?", "exclusive": false, "options": [
+                {"id": "te4", "text": "You made it to the test: Which of the following are nutritious?", "exclusive": false, "options": [
                     {"id": "ap", "text": "Apples"},
                     {"id": "pe", "text": "Pears"},
                     {"id": "ce", "text": "Celery"},
                     {"id": "do", "text": "Donuts"}
                 ]}
             ]},
-            {"id": "optional", "runIf": "do", "pages": [{"id": "worry", "text": "I'm worried about your health."}]}
+            {"id": "optional", "runIf": {"pageID": "te4", "optionID": "do"}, "pages": [{"id": "worry", "text": "I'm worried about your health."}]}
         ]},
     {"id": "outro", "pages": [{"id": "outropage", "text": "Thanks for taking the sample experiment!"}]}
     ],

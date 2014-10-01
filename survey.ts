@@ -25,7 +25,6 @@ var PAGE = "p.question",
     NAVIGATION = "div.navigation",
     CONTINUE = "#continue", // Next or Submit button
     BREAKOFF = "div.breakoff";
-    //FORM = "#surveyman";
 
 
 
@@ -42,19 +41,18 @@ class Survey implements Container{
         "paid depends on the results returned so far. Note that submitting partial " +
         "results does not guarantee payment.</p>";
 
-    constructor(jsonSurvey){
+    constructor(jsonSurvey, psiturk){
         jsonSurvey = _.defaults(jsonSurvey, {breakoff: true, exchangeable: []});
         this.exchangeable = jsonSurvey.exchangeable;
         this.showBreakoff = jsonSurvey.breakoff;
         this.contents = makeBlocks(jsonSurvey.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable);
-        this.experimentRecord = new ExperimentRecord();
+        this.experimentRecord = new ExperimentRecord(psiturk);
     }
 
     public start(){
         this.tellLast();
-        this.makeNext();
-        //$(FORM).val(JSON.stringify({responses: []}));
+        this.addElements();
         if (this.showBreakoff){
             this.showBreakoffNotice();
         } else {
@@ -66,10 +64,24 @@ class Survey implements Container{
         _.last<Block>(this.contents).tellLast();
     }
 
-    private makeNext(){
+    private addElements(){
+        var questionPar = document.createElement('p');
+        $(questionPar).addClass('question');
+
+        var answerPar = document.createElement('p');
+        $(answerPar).addClass('answer');
+
+        var navigationDiv = document.createElement('div');
+        $(navigationDiv).addClass('navigation');
+
+        var breakoffDiv = document.createElement('div');
+        $(breakoffDiv).addClass('breakoff');
+
         var nextButton = document.createElement("input");
         $(nextButton).attr({type: "button", id: "continue", value: "Next"});
-        $(NAVIGATION).append(nextButton);
+
+        $('body').append(questionPar, answerPar, navigationDiv, breakoffDiv);
+        $(navigationDiv).append(nextButton);
     }
 
     private showBreakoffNotice(){

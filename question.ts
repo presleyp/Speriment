@@ -23,7 +23,7 @@ class Page{
         this.text = jsonPage.text;
         this.condition = jsonPage.condition;
         var containers = getContainers(block);
-        this.record = new TrialRecord(containers);
+        this.record = new TrialRecord(this.id, this.condition, containers);
     }
 
     public advance(experimentRecord):void {}
@@ -45,7 +45,6 @@ class Page{
     public nextToSubmit(experimentRecord){
         $(CONTINUE).attr({type: "submit", value: "Submit", form: "surveyman"});
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.finish(experimentRecord)});
-        // $(CONTINUE).submit(); //TODO
     }
 
     public display(experimentRecord){
@@ -61,7 +60,7 @@ class Page{
 
     public finish(experimentRecord) {
         experimentRecord.addRecord(this.record);
-        //TODO
+        experimentRecord.submitRecords();
     }
 
 }
@@ -112,7 +111,7 @@ class Question extends Page{
         this.recordResponses(selected);
         this.recordCorrect(selected);
         // record(this.id, this.record);
-        experimentRecord.addRecord(this.id, this.record);
+        experimentRecord.addRecord(this.record);
 
         if (!_.isEmpty(optionAnswers) && this.exclusive){ // ignoring option-by-option answers if nonexclusive
             optionAnswers[0].display(experimentRecord);
@@ -157,7 +156,7 @@ class Statement extends Page{
     public advance(experimentRecord){
         this.record.endTime = new Date().getTime();
         // record(this.id, this.record);
-        experimentRecord.addRecord(this.id, this.record);
+        experimentRecord.addRecord(this.record);
         this.block.advance(experimentRecord);
     }
 

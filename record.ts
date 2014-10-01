@@ -2,14 +2,18 @@
 /// <reference path="node_modules/underscore/underscore.d.ts" />
 
 class TrialRecord {
+    public pageID;
     public blockIDs;
     public startTime;
     public endTime;
     public selected; // only for Question
     public correct; // only for Question
     public iteration;
+    public condition;
 
-    constructor(containers){
+    constructor(pageID, condition, containers){
+        this.pageID = pageID;
+        this.condition = condition;
         this.blockIDs = containers;
     }
 }
@@ -25,19 +29,21 @@ class TrialRecord {
 */
 class ExperimentRecord {
     private trialRecords; // {pageID: TrialRecord[]}
+    private psiturk;
 
-    constructor(){
+    constructor(psiturk){
+        this.psiturk = psiturk;
         this.trialRecords = {};
     }
 
-    public addRecord(pageID: string, trialRecord: TrialRecord){
-        if (!_.has(this.trialRecords, pageID)){
+    public addRecord(trialRecord: TrialRecord){
+        if (!_.has(this.trialRecords, trialRecord.pageID)){
             trialRecord.iteration = 1;
-            this.trialRecords[pageID] = [trialRecord];
+            this.trialRecords[trialRecord.pageID] = [trialRecord];
         } else {
-            var iter = this.trialRecords[pageID].length + 1;
+            var iter = this.trialRecords[trialRecord.pageID].length + 1;
             trialRecord.iteration = iter;
-            this.trialRecords[pageID].push(trialRecord);
+            this.trialRecords[trialRecord.pageID].push(trialRecord);
         }
     }
 
@@ -71,6 +77,23 @@ class ExperimentRecord {
         // correct answers separated by pages with no specified answers count as in a row
         grades = _.reject<boolean[]>(grades, (g) => {return _.isNull(g) || _.isUndefined(g)});
         return grades;
+    }
+
+    public submitRecords(): void {
+        var records = _.toArray(this.trialRecords);
+        var flatRecords = _.flatten(records);
+        var dataArrays = _.map(flatRecords, (fr) => {
+            return [fr.pageID,
+                fr.blockIDs,
+                fr.startTime,
+                fr.endTime,
+                fr.iteration,
+                fr. condition,
+                fr.selected,
+                fr.correct];
+        });
+        _.each(dataArrays, this.psiturk.recordTrialData);
+        this.psiturk.savedata(this.psiturk.completeHIT);
     }
 
 }
