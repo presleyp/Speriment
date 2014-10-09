@@ -31,6 +31,7 @@ var PAGE = "p.question",
 class Survey implements Container{
     public id: string;
     public exchangeable: string[];
+    public version: number;
     public contents: Block[];
     private showBreakoff: boolean;
     public experimentRecord: ExperimentRecord;
@@ -41,8 +42,9 @@ class Survey implements Container{
         "paid depends on the results returned so far. Note that submitting partial " +
         "results does not guarantee payment.</p>";
 
-    constructor(jsonSurvey, psiturk){
+    constructor(jsonSurvey, version, psiturk){
         jsonSurvey = _.defaults(jsonSurvey, {breakoff: true, exchangeable: []});
+        this.version = version;
         this.exchangeable = jsonSurvey.exchangeable;
         this.showBreakoff = jsonSurvey.breakoff;
         this.contents = makeBlocks(jsonSurvey.blocks, this);
@@ -65,6 +67,9 @@ class Survey implements Container{
     }
 
     private addElements(){
+        var experimentDiv = document.createElement('div');
+        $(experimentDiv).attr("id", "experimentDiv");
+
         var questionPar = document.createElement('p');
         $(questionPar).addClass('question');
 
@@ -80,7 +85,8 @@ class Survey implements Container{
         var nextButton = document.createElement("input");
         $(nextButton).attr({type: "button", id: "continue", value: "Next"});
 
-        $('body').append(questionPar, answerPar, navigationDiv, breakoffDiv);
+        $('body').append(experimentDiv);
+        $(experimentDiv).append(questionPar, answerPar, navigationDiv, breakoffDiv);
         $(navigationDiv).append(nextButton);
     }
 

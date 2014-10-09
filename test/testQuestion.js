@@ -108,7 +108,7 @@ function setup(){
 
 function setupForm(){
     setup();
-    $('#surveyman').val(JSON.stringify({responses:[]}));
+    // $('#surveyman').val(JSON.stringify({responses:[]}));
 }
 
 test("statement display", function(){

@@ -61,12 +61,14 @@ class Block{
 // an OuterBlock can only contain Blocks (InnerBlocks or OuterBlocks)
 class OuterBlock extends Block implements Container{
     exchangeable;
+    version: number;
     contents: Block[];
 
     constructor(jsonBlock, public container: Container){
         super(jsonBlock);
         jsonBlock = _.defaults(jsonBlock, {exchangeable: []});
         this.exchangeable = jsonBlock.exchangeable;
+        this.version = container.version;
         this.contents = makeBlocks(jsonBlock.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable);
     }
@@ -95,7 +97,7 @@ class InnerBlock extends Block{
         this.pseudorandom = jsonBlock.pseudorandomize;
         this.criterion = jsonBlock.criterion;
         if (jsonBlock.groups){
-            this.contents = this.choosePages(jsonBlock.groups);
+            this.contents = this.choosePages(jsonBlock.groups, container.version);
         } else {
             this.contents = this.makePages(jsonBlock.pages);
         }
@@ -121,8 +123,8 @@ class InnerBlock extends Block{
         return pages;
     }
 
-    private choosePages(groups): Page[] {
-        var pages = this.latinSquare ? this.chooseLatinSquare(groups) : this.chooseRandom(groups);
+    private choosePages(groups, version): Page[] {
+        var pages = this.latinSquare ? this.chooseLatinSquare(groups, version) : this.chooseRandom(groups);
         return this.makePages(pages);
     }
 
@@ -134,18 +136,17 @@ class InnerBlock extends Block{
         }
     }
 
-    private chooseLatinSquare(groups): any[]{
+    private chooseLatinSquare(groups, version): any[]{
         var numConditions = groups[0].length;
         var lengths = _.pluck(groups, "length");
         var pages = [];
         if (_.every(lengths, (l:number):boolean => {return l === lengths[0]})){
-            var version = _.random(numConditions - 1);
             for (var i = 0; i < groups.length; i++){
-                var condition = (i + version) % numConditions;
-                pages.push(groups[i][condition]);
+                var cond = (i + version) % numConditions;
+                pages.push(groups[i][cond]);
             }
         } else {
-            pages = this.chooseRandom(groups); // error passing silently - should be caught in Python
+            throw "Can't do Latin Square on groups of uneven sizes.";
         }
         return pages;
     }

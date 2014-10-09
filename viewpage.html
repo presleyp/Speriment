@@ -9,12 +9,15 @@
   <script src="node_modules/underscore/underscore.js"></script>
   <script src="node_modules/jquery/dist/jquery.js"></script>
   <script src="speriment.js"></script>
-  <script src="test/sampleJSON.json"></script> // change this to the name of your JSON file!
+  <script src="test/sampleJSON.json"></script>
+  <script src="cumulativity.json"></script>
 
   <script type="text/javascript">
     $(document).ready(function(){
-        var s = new Survey(training_experiment);
+        <!-- var s = new Survey(training_experiment); -->
         <!-- var s = new Survey(latin_square_experiment); -->
+        var condition = 0; // you can change this to test your latin square
+        var s = new Survey(cumulativity_experiment, condition);
         s.start();
     });
   </script>

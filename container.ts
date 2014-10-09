@@ -10,6 +10,7 @@
 // A Container contains Blocks, so Surveys and OuterBlocks are Containers.
 interface Container{
     exchangeable;
+    version;
     contents;
 
     advance(experimentRecord: ExperimentRecord): void;

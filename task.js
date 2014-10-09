@@ -15,7 +15,7 @@ var mySperiment = latin_square_experiment;
 $(document).ready(function(){
 	var psiturk = PsiTurk(uniqueId, adServerLoc);
 	psiturk.finishInstructions();
-	var speriment = new Survey(mySperiment, psiturk);
+	var speriment = new Survey(mySperiment, condition, psiturk);
 	speriment.start();
 });
 

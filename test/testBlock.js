@@ -1,4 +1,8 @@
 
+function cleanUp(){
+    $('#experimentDiv').remove();
+}
+
 test("create inner block", function(){
     setupForm();
     var jsonb = {id: "b1", pages:[{text:"one", id:"p1"}, {text:"two", id:"p2", freetext: true, options: [{id: "o1"}]}]};
@@ -20,7 +24,7 @@ test("create inner block", function(){
     er.addRecord("p2", {'blockID': 'b1', 'startTime': 0, 'endTime': 0, 'selected': ['o1'], 'correct': 'o1'});
     strictEqual(b2.shouldRun(er), false, "shouldRun not working");
     var jsongroup = {id: "b1", groups:[[{text: "page1", id: "p1"}, {text:"page2", id:"p2", options: [{id: "o1"}]}]]};
-    var b3 = new InnerBlock(jsongroup);
+    var b3 = new InnerBlock(jsongroup, {version: 0});
     strictEqual(b3.contents.length, 1, "initialization from groups");
     _.each(b3.contents, function(p){
         if (p.id === "p1"){
@@ -39,16 +43,16 @@ test("choosing pages", function(){
                                           );
                                  }
                     );
-    var jsonb = {id: "b1", groups: grps};
-    var b = new InnerBlock(jsonb);
+    var jsonb = {id: "b1", groups: grps}; //TODO can test latin square more thoroughly now
+    var b = new InnerBlock(jsonb, {version: 0});
     strictEqual(b.contents.length, 6, "did it choose one page per group?");
     var choices = (_.map(_.range(10), function(i){
-            var bl = new InnerBlock(jsonb);
+            var bl = new InnerBlock(jsonb, {version: 0});
             return _.pluck(bl.contents, "id");
         }));
     ok(_.each(_.range(18), function(id){return _.contains(_.flatten(choices), id.toString());}), "no page is systematically avoided in random sampling");
     jsonb.latinSquare = true;
-    var b2 = new InnerBlock(jsonb);
+    var b2 = new InnerBlock(jsonb, {version: 0});
     strictEqual(b2.latinSquare, true, "latin square variable getting set");
     strictEqual(b2.contents.length, 6, "did it choose one page per group with latinSquare set to true?");
     var condgroups = _.groupBy(b2.contents, "condition");
@@ -65,18 +69,18 @@ test("ordering pages", function(){
                     );
     var jsonb = {id: "b1", groups: grps};
     var firstconditions = _.map(_.range(20), function(){
-        var b = new InnerBlock(jsonb);
+        var b = new InnerBlock(jsonb, {version: 0});
         var conditions = _.pluck(b.contents, "condition");
         return conditions[0];
     });
     strictEqual(_.unique(firstconditions).length, 3, "any condition should be able to end up first (but randomness means this will fail occasionally)");
 
     jsonb.pseudorandomize = true;
-    var b2 = new InnerBlock(jsonb, {});
+    var b2 = new InnerBlock(jsonb, {version: 0});
     var conditions2 = _.pluck(b2.contents, "condition");
     var contentLengths = [];
     var firstconditions2 = _.map(_.range(20), function(){
-        var b = new InnerBlock(jsonb);
+        var b = new InnerBlock(jsonb, {version: 0});
         var conditions = _.pluck(b.contents, "condition");
         contentLengths.push(conditions.length);
         return conditions[0];
@@ -99,7 +103,7 @@ CustomError.prototype.toString = function() {
     return this.message;
 };
 
-var fakeContainer = {advance: function(){throw new CustomError("I advanced");}};
+var fakeContainer = {version: 0, advance: function(){throw new CustomError("I advanced");}};
 
 
 test("statement calling advance", function(){
@@ -352,14 +356,16 @@ test('create outerblock', function(){
 
 
 test("create survey", function(){
-    setupForm();
-    var s = new Survey(jsons);
+    // setupForm();
+    var s = new Survey(jsons, 0);
 
     strictEqual(s.contents.length, 2, "survey should have two blocks");
     ok(s.contents[0] instanceof InnerBlock, 'survey should detect that first block is inner block');
     ok(s.contents[1] instanceof OuterBlock, 'survey should detect that second block is outer block');
     strictEqual(s.exchangeable.length, 0, 'exchangeable should be set to default');
     strictEqual(s.showBreakoff, true, 'showBreakoff should be set to default');
+
+    cleanUp();
 });
 
 test("order blocks", function(){
@@ -410,10 +416,10 @@ test("order blocks", function(){
 });
 
 test('run blocks conditionally: when condition is satisfied', function(){
-    setupForm();
+    // setupForm();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
-    var runBoth = new Survey({blocks: [b1, b2]});
+    var runBoth = new Survey({blocks: [b1, b2]}, 0);
 
     runBoth.start();
     clickNext(); // breakoff notice
@@ -435,15 +441,17 @@ test('run blocks conditionally: when condition is satisfied', function(){
     $("p.answer input").prop('checked', true);
     clickNext(); // page 4
     clickNext(); // page 4 answer
+
+    cleanUp();
 });
 
 test('run blocks conditionally: when text has been entered', function(){
-    setupForm();
+    // setupForm();
     var textpage = {id: 'p1', freetext: true, options: [{id: 'o1'}]};
     var statement = {id: 'p2', text: 'page2'};
     var b1 = {id: 'b1', pages: [textpage]};
     var b2 = {id: 'b2', pages: [statement], runIf: {'pageID': 'p1', 'regex': 'hello'} };
-    var runBoth = new Survey({blocks: [b1, b2], breakoff: false});
+    var runBoth = new Survey({blocks: [b1, b2], breakoff: false}, 0);
 
     runBoth.start();
     strictEqual($('p.answer input').length, 1, 'text box shows');
@@ -453,18 +461,21 @@ test('run blocks conditionally: when text has been entered', function(){
     // b2 should run
     ok(runBoth.experimentRecord.responseGiven({'pageID': 'p1', 'regex': 'hello'}), 'record should note that a matching response was given');
     strictEqual($('p.question').text(), 'page2', 'block 2 runs because hello was given as text answer');
+
+    cleanUp();
 });
 
 test('run blocks conditionally: when condition is unsatisfied', function(){
-    setupForm();
+    // setupForm();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
-    var runOne = new Survey({blocks: [b2, b1]});
+    var runOne = new Survey({blocks: [b2, b1]}, 0);
     runOne.start();
 
     clickNext(); //breakoff notice
     ok(_.contains(['page1', 'page2'], $('p.question').text()), 'b1 should run, skipping b2 because o1 has not been chosen');
 
+    cleanUp();
 });
 
 var ps = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]},
@@ -472,7 +483,7 @@ var ps = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}
 
 test('recording multiple iterations of the same question', function(){
     setupForm();
-    var b1 = new InnerBlock({id: 'b1', pages: [ps[0], ps[0], ps[0]]});
+    var b1 = new InnerBlock({id: 'b1', pages: [ps[0], ps[0], ps[0]]}, {version: 0});
     var er = new ExperimentRecord();
     b1.advance(er);
     $('#o1').prop('checked', true);
