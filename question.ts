@@ -14,6 +14,7 @@ class Page{
     public text: string;
     public id: string;
     public condition: string;
+    public resources: string[];
     public isLast: boolean;
     public record;
 
@@ -22,6 +23,7 @@ class Page{
         this.id = jsonPage.id;
         this.text = jsonPage.text;
         this.condition = jsonPage.condition;
+        this.resources = _.map(jsonPage.resources, this.makeResource);
         var containers = getContainers(block);
         this.record = new TrialRecord(this.id, this.condition, containers);
     }
@@ -47,6 +49,20 @@ class Page{
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.finish(experimentRecord)});
     }
 
+    private makeResource(resource: string): string{ //TODO ogg can also be video, need to disambiguate
+        var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
+            'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4':
+            'video', 'webm': 'video'};
+        var extension = resource.split('.').pop().toLowerCase();
+        var fileType = fileTypeMap[extension];
+        if (fileType === 'img') {
+            return '<img src="' + resource + '" alt="' + resource + '">';
+        } else {
+            var mediaType = extension === 'mp3' ? 'audio/mpeg' : fileType + '/' + extension;
+            return '<' + fileType + ' controls><source src="' + resource + '" type="' + mediaType + '"></' + fileType + '>';
+        }
+    }
+
     public display(experimentRecord){
         if (this.isLast){
             this.nextToSubmit(experimentRecord);
@@ -55,7 +71,7 @@ class Page{
         }
         this.disableNext();
         $(OPTIONS).empty();
-        $(PAGE).empty().append(this.text);
+        $(PAGE).empty().append(this.text, this.resources);
     }
 
     public finish(experimentRecord) {
