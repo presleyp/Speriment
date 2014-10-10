@@ -10,11 +10,14 @@ class TrialRecord {
     public correct; // only for Question
     public iteration;
     public condition;
+    public pageTags;
+    public optionTags;
 
-    constructor(pageID, condition, containers){
+    constructor(pageID, condition, containers, tags){
         this.pageID = pageID;
         this.condition = condition;
         this.blockIDs = containers;
+        this.pageTags = tags;
     }
 }
 
@@ -88,9 +91,9 @@ class ExperimentRecord {
                 fr.startTime,
                 fr.endTime,
                 fr.iteration,
-                fr. condition,
+                fr.condition,
                 fr.selected,
-                fr.correct];
+                fr.correct].concat(fr.pageTags).concat(fr.optionTags);
         });
         _.each(dataArrays, this.psiturk.recordTrialData);
         this.psiturk.savedata(this.psiturk.completeHIT);

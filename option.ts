@@ -10,13 +10,15 @@ class ResponseOption{
     public id: string;
     public answer: string;
     public correct: boolean;
+    public tags: string[];
 
     constructor(jsonOption, public question: Question){
-        jsonOption = _.defaults(jsonOption, {answer: null, correct: null});
+        jsonOption = _.defaults(jsonOption, {answer: null, correct: null, tags: []});
         this.id = jsonOption.id;
         this.text = jsonOption.text;
         this.answer = jsonOption.answer;
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
+        this.tags = jsonOption.tags;
     }
 
     public display(){}

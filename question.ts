@@ -15,17 +15,19 @@ class Page{
     public id: string;
     public condition: string;
     public resources: string[];
+    public tags: string[];
     public isLast: boolean;
     public record;
 
     constructor(jsonPage, public block){
-        jsonPage = _.defaults(jsonPage, {condition: null, resources: null});
+        jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
         this.id = jsonPage.id;
         this.text = jsonPage.text;
         this.condition = jsonPage.condition;
         this.resources = _.map(jsonPage.resources, this.makeResource);
+        this.tags = jsonPage.tags;
         var containers = getContainers(block);
-        this.record = new TrialRecord(this.id, this.condition, containers);
+        this.record = new TrialRecord(this.id, this.condition, containers, this.tags);
     }
 
     public advance(experimentRecord):void {}
@@ -142,6 +144,7 @@ class Question extends Page{
         // ids of selections and value of text
         var responses: string[] = _.map(selected, (s) => {return s.getResponse()});
         this.record.selected = responses;
+        this.record.optionTags = _.zip(_.pluck(selected, 'tags'));
     }
 
     public recordCorrect(selected: ResponseOption[]){

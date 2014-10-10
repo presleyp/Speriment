@@ -17,13 +17,15 @@ def to_file(json_object, filename, varname):
         f.write('var ' + varname + ' = ' + json_object)
 
 class Option:
-    def __init__(self, idgen, text, answer = None, correct = None):
+    def __init__(self, idgen, text, answer = None, correct = None, tags = None):
         self.id = idgen.nextID()
         self.text = text
         if answer != None:
             self.answer = answer
         if correct != None:
             self.correct = correct
+        if tags != None:
+            self.tags = tags
 
     def toJSON(self):
         return self.__dict__
@@ -31,7 +33,7 @@ class Option:
 class Page():
     def __init__(self, idgen, text, options = None, answer = None, correct = None, freetext = False,
             condition = None, resources = None, ordered = False, exclusive =
-            None):
+            None, tags = None):
         self.id = idgen.nextID()
         self.text = text
         if options:
@@ -50,6 +52,8 @@ class Page():
             self.ordered = ordered
         if exclusive != None:
             self.exclusive = exclusive
+        if tags != None:
+            self.tags = tags
 
     def toJSON(self):
         return self.__dict__

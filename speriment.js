@@ -12,11 +12,12 @@ var __extends = this.__extends || function (d, b) {
 var ResponseOption = (function () {
     function ResponseOption(jsonOption, question) {
         this.question = question;
-        jsonOption = _.defaults(jsonOption, { answer: null, correct: null });
+        jsonOption = _.defaults(jsonOption, { answer: null, correct: null, tags: [] });
         this.id = jsonOption.id;
         this.text = jsonOption.text;
         this.answer = jsonOption.answer;
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
+        this.tags = jsonOption.tags;
     }
     ResponseOption.prototype.display = function () {
     };
@@ -180,12 +181,14 @@ var DropDownOption = (function (_super) {
 var Page = (function () {
     function Page(jsonPage, block) {
         this.block = block;
-        jsonPage = _.defaults(jsonPage, { condition: null, resources: null });
+        jsonPage = _.defaults(jsonPage, { condition: null, resources: null, tags: [] });
         this.id = jsonPage.id;
         this.text = jsonPage.text;
         this.condition = jsonPage.condition;
+        this.resources = _.map(jsonPage.resources, this.makeResource);
+        this.tags = jsonPage.tags;
         var containers = getContainers(block);
-        this.record = new TrialRecord(this.id, this.condition, containers);
+        this.record = new TrialRecord(this.id, this.condition, containers, this.tags);
     }
     Page.prototype.advance = function (experimentRecord) {
     };
@@ -212,6 +215,19 @@ var Page = (function () {
         });
     };
 
+    Page.prototype.makeResource = function (resource) {
+        var fileTypeMap = {
+            'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf': 'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4': 'video', 'webm': 'video' };
+        var extension = resource.split('.').pop().toLowerCase();
+        var fileType = fileTypeMap[extension];
+        if (fileType === 'img') {
+            return '<img src="' + resource + '" alt="' + resource + '">';
+        } else {
+            var mediaType = extension === 'mp3' ? 'audio/mpeg' : fileType + '/' + extension;
+            return '<' + fileType + ' controls><source src="' + resource + '" type="' + mediaType + '"></' + fileType + '>';
+        }
+    };
+
     Page.prototype.display = function (experimentRecord) {
         var _this = this;
         if (this.isLast) {
@@ -223,7 +239,7 @@ var Page = (function () {
         }
         this.disableNext();
         $(OPTIONS).empty();
-        $(PAGE).empty().append(this.text);
+        $(PAGE).empty().append(this.text, this.resources);
     };
 
     Page.prototype.finish = function (experimentRecord) {
@@ -300,6 +316,8 @@ var Question = (function (_super) {
             return s.getResponse();
         });
         this.record.selected = responses;
+        this.record.optionTags = _.zip(_.pluck(selected, 'tags'));
+        console.log(this.record);
     };
 
     Question.prototype.recordCorrect = function (selected) {
@@ -406,10 +424,11 @@ function getContainers(block) {
 /// <reference path="node_modules/jquery/jquery.d.ts" />
 /// <reference path="node_modules/underscore/underscore.d.ts" />
 var TrialRecord = (function () {
-    function TrialRecord(pageID, condition, containers) {
+    function TrialRecord(pageID, condition, containers, tags) {
         this.pageID = pageID;
         this.condition = condition;
         this.blockIDs = containers;
+        this.pageTags = tags;
     }
     return TrialRecord;
 })();
@@ -488,7 +507,7 @@ var ExperimentRecord = (function () {
                 fr.iteration,
                 fr.condition,
                 fr.selected,
-                fr.correct];
+                fr.correct].concat(fr.pageTags).concat(fr.optionTags);
         });
         _.each(dataArrays, this.psiturk.recordTrialData);
         this.psiturk.savedata(this.psiturk.completeHIT);
@@ -518,8 +537,9 @@ var ExperimentRecord = (function () {
 var PAGE = "p.question", OPTIONS = "p.answer", NAVIGATION = "div.navigation", CONTINUE = "#continue", BREAKOFF = "div.breakoff";
 
 var Survey = (function () {
-    function Survey(jsonSurvey, psiturk) {
+    function Survey(jsonSurvey, version, psiturk) {
         jsonSurvey = _.defaults(jsonSurvey, { breakoff: true, exchangeable: [] });
+        this.version = version;
         this.exchangeable = jsonSurvey.exchangeable;
         this.showBreakoff = jsonSurvey.breakoff;
         this.contents = makeBlocks(jsonSurvey.blocks, this);
@@ -541,6 +561,9 @@ var Survey = (function () {
     };
 
     Survey.prototype.addElements = function () {
+        var experimentDiv = document.createElement('div');
+        $(experimentDiv).attr("id", "experimentDiv");
+
         var questionPar = document.createElement('p');
         $(questionPar).addClass('question');
 
@@ -556,7 +579,8 @@ var Survey = (function () {
         var nextButton = document.createElement("input");
         $(nextButton).attr({ type: "button", id: "continue", value: "Next" });
 
-        $('body').append(questionPar, answerPar, navigationDiv, breakoffDiv);
+        $('body').append(experimentDiv);
+        $(experimentDiv).append(questionPar, answerPar, navigationDiv, breakoffDiv);
         $(navigationDiv).append(nextButton);
     };
 
@@ -637,6 +661,7 @@ var OuterBlock = (function (_super) {
         this.container = container;
         jsonBlock = _.defaults(jsonBlock, { exchangeable: [] });
         this.exchangeable = jsonBlock.exchangeable;
+        this.version = container.version;
         this.contents = makeBlocks(jsonBlock.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable);
     }
@@ -661,7 +686,7 @@ var InnerBlock = (function (_super) {
         this.pseudorandom = jsonBlock.pseudorandomize;
         this.criterion = jsonBlock.criterion;
         if (jsonBlock.groups) {
-            this.contents = this.choosePages(jsonBlock.groups);
+            this.contents = this.choosePages(jsonBlock.groups, container.version);
         } else {
             this.contents = this.makePages(jsonBlock.pages);
         }
@@ -687,8 +712,8 @@ var InnerBlock = (function (_super) {
         return pages;
     };
 
-    InnerBlock.prototype.choosePages = function (groups) {
-        var pages = this.latinSquare ? this.chooseLatinSquare(groups) : this.chooseRandom(groups);
+    InnerBlock.prototype.choosePages = function (groups, version) {
+        var pages = this.latinSquare ? this.chooseLatinSquare(groups, version) : this.chooseRandom(groups);
         return this.makePages(pages);
     };
 
@@ -700,20 +725,19 @@ var InnerBlock = (function (_super) {
         }
     };
 
-    InnerBlock.prototype.chooseLatinSquare = function (groups) {
+    InnerBlock.prototype.chooseLatinSquare = function (groups, version) {
         var numConditions = groups[0].length;
         var lengths = _.pluck(groups, "length");
         var pages = [];
         if (_.every(lengths, function (l) {
             return l === lengths[0];
         })) {
-            var version = _.random(numConditions - 1);
             for (var i = 0; i < groups.length; i++) {
-                var condition = (i + version) % numConditions;
-                pages.push(groups[i][condition]);
+                var cond = (i + version) % numConditions;
+                pages.push(groups[i][cond]);
             }
         } else {
-            pages = this.chooseRandom(groups); // error passing silently - should be caught in Python
+            throw "Can't do Latin Square on groups of uneven sizes.";
         }
         return pages;
     };
