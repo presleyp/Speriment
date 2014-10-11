@@ -1,13 +1,8 @@
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
 /// <reference path="option.ts"/>
-/// <reference path="node_modules/jquery/jquery.d.ts" />
-/// <reference path="node_modules/underscore/underscore.d.ts" />
-
-// function record(pageID, pageRecord){
-//     responses[pageID] = pageRecord;
-// }
-
+/// <reference path="../node_modules/jquery/jquery.d.ts" />
+/// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 class Page{
     public static dropdownThreshold: number = 7;
@@ -47,7 +42,7 @@ class Page{
     }
 
     public nextToSubmit(experimentRecord){
-        $(CONTINUE).attr({type: "submit", value: "Submit", form: "surveyman"});
+        $(CONTINUE).attr({type: "submit", value: "Submit"});
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.finish(experimentRecord)});
     }
 
@@ -96,7 +91,7 @@ class Question extends Page{
         this.ordered = jQuestion.ordered;
         this.exclusive = jQuestion.exclusive;
         this.freetext = jQuestion.freetext;
-        if (jQuestion.answer){
+        if (jQuestion.answer){ //TODO will probably want to use resources in answers
             this.answer = new Statement({text: jQuestion.answer, id: this.id + "_answer"}, block);
         }
         this.options = _.map(jQuestion.options, (o):ResponseOption => {
@@ -128,7 +123,6 @@ class Question extends Page{
 
         this.recordResponses(selected);
         this.recordCorrect(selected);
-        // record(this.id, this.record);
         experimentRecord.addRecord(this.record);
 
         if (!_.isEmpty(optionAnswers) && this.exclusive){ // ignoring option-by-option answers if nonexclusive
@@ -174,7 +168,6 @@ class Statement extends Page{
 
     public advance(experimentRecord){
         this.record.endTime = new Date().getTime();
-        // record(this.id, this.record);
         experimentRecord.addRecord(this.record);
         this.block.advance(experimentRecord);
     }

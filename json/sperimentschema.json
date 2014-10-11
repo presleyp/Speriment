@@ -1,0 +1,211 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Speriment Schema",
+
+
+
+    "definitions": {
+
+        "id": {
+            "description": "Unique identifier for a component of the experiment.",
+            "type": "string"
+        },
+
+        "text": {
+            "description": "The text to display for a component of the experiment.",
+            "type": "string"
+        },
+
+        "answer": {
+            "description": "The feedback to display after this page/if this option is chosen.",
+            "type": "string"
+        },
+
+        "correct": {
+            "description": "Either whether this option is correct, or a regular expression that any correct response will match.",
+            "type": ["string", "boolean"]
+        },
+
+        "tag": {
+            "description": "A descriptor for a page or option that is not acted upon, but passed into the record of the experiment for purposes of analysis.",
+            "type": "string"
+        },
+
+        "exchangeable": {
+            "description": "IDs of blocks that can swap positions with each other. For instance, if I have blocks 1, 2, and 3 and blocks 1 and 3 are exchangeable, the possible orders are 1, 2, 3 and 3, 2, 1.",
+            "type": "array",
+            "items": {
+                "description": "Block ID",
+                "type": "string"
+            }
+        },
+
+        "pseudorandom": {
+            "description": "",
+            "type": "string"
+        },
+
+        "pageID": {
+            "description": "",
+            "type": "string"
+        },
+
+        "runIf": {
+            "description": "",
+            "type": "object",
+            "oneOf": [
+                {
+                    "properties": {
+                        "pageID": {"$ref": "#/definitions/pageID"},
+                        "optionID": {
+                            "description": "",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["pageID"]
+                },
+                {
+                    "properties": {
+                        "pageID": {"$ref": "#/definitions/pageID"},
+                        "regex": {
+                            "description": "",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["pageID"]
+                }
+            ]
+        },
+
+        "criterion": {
+            "description": "",
+            "type": "number"
+        },
+
+        "option": {
+            "description": "Option for user response.",
+            "type": "object",
+            "properties": {
+                "id": {"$ref": "#/definitions/id"},
+                "text": {"$ref": "#/definitions/text"},
+                "answer": {"$ref": "#/definitions/answer"},
+                "correct": {"$ref": "#/definitions/correct"},
+                "tags": {
+                    "description": "Array of descriptors. This array should be the same length for all options in the entire experiment, or absent for all options.",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/tag"}
+                }
+            },
+            "required": ["id", "text"]
+        },
+
+        "page": {
+            "description": "A unit of the experiment to be showed at once, such as instructions or a question. The answer given for a page or its options will be shown separately.",
+            "type": "object",
+            "properties": {
+                "id": {"$ref": "#/definitions/id"},
+                "text": {"$ref": "#/definitions/text"},
+                "answer": {"$ref": "#/definitions/answer"},
+                "correct": {"$ref": "#/definitions/correct"},
+                "condition": {
+                    "description": "The experimental condition that this item belongs to. Used for constrained randomization, to keep items of the same condition from being adjacent.",
+                    "type": "string"
+                },
+                "tags": {
+                    "description": "Array of descriptors. This array should be the same length for all pages in the entire experiment, or absent for all pages.",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/tag"}
+                },
+                "ordered": {
+                    "description": "Are the options for this question ordered? Used to decide how to randomize the order of the options. Defaults to false.",
+                    "type": "boolean"
+                },
+                "exclusive": {
+                    "description": "Can only one of these options be chosen? Defaults to true.",
+                    "type": "boolean"
+                },
+                "freetext": {
+                    "description": "Does this question have a text box option, as opposed to discrete choices? Defaults to false.",
+                    "type": "boolean"
+                }
+            },
+            "required": ["id", "text"]
+        },
+
+        "block": {
+            "description": "A grouping of blocks, pages, or groups of pages. Blocks appear in the order in which they're defined, except that exchangeable blocks within the same container can swap places with each other.",
+            "type": "object",
+            "oneOf": [
+
+                {
+                    "properties": {
+                        "id": {"$ref": "#/definitions/id"},
+                        "pages": {
+                            "description": "",
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/page"}
+                        },
+                        "pseudorandom": {"$ref": "#/definitions/pseudorandom"},
+                        "runIf": {"$ref": "#/definitions/runIf"},
+                        "criterion": {"$ref": "#/definitions/criterion"}
+                    },
+                    "required": ["id", "pages"]
+                },
+
+                {
+                    "properties": {
+                        "id": {"$ref": "#/definitions/id"},
+                        "groups": {
+                            "description": "",
+                            "type": "array",
+                            "items": {
+                                "description": "",
+                                "type": "array",
+                                "items": {"$ref": "#/definitions/page"}
+                            }
+                        },
+                        "latinSquare": {
+                            "description": "",
+                            "type": "boolean"
+                        },
+                        "pseudorandom": {"$ref": "#/definitions/pseudorandom"},
+                        "runIf": {"$ref": "#/definitions/runIf"},
+                        "criterion": {"$ref": "#/definitions/criterion"}
+                    },
+                    "required": ["id", "groups"]
+                },
+
+                {
+                    "properties": {
+                        "id": {"$ref": "#/definitions/id"},
+                        "blocks": {
+                            "description": "",
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/block"}
+                        },
+                        "exchangeable": {"$ref": "#/definitions/exchangeable"},
+                        "runIf": {"$ref": "#/definitions/runIf"},
+                        "criterion": {"$ref": "#/definitions/criterion"}
+                    },
+                    "required": ["id", "blocks"]
+                }
+            ]
+        }
+    },
+
+
+
+    "properties": {
+        "breakoff": {
+            "description": "Does the experiment allow people to quit early and submit incomplete data?",
+            "type": "boolean"
+        },
+        "exchangeable": {"$ref": "#/definitions/exchangeable"},
+        "blocks": {
+            "description": "Experiments are made up of blocks. Blocks are made up of either smaller blocks, or pages. Blocks are run in the order in which you specify them, unless they're exchangeable.",
+            "type": "array",
+            "items": {"$ref": "#/definitions/block"}
+        }
+    },
+    "required": ["blocks"]
+}

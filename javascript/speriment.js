@@ -1,6 +1,6 @@
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="node_modules/jquery/jquery.d.ts" />
 /// <reference path="node_modules/underscore/underscore.d.ts" />
 var __extends = this.__extends || function (d, b) {
@@ -170,14 +170,11 @@ var DropDownOption = (function (_super) {
     };
     return DropDownOption;
 })(ResponseOption);
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="node_modules/jquery/jquery.d.ts" />
 /// <reference path="node_modules/underscore/underscore.d.ts" />
-// function record(pageID, pageRecord){
-//     responses[pageID] = pageRecord;
-// }
 var Page = (function () {
     function Page(jsonPage, block) {
         this.block = block;
@@ -209,7 +206,7 @@ var Page = (function () {
 
     Page.prototype.nextToSubmit = function (experimentRecord) {
         var _this = this;
-        $(CONTINUE).attr({ type: "submit", value: "Submit", form: "surveyman" });
+        $(CONTINUE).attr({ type: "submit", value: "Submit" });
         $(CONTINUE).off('click').click(function (m) {
             _this.finish(experimentRecord);
         });
@@ -297,8 +294,6 @@ var Question = (function (_super) {
 
         this.recordResponses(selected);
         this.recordCorrect(selected);
-
-        // record(this.id, this.record);
         experimentRecord.addRecord(this.record);
 
         if (!_.isEmpty(optionAnswers) && this.exclusive) {
@@ -317,7 +312,6 @@ var Question = (function (_super) {
         });
         this.record.selected = responses;
         this.record.optionTags = _.zip(_.pluck(selected, 'tags'));
-        console.log(this.record);
     };
 
     Question.prototype.recordCorrect = function (selected) {
@@ -353,16 +347,14 @@ var Statement = (function (_super) {
 
     Statement.prototype.advance = function (experimentRecord) {
         this.record.endTime = new Date().getTime();
-
-        // record(this.id, this.record);
         experimentRecord.addRecord(this.record);
         this.block.advance(experimentRecord);
     };
     return Statement;
 })(Page);
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="node_modules/jquery/jquery.d.ts" />
 /// <reference path="node_modules/underscore/underscore.d.ts" />
@@ -433,7 +425,7 @@ var TrialRecord = (function () {
     return TrialRecord;
 })();
 
-/* Each record is actually a list of TrialRecords, in case the
+/* Each record is actually an array of TrialRecords, in case the
 page is displayed more than once (as in a training block). In many cases,
 this will be a list of one item. But when the page was displayed multiple
 time and it is a longer list, only the last item in the list - the final
@@ -514,21 +506,15 @@ var ExperimentRecord = (function () {
     };
     return ExperimentRecord;
 })();
-//TODO decide how to handle errors
-//TODO make decimal criterion check against number of expected trues rather than number of questions
-//TODO latin square using condition
-//TODO interface with HTML, JSON, Java
-//TODO create page html from text and resources; preload audio
+//TODO latin square using condition?
+//TODO preload audio
 //TODO placeholders
 //TODO other radio/check with text box
-//TODO allow runIf to be dependent on regex matching
-//TODO matching any text ever given isn't very precise - change to match a certain option id and its text
 //TODO maybe: allow option-by-option answers on nonexclusive questions
-//TODO maybe: allow text box to start with text already in it
 //TODO (css) spread checkboxes out by default, it's hard to know which label is for which box
 /// <reference path="container.ts"/>
 /// <reference path="block.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="record.ts"/>
 /// <reference path="node_modules/jquery/jquery.d.ts" />
@@ -536,17 +522,17 @@ var ExperimentRecord = (function () {
 // global constants for referring to HTML
 var PAGE = "p.question", OPTIONS = "p.answer", NAVIGATION = "div.navigation", CONTINUE = "#continue", BREAKOFF = "div.breakoff";
 
-var Survey = (function () {
-    function Survey(jsonSurvey, version, psiturk) {
-        jsonSurvey = _.defaults(jsonSurvey, { breakoff: true, exchangeable: [] });
+var Experiment = (function () {
+    function Experiment(jsonExperiment, version, psiturk) {
+        jsonExperiment = _.defaults(jsonExperiment, { breakoff: true, exchangeable: [] });
         this.version = version;
-        this.exchangeable = jsonSurvey.exchangeable;
-        this.showBreakoff = jsonSurvey.breakoff;
-        this.contents = makeBlocks(jsonSurvey.blocks, this);
+        this.exchangeable = jsonExperiment.exchangeable;
+        this.showBreakoff = jsonExperiment.breakoff;
+        this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable);
         this.experimentRecord = new ExperimentRecord(psiturk);
     }
-    Survey.prototype.start = function () {
+    Experiment.prototype.start = function () {
         this.tellLast();
         this.addElements();
         if (this.showBreakoff) {
@@ -556,11 +542,11 @@ var Survey = (function () {
         }
     };
 
-    Survey.prototype.tellLast = function () {
+    Experiment.prototype.tellLast = function () {
         _.last(this.contents).tellLast();
     };
 
-    Survey.prototype.addElements = function () {
+    Experiment.prototype.addElements = function () {
         var experimentDiv = document.createElement('div');
         $(experimentDiv).attr("id", "experimentDiv");
 
@@ -584,39 +570,29 @@ var Survey = (function () {
         $(navigationDiv).append(nextButton);
     };
 
-    Survey.prototype.showBreakoffNotice = function () {
-        var breakoff = new Statement({ text: Survey.breakoffNotice, id: "breakoffnotice" }, this);
+    Experiment.prototype.showBreakoffNotice = function () {
+        var breakoff = new Statement({ text: Experiment.breakoffNotice, id: "breakoffnotice" }, this);
         var breakoffButton = document.createElement("input");
         $(breakoffButton).attr({ type: "submit", value: "Submit Early" });
         $(BREAKOFF).append(breakoffButton);
         breakoff.display(this.experimentRecord);
     };
 
-    Survey.prototype.advance = function (experimentRecord) {
+    Experiment.prototype.advance = function (experimentRecord) {
         if (!_.isEmpty(this.contents)) {
             var block = this.contents.shift();
             block.advance(experimentRecord);
         }
     };
-    Survey.breakoffNotice = "<p>This survey will allow you to " + "submit partial responses. The minimum payment is the quantity listed. " + "However, you will be compensated more for completing more of the survey " + "in the form of bonuses, at the completion of this study. The quantity " + "paid depends on the results returned so far. Note that submitting partial " + "results does not guarantee payment.</p>";
-    return Survey;
+    Experiment.breakoffNotice = "<p>This experiment will allow you to " + "submit partial responses. The minimum payment is the quantity listed. " + "However, you will be compensated more for completing more of the experiment " + "in the form of bonuses, at the completion of this study. The quantity " + "paid depends on the results returned so far. Note that submitting partial " + "results does not guarantee payment.</p>";
+    return Experiment;
 })();
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="container.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="node_modules/jquery/jquery.d.ts" />
 /// <reference path="node_modules/underscore/underscore.d.ts" />
-// function getResponses(fromPage?){
-//     var data = JSON.parse($(FORM).val()).responses;
-//     if (fromPage){
-//         var pageIds = _.pluck(data, 'page')
-//         var fromIndex = _.lastIndexOf(pageIds, fromPage);
-//         return _.rest(data, fromIndex);
-//     } else {
-//         return data;
-//     }
-// }
 var Block = (function () {
     function Block(jsonBlock) {
         jsonBlock = _.defaults(jsonBlock, { runIf: null });
@@ -634,8 +610,6 @@ var Block = (function () {
     Block.prototype.shouldRun = function (experimentRecord) {
         if (this.runIf) {
             return experimentRecord.responseGiven(this.runIf);
-            // var answersGiven = _.flatten(_.pluck(getResponses(), 'selected'));
-            // return _.contains(answersGiven, this.runIf); //TODO make it possible to do regex matching for text options
         } else {
             return true;
         }
@@ -675,7 +649,7 @@ var OuterBlock = (function (_super) {
     return OuterBlock;
 })(Block);
 
-// an InnerBlock can only contain Pages
+// an InnerBlock can only contain Pages or groups of Pages
 var InnerBlock = (function (_super) {
     __extends(InnerBlock, _super);
     function InnerBlock(jsonBlock, container) {
@@ -762,13 +736,17 @@ var InnerBlock = (function (_super) {
             pages[swapTo] = nextP;
             return pages;
         } else {
-            pages.push(nextP); //TODO throw error, not pseudorandomizing
-            return pages;
+            throw "Pseudorandomization may not work if there are not an equal number of all conditions.";
         }
     };
 
     InnerBlock.prototype.pseudorandomize = function () {
         var _this = this;
+        if (_.any(this.contents, function (page) {
+            return _.isUndefined(page.condition);
+        })) {
+            throw "Can't pseudorandomize if not all pages have a condition.";
+        }
         var pages = [];
         var remaining = _.shuffle(this.contents);
         pages.push(remaining.shift());

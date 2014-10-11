@@ -1,23 +1,17 @@
-//TODO decide how to handle errors
-//TODO make decimal criterion check against number of expected trues rather than number of questions
-//TODO latin square using condition
-//TODO interface with HTML, JSON, Java
-//TODO create page html from text and resources; preload audio
+//TODO latin square using condition?
+//TODO preload audio
 //TODO placeholders
 //TODO other radio/check with text box
-//TODO allow runIf to be dependent on regex matching
-//TODO matching any text ever given isn't very precise - change to match a certain option id and its text
 //TODO maybe: allow option-by-option answers on nonexclusive questions
-//TODO maybe: allow text box to start with text already in it
 //TODO (css) spread checkboxes out by default, it's hard to know which label is for which box
 
 /// <reference path="container.ts"/>
 /// <reference path="block.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="record.ts"/>
-/// <reference path="node_modules/jquery/jquery.d.ts" />
-/// <reference path="node_modules/underscore/underscore.d.ts" />
+/// <reference path="../node_modules/jquery/jquery.d.ts" />
+/// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 // global constants for referring to HTML
 var PAGE = "p.question",
@@ -27,27 +21,26 @@ var PAGE = "p.question",
     BREAKOFF = "div.breakoff";
 
 
-
-class Survey implements Container{
+class Experiment implements Container{
     public id: string;
     public exchangeable: string[];
     public version: number;
     public contents: Block[];
     private showBreakoff: boolean;
     public experimentRecord: ExperimentRecord;
-    private static breakoffNotice: string = "<p>This survey will allow you to " +
+    private static breakoffNotice: string = "<p>This experiment will allow you to " +
         "submit partial responses. The minimum payment is the quantity listed. " +
-        "However, you will be compensated more for completing more of the survey " +
+        "However, you will be compensated more for completing more of the experiment " +
         "in the form of bonuses, at the completion of this study. The quantity " +
         "paid depends on the results returned so far. Note that submitting partial " +
         "results does not guarantee payment.</p>";
 
-    constructor(jsonSurvey, version, psiturk){
-        jsonSurvey = _.defaults(jsonSurvey, {breakoff: true, exchangeable: []});
+    constructor(jsonExperiment, version, psiturk){
+        jsonExperiment = _.defaults(jsonExperiment, {breakoff: true, exchangeable: []});
         this.version = version;
-        this.exchangeable = jsonSurvey.exchangeable;
-        this.showBreakoff = jsonSurvey.breakoff;
-        this.contents = makeBlocks(jsonSurvey.blocks, this);
+        this.exchangeable = jsonExperiment.exchangeable;
+        this.showBreakoff = jsonExperiment.breakoff;
+        this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable);
         this.experimentRecord = new ExperimentRecord(psiturk);
     }
@@ -91,7 +84,7 @@ class Survey implements Container{
     }
 
     private showBreakoffNotice(){
-        var breakoff = new Statement({text: Survey.breakoffNotice, id: "breakoffnotice"}, this);
+        var breakoff = new Statement({text: Experiment.breakoffNotice, id: "breakoffnotice"}, this);
         var breakoffButton = document.createElement("input");
         $(breakoffButton).attr({type: "submit", value: "Submit Early"});
         $(BREAKOFF).append(breakoffButton);

@@ -1,13 +1,13 @@
 
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
-/// <reference path="node_modules/jquery/jquery.d.ts" />
-/// <reference path="node_modules/underscore/underscore.d.ts" />
+/// <reference path="../node_modules/jquery/jquery.d.ts" />
+/// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 
-// A Container contains Blocks, so Surveys and OuterBlocks are Containers.
+// A Container contains Blocks, so Experiments and OuterBlocks are Containers.
 interface Container{
     exchangeable;
     version;

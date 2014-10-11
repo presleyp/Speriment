@@ -75,7 +75,7 @@ test("ordering pages", function(){
     });
     strictEqual(_.unique(firstconditions).length, 3, "any condition should be able to end up first (but randomness means this will fail occasionally)");
 
-    jsonb.pseudorandomize = true;
+    jsonb.pseudorandom = true;
     var b2 = new InnerBlock(jsonb, {version: 0});
     var conditions2 = _.pluck(b2.contents, "condition");
     var contentLengths = [];
@@ -357,7 +357,7 @@ test('create outerblock', function(){
 
 test("create survey", function(){
     // setupForm();
-    var s = new Survey(jsons, 0);
+    var s = new Experiment(jsons, 0);
 
     strictEqual(s.contents.length, 2, "survey should have two blocks");
     ok(s.contents[0] instanceof InnerBlock, 'survey should detect that first block is inner block');
@@ -419,7 +419,7 @@ test('run blocks conditionally: when condition is satisfied', function(){
     // setupForm();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
-    var runBoth = new Survey({blocks: [b1, b2]}, 0);
+    var runBoth = new Experiment({blocks: [b1, b2]}, 0);
 
     runBoth.start();
     clickNext(); // breakoff notice
@@ -451,7 +451,7 @@ test('run blocks conditionally: when text has been entered', function(){
     var statement = {id: 'p2', text: 'page2'};
     var b1 = {id: 'b1', pages: [textpage]};
     var b2 = {id: 'b2', pages: [statement], runIf: {'pageID': 'p1', 'regex': 'hello'} };
-    var runBoth = new Survey({blocks: [b1, b2], breakoff: false}, 0);
+    var runBoth = new Experiment({blocks: [b1, b2], breakoff: false}, 0);
 
     runBoth.start();
     strictEqual($('p.answer input').length, 1, 'text box shows');
@@ -469,7 +469,7 @@ test('run blocks conditionally: when condition is unsatisfied', function(){
     // setupForm();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
-    var runOne = new Survey({blocks: [b2, b1]}, 0);
+    var runOne = new Experiment({blocks: [b2, b1]}, 0);
     runOne.start();
 
     clickNext(); //breakoff notice

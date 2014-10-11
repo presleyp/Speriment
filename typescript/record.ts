@@ -1,5 +1,5 @@
-/// <reference path="node_modules/jquery/jquery.d.ts" />
-/// <reference path="node_modules/underscore/underscore.d.ts" />
+/// <reference path="../node_modules/jquery/jquery.d.ts" />
+/// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 class TrialRecord {
     public pageID;
@@ -21,7 +21,7 @@ class TrialRecord {
     }
 }
 
-/* Each record is actually a list of TrialRecords, in case the
+/* Each record is actually an array of TrialRecords, in case the
    page is displayed more than once (as in a training block). In many cases,
    this will be a list of one item. But when the page was displayed multiple
    time and it is a longer list, only the last item in the list - the final
@@ -66,7 +66,7 @@ class ExperimentRecord {
         }
     }
 
-    public getBlockGrades(blockID: string): boolean[] {
+    public getBlockGrades(blockID: string): boolean[] { // TODO does this maintain question order?
         // get the last iteration of each page
         var recentRecords: TrialRecord[] = _.map(this.trialRecords, (trlist: TrialRecord[]) => {
             return _.last(trlist);

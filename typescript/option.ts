@@ -1,8 +1,8 @@
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
-/// <reference path="question.ts"/>
-/// <reference path="node_modules/jquery/jquery.d.ts" />
-/// <reference path="node_modules/underscore/underscore.d.ts" />
+/// <reference path="page.ts"/>
+/// <reference path="../node_modules/jquery/jquery.d.ts" />
+/// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 class ResponseOption{
 

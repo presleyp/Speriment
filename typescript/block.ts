@@ -1,20 +1,9 @@
-/// <reference path="survey.ts"/>
+/// <reference path="experiment.ts"/>
 /// <reference path="container.ts"/>
-/// <reference path="question.ts"/>
+/// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
-/// <reference path="node_modules/jquery/jquery.d.ts" />
-/// <reference path="node_modules/underscore/underscore.d.ts" />
-
-// function getResponses(fromPage?){
-//     var data = JSON.parse($(FORM).val()).responses;
-//     if (fromPage){
-//         var pageIds = _.pluck(data, 'page')
-//         var fromIndex = _.lastIndexOf(pageIds, fromPage);
-//         return _.rest(data, fromIndex);
-//     } else {
-//         return data;
-//     }
-// }
+/// <reference path="../node_modules/jquery/jquery.d.ts" />
+/// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 class Block{
 
@@ -40,8 +29,6 @@ class Block{
     shouldRun(experimentRecord: ExperimentRecord): boolean {
         if (this.runIf){
             return experimentRecord.responseGiven(this.runIf);
-            // var answersGiven = _.flatten(_.pluck(getResponses(), 'selected'));
-            // return _.contains(answersGiven, this.runIf); //TODO make it possible to do regex matching for text options
         } else {
             return true;
         }
@@ -83,7 +70,7 @@ class OuterBlock extends Block implements Container{
 
 }
 
-// an InnerBlock can only contain Pages
+// an InnerBlock can only contain Pages or groups of Pages
 class InnerBlock extends Block{
     contents: Page[];
     private latinSquare: boolean;
@@ -92,9 +79,9 @@ class InnerBlock extends Block{
 
     constructor(jsonBlock, public container: Container){
         super(jsonBlock);
-        jsonBlock = _.defaults(jsonBlock, {latinSquare: false, pseudorandomize: false, training: false, criterion: null});
+        jsonBlock = _.defaults(jsonBlock, {latinSquare: false, pseudorandom: false, criterion: null});
         this.latinSquare = jsonBlock.latinSquare;
-        this.pseudorandom = jsonBlock.pseudorandomize;
+        this.pseudorandom = jsonBlock.pseudorandom;
         this.criterion = jsonBlock.criterion;
         if (jsonBlock.groups){
             this.contents = this.choosePages(jsonBlock.groups, container.version);
@@ -169,12 +156,14 @@ class InnerBlock extends Block{
             pages[swapTo] = nextP;
             return pages;
         } else {
-            pages.push(nextP); //TODO throw error, not pseudorandomizing
-            return pages;
+            throw "Pseudorandomization may not work if there are not an equal number of all conditions.";
         }
     }
 
-    private pseudorandomize(): void{ //TODO throw error if conditions not specified
+    private pseudorandomize(): void{
+        if (_.any(this.contents, (page: Page) => {return _.isUndefined(page.condition);})){
+            throw "Can't pseudorandomize if not all pages have a condition.";
+        }
         var pages: Page[] = [];
         var remaining: Page[] = _.shuffle<Page>(this.contents);
         pages.push(remaining.shift());
@@ -195,6 +184,7 @@ class InnerBlock extends Block{
         this.contents = pages;
     }
 
+    //TODO move to Block
     // have to meet or exceed criterion to move on; otherwise you repeat this block
     shouldLoop(experimentRecord: ExperimentRecord): boolean {
         if (!this.criterion){

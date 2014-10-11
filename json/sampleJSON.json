@@ -64,9 +64,9 @@ training_experiment = {"blocks": [
 latin_square_experiment = {"breakoff": false, "blocks": [
     {"id": "intro", "pages": [{"id": "intropage", "text": "Welcome! You should never see the same letter twice in a row or the same number twice at all."}]},
     {"id": "questionblock", "latinSquare": true, "pseudorandomize": true, "groups": [
-        [   {"id": "1a", "text": "1A", "condition": "a"},
-            {"id": "1b", "text": "1B", "condition": "b"},
-            {"id": "1c", "text": "1C", "condition": "c"}
+        [   {"id": "1a", "text": "1A", "condition": "a", "resources": ["/Users/presley/Pictures/theobromine.jpg"]},
+            {"id": "1b", "text": "1B", "condition": "b", "resources": ["/Users/presley/Pictures/theobromine.jpg"]},
+            {"id": "1c", "text": "1C", "condition": "c", "resources": ["/Users/presley/Pictures/theobromine.jpg"]}
         ],
         [   {"id": "2a", "text": "2A", "condition": "a"},
             {"id": "2b", "text": "2B", "condition": "b"},
