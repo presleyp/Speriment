@@ -16,7 +16,7 @@
             "type": "string"
         },
 
-        "answer": {
+        "feedback": {
             "description": "The feedback to display after this page/if this option is chosen.",
             "type": "string"
         },
@@ -88,7 +88,7 @@
             "properties": {
                 "id": {"$ref": "#/definitions/id"},
                 "text": {"$ref": "#/definitions/text"},
-                "answer": {"$ref": "#/definitions/answer"},
+                "feedback": {"$ref": "#/definitions/feedback"},
                 "correct": {"$ref": "#/definitions/correct"},
                 "tags": {
                     "description": "Array of descriptors. This array should be the same length for all options in the entire experiment, or absent for all options.",
@@ -105,7 +105,7 @@
             "properties": {
                 "id": {"$ref": "#/definitions/id"},
                 "text": {"$ref": "#/definitions/text"},
-                "answer": {"$ref": "#/definitions/answer"},
+                "feedback": {"$ref": "#/definitions/feedback"},
                 "correct": {"$ref": "#/definitions/correct"},
                 "condition": {
                     "description": "The experimental condition that this item belongs to. Used for constrained randomization, to keep items of the same condition from being adjacent.",

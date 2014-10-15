@@ -60,6 +60,7 @@ test("choosing pages", function(){
 });
 
 test("ordering pages", function(){
+    // groups with three conditions each, in the same order
     var grps = _.map(_.range(6), function(i){
                                     return _.map(_.range(3), function(j){
                                                           return {text: "page "+(i*10 + j).toString(), id: (i*10+j).toString(), condition: j.toString()};
@@ -67,7 +68,7 @@ test("ordering pages", function(){
                                           );
                                  }
                     );
-    var jsonb = {id: "b1", groups: grps};
+    var jsonb = {id: "b1", groups: grps, latinSquare: true};
     var firstconditions = _.map(_.range(20), function(){
         var b = new InnerBlock(jsonb, {version: 0});
         var conditions = _.pluck(b.contents, "condition");
@@ -77,7 +78,6 @@ test("ordering pages", function(){
 
     jsonb.pseudorandom = true;
     var b2 = new InnerBlock(jsonb, {version: 0});
-    var conditions2 = _.pluck(b2.contents, "condition");
     var contentLengths = [];
     var firstconditions2 = _.map(_.range(20), function(){
         var b = new InnerBlock(jsonb, {version: 0});
@@ -226,8 +226,8 @@ test("question calling advance", function(){
 
 test("question with answer calling advance", function(){
     setupForm();
-    var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1"}] , answer:"good job" } ,
-        {text:"page2", id:"p2", freetext: true, options:[{id:"o2"}] , answer: "great job" }];
+    var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1"}] , feedback:"good job" } ,
+        {text:"page2", id:"p2", freetext: true, options:[{id:"o2"}] , feedback: "great job" }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
     var er = new ExperimentRecord();
     b.advance(er);
@@ -291,8 +291,8 @@ test("question with answer calling advance", function(){
 
 test("question with options with answers calling advance", function(){
     setupForm();
-    var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "a", answer: "good job"}, {id:'o2', text:'b', answer:'not quite'} ] , } ,
-        {text:"page2", id:"p2", options:[{id: "o1", text: "a", answer: "good job"}, {id:'o2', text:'b', answer:'not quite'}] }];
+    var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "a", feedback: "good job"}, {id:'o2', text:'b', feedback:'not quite'} ] , } ,
+        {text:"page2", id:"p2", options:[{id: "o1", text: "a", feedback: "good job"}, {id:'o2', text:'b', feedback:'not quite'}] }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
 
     var er = new ExperimentRecord();
@@ -523,22 +523,22 @@ test('training block: whole number criterion met', function(){
     throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
 });
 
-test('training block: whole number criterion met, answer page', function(){
+test('training block: whole number criterion met, feedback page', function(){
     setupForm();
     var er = new ExperimentRecord();
-    var qa = [{id: 'p5', text: 'page1', options: [{id: 'o1', text:'A', correct:true, answer:'good job'}, {id:'o2', text:'B', correct:false}]},
-        {id: 'p6', text:'page2', options: [{id: 'o1', text:'A', correct:true, answer:'good job'}, {id:'o4', text:'B', correct:false}]}];
+    var qa = [{id: 'p5', text: 'page1', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o2', text:'B', correct:false}]},
+        {id: 'p6', text:'page2', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o4', text:'B', correct:false}]}];
     var bqa = new InnerBlock({id: 'b2', pages: qa, criterion: 2}, fakeContainer);
     bqa.advance(er);
     // choose right answer
     $('#o1').prop('checked', true);
     clickNext();
-    // answer displays
+    // feedback displays
     clickNext();
     // choose right answer
     $('#o1').prop('checked', true);
     clickNext();
-    // answer displays
+    // feedback displays
     throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
 });
 

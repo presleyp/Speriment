@@ -96,7 +96,8 @@ class ExperimentRecord {
                 fr.correct].concat(fr.pageTags).concat(fr.optionTags);
         });
         _.each(dataArrays, this.psiturk.recordTrialData);
-        this.psiturk.savedata(this.psiturk.completeHIT);
+        this.psiturk.saveData();
+        this.psiturk.completeHIT();
     }
 
 }

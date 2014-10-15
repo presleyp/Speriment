@@ -8,15 +8,15 @@ class ResponseOption{
 
     public text: string;
     public id: string;
-    public answer: string;
+    public feedback: string;
     public correct: boolean;
     public tags: string[];
 
     constructor(jsonOption, public question: Question){
-        jsonOption = _.defaults(jsonOption, {answer: null, correct: null, tags: []});
+        jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: []});
         this.id = jsonOption.id;
         this.text = jsonOption.text;
-        this.answer = jsonOption.answer;
+        this.feedback = jsonOption.feedback;
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         this.tags = jsonOption.tags;
     }
@@ -39,9 +39,9 @@ class ResponseOption{
         return $('#'+this.id).is(':checked');
     }
 
-    public getAnswer(){
-        if (this.answer){
-            return new Statement({text: this.answer, id: this.id + "_answer"}, this.question.block);
+    public getFeedback(){
+        if (this.feedback){
+            return new Statement({text: this.feedback, id: this.id + "_feedback"}, this.question.block);
         } else {
             return null;
         }

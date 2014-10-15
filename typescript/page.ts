@@ -83,7 +83,7 @@ class Question extends Page{
     private exclusive: boolean;
     private freetext: boolean;
     private options: ResponseOption[];
-    private answer: Statement;
+    private feedback: Statement;
 
     constructor(jsonQuestion, block){
         super(jsonQuestion, block);
@@ -91,8 +91,8 @@ class Question extends Page{
         this.ordered = jQuestion.ordered;
         this.exclusive = jQuestion.exclusive;
         this.freetext = jQuestion.freetext;
-        if (jQuestion.answer){ //TODO will probably want to use resources in answers
-            this.answer = new Statement({text: jQuestion.answer, id: this.id + "_answer"}, block);
+        if (!_.isUndefined(jQuestion.feedback)){ //TODO will probably want to use resources in feedback
+            this.feedback = new Statement({text: jQuestion.feedback, id: this.id + "_feedback"}, block);
         }
         this.options = _.map(jQuestion.options, (o):ResponseOption => {
             if (jQuestion.options.length > Page.dropdownThreshold){
@@ -118,17 +118,17 @@ class Question extends Page{
         this.record.endTime = new Date().getTime();
 
         var selected: ResponseOption[] = _.filter<ResponseOption>(this.options, (o) => {return o.selected()});
-        // answers that should be displayed to the respondent
-        var optionAnswers: Statement[] = _.compact(_.map(selected, (o) => {return o.getAnswer();}));
+        // feedback that should be displayed to the respondent
+        var optionFeedback: Statement[] = _.compact(_.map(selected, (o) => {return o.getFeedback();}));
 
         this.recordResponses(selected);
         this.recordCorrect(selected);
         experimentRecord.addRecord(this.record);
 
-        if (!_.isEmpty(optionAnswers) && this.exclusive){ // ignoring option-by-option answers if nonexclusive
-            optionAnswers[0].display(experimentRecord);
-        } else if (this.answer){
-            this.answer.display(experimentRecord);
+        if (!_.isEmpty(optionFeedback) && this.exclusive){ // ignoring option-by-option feedback if nonexclusive TODO
+            optionFeedback[0].display(experimentRecord);
+        } else if (this.feedback){
+            this.feedback.display(experimentRecord);
         } else {
             this.block.advance(experimentRecord);
         }

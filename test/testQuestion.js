@@ -59,22 +59,22 @@ test("text option", function(){
     ok(q.options[0] instanceof TextOption);
 });
 
-test("question with answer", function(){
-    var q = new Question({id: 2, "text": "here's the question", answer: "here's the answer",
+test("question with feedback", function(){
+    var q = new Question({id: 2, "text": "here's the question", feedback: "here's the feedback",
                          options: [{text: "option A", id:"o1"}, {text: "option B", id:"o2"}]}, {});
     strictEqual(q.options.length, 2);
-    ok(q.answer instanceof Statement, "Statement not created from answer");
-    strictEqual(q.answer.text, "here's the answer", "answer text not set properly");
+    ok(q.feedback instanceof Statement, "Statement not created from feedback");
+    strictEqual(q.feedback.text, "here's the feedback", "feedback text not set properly");
 });
 
-test("question with options with answers", function(){
+test("question with options with feedback", function(){
     var q = new Question({id: 2, "text": "here's the question",
-                         options: [{text: "option A", id:"o1", answer: "that's right!"},
-                             {text: "option B", id:"o2", answer: "not quite"}]}, {});
+                         options: [{text: "option A", id:"o1", feedback: "that's right!"},
+                             {text: "option B", id:"o2", feedback: "not quite"}]}, {});
     strictEqual(q.options.length, 2, "options should be initialized");
-    ok(!q.answer, "question should not have answer");
-    ok(q.options[0].answer, "option should have answer");
-    ok(q.options[1].answer, "option should have answer");
+    ok(!q.feedback, "question should not have feedback");
+    ok(q.options[0].feedback, "option should have feedback");
+    ok(q.options[1].feedback, "option should have feedback");
 });
 
 test("option ordering", function(){
