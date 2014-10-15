@@ -138,6 +138,7 @@ class Question extends Page{
         // ids of selections and value of text
         var responses: string[] = _.map(selected, (s) => {return s.getResponse()});
         this.record.selected = responses;
+        this.record.selectedPosition = _.map(selected, (s) => {return _.indexOf(this.options, s);});
         this.record.optionTags = _.zip(_.pluck(selected, 'tags'));
     }
 
@@ -153,6 +154,11 @@ class Question extends Page{
         } else {
             this.options = _.shuffle<ResponseOption>(this.options);
         }
+        this.recordOptionOrder();
+    }
+
+    public recordOptionOrder(){
+        this.record.optionOrder = _.pluck(this.options, 'id');
     }
 
 }

@@ -6,12 +6,14 @@ class TrialRecord {
     public blockIDs;
     public startTime;
     public endTime;
-    public selected; // only for Question
-    public correct; // only for Question
+    public selected = '';
+    public correct = '';
     public iteration;
-    public condition;
-    public pageTags;
-    public optionTags;
+    public condition = '';
+    public pageTags = [];
+    public optionTags = [];
+    public optionOrder = '';
+    public selectedPosition = '';
 
     constructor(pageID, condition, containers, tags){
         this.pageID = pageID;
@@ -93,7 +95,11 @@ class ExperimentRecord {
                 fr.iteration,
                 fr.condition,
                 fr.selected,
-                fr.correct].concat(fr.pageTags).concat(fr.optionTags);
+                fr.correct,
+                fr.optionOrder,
+                fr.selectedPosition]
+            .concat(fr.pageTags)
+            .concat(fr.optionTags);
         });
         _.each(dataArrays, this.psiturk.recordTrialData);
         this.psiturk.saveData();
