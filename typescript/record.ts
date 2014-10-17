@@ -3,6 +3,7 @@
 
 class TrialRecord {
     public pageID;
+    public pageText;
     public blockIDs;
     public startTime;
     public endTime;
@@ -16,8 +17,9 @@ class TrialRecord {
     public optionOrder = '';
     public selectedPosition = '';
 
-    constructor(pageID, condition, containers, tags){
+    constructor(pageID, pageText, condition, containers, tags){
         this.pageID = pageID;
+        this.pageText = pageText;
         this.condition = condition;
         this.blockIDs = containers;
         this.pageTags = tags;
@@ -91,6 +93,7 @@ class ExperimentRecord {
         var dataArrays = _.map(flatRecords, (fr) => {
             return [
                 fr.pageID,
+                fr.pageText,
                 fr.blockIDs,
                 fr.startTime,
                 fr.endTime,

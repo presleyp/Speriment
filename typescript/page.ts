@@ -22,7 +22,7 @@ class Page{
         this.resources = _.map(jsonPage.resources, this.makeResource);
         this.tags = jsonPage.tags;
         var containers = getContainers(block);
-        this.record = new TrialRecord(this.id, this.condition, containers, this.tags);
+        this.record = new TrialRecord(this.id, this.text, this.condition, containers, this.tags);
     }
 
     public advance(experimentRecord):void {}
