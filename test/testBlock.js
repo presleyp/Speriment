@@ -43,7 +43,7 @@ test("choosing pages", function(){
                                           );
                                  }
                     );
-    var jsonb = {id: "b1", groups: grps}; //TODO can test latin square more thoroughly now
+    var jsonb = {id: "b1", groups: grps};
     var b = new InnerBlock(jsonb, {version: 0});
     strictEqual(b.contents.length, 6, "did it choose one page per group?");
     var choices = (_.map(_.range(10), function(i){
@@ -51,12 +51,27 @@ test("choosing pages", function(){
             return _.pluck(bl.contents, "id");
         }));
     ok(_.each(_.range(18), function(id){return _.contains(_.flatten(choices), id.toString());}), "no page is systematically avoided in random sampling");
+
     jsonb.latinSquare = true;
     var b2 = new InnerBlock(jsonb, {version: 0});
+    var b3 = new InnerBlock(jsonb, {version: 1});
+    var b4 = new InnerBlock(jsonb, {version: 2});
     strictEqual(b2.latinSquare, true, "latin square variable getting set");
     strictEqual(b2.contents.length, 6, "did it choose one page per group with latinSquare set to true?");
     var condgroups = _.groupBy(b2.contents, "condition");
     ok(_.every(condgroups, function(g){return g.length === 2;}), "check latin square");
+    var chosen2 = _.pluck(b2.contents, 'id');
+    var chosen3 = _.pluck(b3.contents, 'id');
+    var chosen4 = _.pluck(b4.contents, 'id');
+    ok(_.isEmpty(_.intersection(chosen2, chosen3)), "different versions of latin square should choose different pages.");
+    ok(_.isEmpty(_.intersection(chosen3, chosen4)), "different versions of latin square should choose different pages.");
+    ok(_.isEmpty(_.intersection(chosen2, chosen4)), "different versions of latin square should choose different pages.");
+    strictEqual(b3.contents.length, 6, "each version of latin square should have one page from each group.");
+    strictEqual(b4.contents.length, 6, "each version of latin square should have one page from each group.");
+    var condgroups3 = _.groupBy(b3.contents, "condition");
+    var condgroups4 = _.groupBy(b4.contents, "condition");
+    ok(_.every(condgroups3, function(g){return g.length === 2;}), "check latin square");
+    ok(_.every(condgroups4, function(g){return g.length === 2;}), "check latin square");
 });
 
 test("ordering pages", function(){
@@ -363,7 +378,7 @@ test("create survey", function(){
     ok(s.contents[0] instanceof InnerBlock, 'survey should detect that first block is inner block');
     ok(s.contents[1] instanceof OuterBlock, 'survey should detect that second block is outer block');
     strictEqual(s.exchangeable.length, 0, 'exchangeable should be set to default');
-    strictEqual(s.showBreakoff, true, 'showBreakoff should be set to default');
+    strictEqual(s.showBreakoff, false, 'showBreakoff should be set to default');
 
     cleanUp();
 });
