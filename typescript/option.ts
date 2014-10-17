@@ -13,7 +13,7 @@ class ResponseOption{
     public tags: string[];
 
     constructor(jsonOption, public question: Question){
-        jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: []});
+        jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null});
         this.id = jsonOption.id;
         this.text = jsonOption.text;
         this.feedback = jsonOption.feedback;
@@ -24,7 +24,7 @@ class ResponseOption{
     public display(){}
 
     public getResponse(){
-        return this.id;
+        return [this.id, this.text];
     }
 
     public onChange(){
@@ -104,7 +104,7 @@ class TextOption extends ResponseOption{
     }
 
     public getResponse(){
-        return $("#"+this.id).val();
+        return [this.id, $("#"+this.id).val()];
     }
 
     public onChange(){
@@ -116,12 +116,12 @@ class TextOption extends ResponseOption{
     }
 
     public selected(){
-        return this.getResponse().length > 0;
+        return this.getResponse()[1].length > 0;
     }
 
     public isCorrect(){
         if (this.regex){
-            return Boolean(this.getResponse().match(this.regex));
+            return Boolean(this.getResponse()[1].match(this.regex));
         } else {
             return null;
         }

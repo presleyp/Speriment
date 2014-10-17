@@ -6,7 +6,8 @@ class TrialRecord {
     public blockIDs;
     public startTime;
     public endTime;
-    public selected = '';
+    public selectedID = '';
+    public selectedText = '';
     public correct = '';
     public iteration;
     public condition = '';
@@ -57,9 +58,9 @@ class ExperimentRecord {
             var pageResponses: TrialRecord[] = this.trialRecords[runIf.pageID];
             var response: TrialRecord = _.last(pageResponses);
             if (runIf.optionID){
-                return _.contains(response.selected, runIf.optionID);
-            } else if (runIf.regex && response.selected.length === 1){
-                return response.selected[0].search(runIf.regex) >= 0;
+                return _.contains(response.selectedID, runIf.optionID);
+            } else if (runIf.regex && response.selectedID.length === 1){
+                return response.selectedText[0].search(runIf.regex) >= 0;
             } else {
                 throw "runIf does not contain optionID or regex.";
             }
@@ -88,13 +89,15 @@ class ExperimentRecord {
         var records = _.toArray(this.trialRecords);
         var flatRecords = _.flatten(records);
         var dataArrays = _.map(flatRecords, (fr) => {
-            return [fr.pageID,
+            return [
+                fr.pageID,
                 fr.blockIDs,
                 fr.startTime,
                 fr.endTime,
                 fr.iteration,
                 fr.condition,
-                fr.selected,
+                fr.selectedID,
+                fr.selectedText,
                 fr.correct,
                 fr.optionOrder,
                 fr.selectedPosition]

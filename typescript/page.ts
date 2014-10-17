@@ -136,8 +136,10 @@ class Question extends Page{
 
     public recordResponses(selected: ResponseOption[]){
         // ids of selections and value of text
-        var responses: string[] = _.map(selected, (s) => {return s.getResponse()});
-        this.record.selected = responses;
+        var responses: string[][] = _.map(selected, (s) => {return s.getResponse()});
+        var response_parts = _.zip.apply(_, responses);
+        this.record.selectedID = response_parts[0];
+        this.record.selectedText = response_parts[1];
         this.record.selectedPosition = _.map(selected, (s) => {return _.indexOf(this.options, s);});
         this.record.optionTags = _.zip(_.pluck(selected, 'tags'));
     }
