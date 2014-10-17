@@ -2,20 +2,20 @@
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 class TrialRecord {
-    public pageID;
-    public pageText;
-    public blockIDs;
+    public pageID: string;
+    public pageText: string;
+    public blockIDs: string[];
     public startTime;
     public endTime;
-    public selectedID = '';
-    public selectedText = '';
+    public selectedID: string = '';
+    public selectedText: string = '';
     public correct = '';
-    public iteration;
-    public condition = '';
-    public pageTags = [];
-    public optionTags = [];
-    public optionOrder = '';
-    public selectedPosition = '';
+    public iteration: number;
+    public condition: string = '';
+    public pageTags: string[] = [];
+    public optionTags: string[] = [];
+    public optionOrder: string[] = null;
+    public selectedPosition: number = null;
 
     constructor(pageID, pageText, condition, containers, tags){
         this.pageID = pageID;
@@ -71,7 +71,7 @@ class ExperimentRecord {
         }
     }
 
-    public getBlockGrades(blockID: string): boolean[] { // TODO does this maintain question order?
+    public getBlockGrades(blockID: string): boolean[] {
         // get the last iteration of each page
         var recentRecords: TrialRecord[] = _.map(this.trialRecords, (trlist: TrialRecord[]) => {
             return _.last(trlist);
@@ -80,8 +80,10 @@ class ExperimentRecord {
         var relevantRecords: TrialRecord[] = _.filter(recentRecords, (tr: TrialRecord) => {
             return _.contains(tr.blockIDs, blockID);
         });
+        // order by time so you can check the number correct in a row
+        var orderedRecords = relevantRecords.sort((r1, r2) => {return r1.startTime - r2.startTime});
         // gather correctness info, flatten nonexclusive responses
-        var grades = _.flatten(_.pluck(relevantRecords, "correct"));
+        var grades = _.flatten(_.pluck(orderedRecords, "correct"));
         // correct answers separated by pages with no specified answers count as in a row
         grades = _.reject<boolean[]>(grades, (g) => {return _.isNull(g) || _.isUndefined(g)});
         return grades;
