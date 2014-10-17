@@ -36,7 +36,7 @@ class Experiment implements Container{
         "results does not guarantee payment.</p>";
 
     constructor(jsonExperiment, version, psiturk){
-        jsonExperiment = _.defaults(jsonExperiment, {breakoff: true, exchangeable: []});
+        jsonExperiment = _.defaults(jsonExperiment, {breakoff: false, exchangeable: []});
         this.version = version;
         this.exchangeable = jsonExperiment.exchangeable;
         this.showBreakoff = jsonExperiment.breakoff;
