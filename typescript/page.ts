@@ -141,7 +141,7 @@ class Question extends Page{
         this.record.selectedID = response_parts[0];
         this.record.selectedText = response_parts[1];
         this.record.selectedPosition = _.map(selected, (s) => {return _.indexOf(this.options, s);});
-        this.record.optionTags = _.zip(_.pluck(selected, 'tags'));
+        this.record.optionTags = _.zip.apply(_, _.pluck(selected, 'tags'));
     }
 
     public recordCorrect(selected: ResponseOption[]){

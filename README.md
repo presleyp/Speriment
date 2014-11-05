@@ -175,3 +175,26 @@ But instead of putting your own JavaScript code in task.js, take the following s
 You can do these in any order, except that it helps to write the script before you run it.
 
 Now you can test and run your experiment just as PsiTurk describes.
+
+###How do I analyze my data?
+
+Follow PsiTurk's instructions on retrieving your data. Speriment only records trial data, not unstructured data. PsiTurk records
+event data automatically, but only for a few kinds of events.
+
+Speriment records trial data in the following order.
+
+- PageID: ID given or automatically generated for the page
+- PageText: Text given to display on the page
+- BlockIDs: IDs of all blocks that enclose this page
+- StartTime: The time when the page displayed. This is in milliseconds since 1/1/1970, which makes it easy to subtract EndTime from it for reaction time.
+- EndTime: The time when the participant clicked Next.
+- Iteration: The number of times, counting from 1, that this page was displayed. Will always be 1 unless the page is in a block with a criterion.
+- Condition: The experimental condition you supplied for the page.
+- SelectedID: The IDs of any options that the participant selected.
+- SelectedText: The text of any options that the participant selected.
+- Correct: The information you supplied about whether the option is correct or what a correct text answer will match.
+- OptionOrder: The option IDs in the order in which they were displayed. Options are shuffled and you may want to look at how they appeared on the page.
+- SelectedPosition: The position, left-to-right starting from 0 at the left, of any selected options.
+- User-defined columns: There will then be a column for each page tag you supplied followed by a column for each option tag you supplied. If you supplied none of a kind of tag, those columns will not be present. Note that, because you're allowed to make nonexclusive questions where participants can select multiple options, each option tag column will contain a list of one or more values, one for each option selected. If the page is exclusive, it will be a list containing one value rather than a bare value.
+
+PsiTurk provides information about the version of the experiment (which they call condition) that was used for the purpose of Latin squares, the worker ID, and the trial number. Note that it also supplies, with each trial, a field called "datetime", which is the time the trial was saved. All trials are saved at the end of the experiment, so this number is not informative for reaction times and does not reliably show trial order.
