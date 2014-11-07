@@ -40,8 +40,12 @@ class Block{
             this.oldContents.push(nextUp);
             this.run(nextUp, experimentRecord);
         } else {
-            this.container.advance(experimentRecord);
+            this.nextMove(experimentRecord);
         }
+    }
+
+    nextMove(experimentRecord: ExperimentRecord): void {
+        this.container.advance(experimentRecord);
     }
 }
 
@@ -76,6 +80,7 @@ class InnerBlock extends Block{
     private latinSquare: boolean;
     private pseudorandom: boolean;
     private criterion: number;
+    private isLast: boolean = false;
 
     constructor(jsonBlock, public container: Container){
         super(jsonBlock);
@@ -96,7 +101,8 @@ class InnerBlock extends Block{
     }
 
     tellLast(){
-        _.last(this.contents).isLast = true;
+        // _.last(this.contents).isLast = true;
+        this.isLast = true;
     }
 
     private makePages(jsonPages): Page[] {
@@ -216,5 +222,11 @@ class InnerBlock extends Block{
         super.advance(experimentRecord);
     }
 
-
+    nextMove(experimentRecord: ExperimentRecord){
+        if (this.isLast){
+            experimentRecord.submitRecords();
+        } else {
+            super.nextMove(experimentRecord);
+        }
+    }
 }

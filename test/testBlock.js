@@ -119,6 +119,7 @@ CustomError.prototype.toString = function() {
 };
 
 var fakeContainer = {version: 0, advance: function(){throw new CustomError("I advanced");}};
+var fakePsiTurk = {recordTrialData: function(){throw new CustomError("Would save data here");}};
 
 
 test("statement calling advance", function(){
@@ -330,14 +331,14 @@ test("question with options with answers calling advance", function(){
     throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
 });
 
-var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "A", answer:"good job"}, {id:'o2', text:"B", answer: 'no'}] },
-    {text:"page2", id:"p2", options:[{id: "o3", text: "A", answer: 'great job'}, {id:'o4', text:"B", answer: 'not quite'}]}];
-var pgs2 = [{text:"page3", id:"p3", options:[{id: "o5", text: "A", correct: true}, {id:'o6', text:"B", correct: false}], answer: "the correct answer was o5" },
-    {text:"page4", id:"p4", options:[{id: "o7", text: "A", correct: true}, {id:'o8', text:"B", correct: false}], answer: "great job either way" }];
-var pgs3 = [{text:"page5", id:"p5", options:[{id: "o9", text: "A"}, {id:'o10', text:"B"}] , answer: "good job" },
-    {text:"page6", id:"p6", options:[{id: "o11", text: "A"}, {id:'o12', text:"B"}], answer: "great job" }];
-var pgs4 = [{text:"page8", id:"p8", options:[{id: "o13", text: "A"}, {id:'o14', text:"B"}] , answer: "good job" },
-    {text:"page9", id:"p9", options:[{id: "o15", text: "A"}, {id:'o16', text:"B"}], answer: "great job" }];
+var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "A", feedback:"good job"}, {id:'o2', text:"B", feedback: 'no'}] },
+    {text:"page2", id:"p2", options:[{id: "o3", text: "A", feedback: 'great job'}, {id:'o4', text:"B", feedback: 'not quite'}]}];
+var pgs2 = [{text:"page3", id:"p3", options:[{id: "o5", text: "A", correct: true}, {id:'o6', text:"B", correct: false}], feedback: "the correct feedback was o5" },
+    {text:"page4", id:"p4", options:[{id: "o7", text: "A", correct: true}, {id:'o8', text:"B", correct: false}], feedback: "great job either way" }];
+var pgs3 = [{text:"page5", id:"p5", options:[{id: "o9", text: "A"}, {id:'o10', text:"B"}] , feedback: "good job" },
+    {text:"page6", id:"p6", options:[{id: "o11", text: "A"}, {id:'o12', text:"B"}], feedback: "great job" }];
+var pgs4 = [{text:"page8", id:"p8", options:[{id: "o13", text: "A"}, {id:'o14', text:"B"}] , feedback: "good job" },
+    {text:"page9", id:"p9", options:[{id: "o15", text: "A"}, {id:'o16', text:"B"}], feedback: "great job" }];
 
 var jsons = {blocks:[
     { id:'b1', pages: pgs },
@@ -432,18 +433,28 @@ test("order blocks", function(){
 
 test('run blocks conditionally: when condition is satisfied', function(){
     // setupForm();
+    cleanUp();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
-    var runBoth = new Experiment({blocks: [b1, b2]}, 0);
+    var runBoth = new Experiment({blocks: [b1, b2]}, 0, fakePsiTurk);
 
     runBoth.start();
-    clickNext(); // breakoff notice
+    // clickNext(); // breakoff notice
     strictEqual($('p.answer input').length, 2, "there should be two options");
-    $("p.answer input").prop('checked', true);
+    if ($("#o1").length === 1){
+        $("#o1").prop('checked', true);
+    } else {
+        $("#o3").prop('checked', true);
+    }
     clickNext(); // page 1
     clickNext(); // page 1 answer
 
-    $("p.answer input").prop('checked', true);
+    // $("p.answer input").prop('checked', true);
+    if ($("#o1").length === 1){
+        $("#o1").prop('checked', true);
+    } else {
+        $("#o3").prop('checked', true);
+    }
     clickNext(); // page 2
     clickNext(); // page 2 answer
 
@@ -455,7 +466,9 @@ test('run blocks conditionally: when condition is satisfied', function(){
 
     $("p.answer input").prop('checked', true);
     clickNext(); // page 4
-    clickNext(); // page 4 answer
+
+    // page 4 answer
+    throws(clickNext, CustomError, 'should try to save data');
 
     cleanUp();
 });

@@ -127,8 +127,8 @@ test("statement display", function(){
 
     strictEqual($("p.question").text(), "Do I pass?", "statement text should be appended");
     strictEqual($("p.answer").html().length, 0, "statement shouldn't put anything in answer paragraph");
-    strictEqual($(":button[value='Next']").length, 0, "Next button shouldn't display");
-    strictEqual($(":submit").length, 1, "Submit button should show");
+    // strictEqual($(":button[value='Next']").length, 0, "Next button shouldn't display");
+    // strictEqual($(":submit").length, 1, "Submit button should show");
     // strictEqual($(":submit").prop('disabled'), true, 'Submit button should be disabled at first');
 });
 
@@ -157,12 +157,12 @@ test("question display with radios", function(){
     strictEqual($("p.question").text(), "Do I pass?", "is question text accurate?");
     strictEqual($("p.answer :input").length, 2, "did option inputs get appended?");
     strictEqual($("p.answer *").length, 4, "did option inputs and labels get appended?");
-    strictEqual($(":button").length, 0, "should not be a next button");
-    strictEqual($(":submit").length, 1, "should be a submit button");
-    strictEqual($(":submit").prop("disabled"), true, "submit button should be disabled");
+    // strictEqual($(":button").length, 0, "should not be a next button");
+    // strictEqual($(":submit").length, 1, "should be a submit button");
+    // strictEqual($(":submit").prop("disabled"), true, "submit button should be disabled");
     $(":input[id='"+id1+"']").prop("checked", true);
     $(":input[id='"+id1+"']").trigger("change");
-    strictEqual($(":submit").prop("disabled"), false, "submit button should be enabled");
+    // strictEqual($(":submit").prop("disabled"), false, "submit button should be enabled");
     strictEqual(q.options[0].selected(), true, "does option know it's selected?");
     strictEqual(q.options[1].selected(), false, "does option know it's not selected?");
     notEqual(q.options[0].isCorrect(), null, "does option know if it's correct?");

@@ -7,11 +7,11 @@ class TrialRecord {
     public blockIDs: string[];
     public startTime;
     public endTime;
-    public selectedID: string = '';
-    public selectedText: string = '';
-    public correct = '';
-    public iteration: number;
-    public condition: string = '';
+    public selectedID: string = null;
+    public selectedText: string = null;
+    public correct = null;
+    public iteration: number = 1;
+    public condition: string = null;
     public pageTags: string[] = [];
     public optionTags: string[] = [];
     public optionOrder: string[] = null;
@@ -46,7 +46,6 @@ class ExperimentRecord {
 
     public addRecord(trialRecord: TrialRecord){
         if (!_.has(this.trialRecords, trialRecord.pageID)){
-            trialRecord.iteration = 1;
             this.trialRecords[trialRecord.pageID] = [trialRecord];
         } else {
             var iter = this.trialRecords[trialRecord.pageID].length + 1;
@@ -81,7 +80,7 @@ class ExperimentRecord {
             return _.contains(tr.blockIDs, blockID);
         });
         // order by time so you can check the number correct in a row
-        var orderedRecords = relevantRecords.sort((r1, r2) => {return r1.startTime - r2.startTime});
+        var orderedRecords = this.sortByStart(relevantRecords);
         // gather correctness info, flatten nonexclusive responses
         var grades = _.flatten(_.pluck(orderedRecords, "correct"));
         // correct answers separated by pages with no specified answers count as in a row
@@ -92,7 +91,8 @@ class ExperimentRecord {
     public submitRecords(): void {
         var records = _.toArray(this.trialRecords);
         var flatRecords = _.flatten(records);
-        var dataArrays = _.map(flatRecords, (fr) => {
+        var orderedRecords = this.sortByStart(flatRecords);
+        var dataArrays = _.map(orderedRecords, (fr) => {
             return [
                 fr.pageID,
                 fr.pageText,
@@ -112,6 +112,10 @@ class ExperimentRecord {
         _.each(dataArrays, this.psiturk.recordTrialData);
         this.psiturk.saveData();
         this.psiturk.completeHIT();
+    }
+
+    private sortByStart(records: TrialRecord[]): TrialRecord[] {
+        return records.sort((r1, r2) => {return r1.startTime - r2.startTime});
     }
 
 }
