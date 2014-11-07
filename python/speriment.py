@@ -39,10 +39,24 @@ class ExperimentEncoder(json.JSONEncoder):
     '''This class enables nested Python objects to be correctly serialized to JSON.
     It also requires that non-schema validation pass before the JSON is
     generated.'''
+    def rename_key(self, dictionary, key, new_key):
+        if key in dictionary:
+            dict_copy = copy.deepcopy(dictionary)
+            value = dictionary[key]
+            dict_copy[new_key] = value
+            del dict_copy[key]
+            return dict_copy
+        else:
+            return dictionary
+
     def default(self, obj):
         if isinstance(obj, Component):
             obj.validate()
-            return obj.__dict__
+            dict_copy = copy.deepcopy(obj.__dict__)
+            # make keys follow JS conventions
+            renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
+            renamed_ri = self.rename_key(renamed_ls, 'run_if', 'runIf')
+            return renamed_ri
         if isinstance(obj, RunIf):
             return obj.__dict__
         # Let the base class default method raise the TypeError
@@ -62,12 +76,12 @@ class IDGenerator:
 
     def __init__(self, seed = 0):
         '''seed: optional, an integer to start making IDs at.'''
-        self.currentID = seed
+        self.current_id = seed
 
-    def nextID(self):
+    def next_id(self):
         '''Takes no arguments and returns a string, which is a new unique ID.'''
-        self.currentID += 1
-        return str(self.currentID)
+        self.current_id += 1
+        return str(self.current_id)
 
 ### Makes the with statement possible
 
@@ -120,9 +134,9 @@ class RunIf:
         The reason RunIfs depend on "the last time" their page was displayed is
         that Pages can display multiple times if they are in Blocks with a
         criterion.'''
-        self.pageID = page.id
+        self.page_id = page.id_str
         if option != None:
-            self.optionID = option.id
+            self.option_id = option.id_str
         elif regex != None:
             self.regex = regex
 
@@ -135,11 +149,11 @@ class Component:
     # class variable
     id_generator = None
 
-    def set_id(self, ID = None):
-        if ID:
-            self.id = ID
+    def set_id(self, id_str = None):
+        if id_str:
+            self.id_str = id_str
         else:
-            self.id = self.id_generator.nextID()
+            self.id_str = self.id_generator.next_id()
 
     def new(self):
         '''Use this method to return a new experimental component with the same
@@ -148,7 +162,7 @@ class Component:
         they can coexist in an experiment and won't be confused with each other,
         for instance if one is referred to in a RunIf.'''
         new_component = copy.deepcopy(self)
-        new_component.id = self.id_generator.nextID()
+        new_component.id = self.id_generator.next_id()
         for att in ['blocks', 'pages', 'options']:
             if hasattr(new_component, att):
                 setattr(new_component, att, [item.new()
@@ -168,11 +182,15 @@ class Component:
 
 
 class Option(Component):
-    def __init__(self, text = None, ID = None, **kwargs):
+    def __init__(self, text = None, id_str = None, **kwargs):
         '''
         text: If the Option is not a text box, this is the label for the Option
         that will be displayed on the page. If the Option is a text box, this is
         not currently used.
+
+        id_str: String, optional, an identifier unique among all options in this
+        experiment. (Currently uniqueness in its page is sufficient but this may
+        change in the future.)
 
         **kwargs: optional keyword arguments, which can include:
 
@@ -192,25 +210,28 @@ class Option(Component):
         Note that the type of an Option (radio button, check box, dropdown, or
         text box) is determined based on its data and the attributes of its
         containing Page. It is not set directly in the Option.'''
-        self.set_id(ID)
+        self.set_id(id_str)
         if text != None:
             self.text = text
         self.set_optional_args(**kwargs)
 
 
 class Page(Component):
-    def __init__(self, text, options = None, ID = None, **kwargs):
+    def __init__(self, text, options = None, id_str = None, **kwargs):
         '''
         text: The text to be displayed on the page.
 
         options: [Option], optional, the answer choices to be displayed on the
         page.
 
+        id_str: String, optional, an identifier for this page unique among all
+        pages in the experiment.
+
         **kwargs: optional keyword arguments, which can include:
 
         feedback: string, the feedback to be displayed after an answer is chosen.
 
-        correct: If freetext is False, a string representing the ID of the
+        correct: If freetext is False, a string representing the id_str of the
         correct Option. If freetext is True, a string representing a regular
         expression that a correct answer will match.
 
@@ -237,7 +258,7 @@ class Page(Component):
         freetext: boolean, whether the Option is a text box rather than multiple
         choice.
         '''
-        self.set_id(ID)
+        self.set_id(id_str)
         self.text = text
         self.set_optional_args(**kwargs)
         if options:
@@ -264,15 +285,21 @@ class Page(Component):
         self.validate_resources()
         self.validate_freetext()
 
-
 class Block(Component):
-    def __init__(self, pages = None, groups = None, blocks = None, ID = None,
-            exchangeable = [], latinSquare = None, pseudorandom = None, **kwargs):
+    def __init__(self, pages = None, groups = None, blocks = None, id_str = None,
+            exchangeable = [], latin_square = None, pseudorandom = None, **kwargs):
         '''
-        contents: either [Page], [[Page]], or [Block]. If [[Page]], the inner
-        lists are referred to as groups (of Pages). Blocks containing groups
-        choose one Page to display from each group, and make this choice
-        separately for each participant.
+        Exactly one of pages, groups, and blocks must be provided.
+
+        pages: [Page], the pages contained by this Block.
+
+        groups: [[Page]], the groups contained by this Block. One page from each
+        inner list of Pages will be displayed per participant.
+
+        blocks: [Block], the blocks contained by this Block.
+
+        id_str: String, optional, identifier unique among the Blocks in this
+        experiment.
 
         exchangeable: [Block], only valid if contents is [Block]. A subset of
         contents. The Blocks in this list are allowed to switch places with each
@@ -281,7 +308,7 @@ class Block(Component):
         designs. For example, if there are three blocks, A, B, and C, and A and
         C are exchangeable, they can run in the order A, B, C or C, B, A.
 
-        latinSquare: boolean, only valid if contents is [[Page]], that is,
+        latin_square: boolean, only valid if contents is [[Page]], that is,
         groups of Pages. If True, Pages are chosen from groups according to a
         Latin Square. This process requires that all groups in the Block have
         equal length. Additionally, the number of groups in the Block should be
@@ -293,7 +320,7 @@ class Block(Component):
         pseudorandom: boolean, only valid if contents is [[Pages]] or [Pages], 
         all Pages have a condition attribute specified, and there will be an equal
         number of each Pages of each condition displayed (therefore it is not
-        valid if contents is [[Pages]] and latinSquare is False, because there's
+        valid if contents is [[Pages]] and latin_square is False, because there's
         no guarantee about how many Pages of each condition will display). If True,
         no two Pages with the same condition will display in a row.
 
@@ -317,11 +344,11 @@ class Block(Component):
         Blocks, and can be used to train participants before later testing them
         on novel information.
 
-        runIf: RunIf, gives a condition that must be met in order for this Block
+        run_if: RunIf, gives a condition that must be met in order for this Block
         to display its contents, no matter the type of contents. See the RunIf
         documentation for more information.'''
 
-        self.set_id(ID)
+        self.set_id(id_str)
         self.set_optional_args(**kwargs)
         if pages != None:
             self.pages = pages
@@ -335,9 +362,9 @@ class Block(Component):
         if exchangeable:
             self.exchangeable = [b.id for b in exchangeable]
 
-        if latinSquare:
-            self.latinSquare = latinSquare
-            self.validate_latinSquare()
+        if latin_square:
+            self.latin_square = latin_square
+            self.validate_latin_square()
 
         if pseudorandom:
             self.pseudorandom = pseudorandom
@@ -346,7 +373,7 @@ class Block(Component):
     def validate(self):
         self.validate_contents()
         self.validate_pseudorandom()
-        self.validate_latinSquare()
+        self.validate_latin_square()
 
     def validate_contents(self):
         content_types = [attribute for attribute in
@@ -357,13 +384,13 @@ class Block(Component):
 
     def validate_pseudorandom(self):
         if hasattr(self, 'groups'):
-            if self.latinSquare == False:
+            if self.latin_square == False:
                 raise ValueError, '''Can't choose pages from groups randomly and
                 ensure that pseudorandomization will work. Supply pages instead of
-                groups, change latinSquare to True, or change pseudorandom to
+                groups, change latin_square to True, or change pseudorandom to
                 False.'''
             try:
-                conditions = [p.condition for group in self.groups for page in
+                conditions = [page.condition for group in self.groups for page in
                     group]
             except AttributeError:
                 raise ValueError, '''Can't pseudorandomize pages without
@@ -377,7 +404,7 @@ class Block(Component):
                 block.'''
         #TODO elif hasattr('pages')
 
-    def validate_latinSquare(self):
+    def validate_latin_square(self):
         pass
 
 class Experiment(Component):
@@ -414,16 +441,58 @@ class Experiment(Component):
     def validate_json(self, json_object):
         jsonschema.validate(json_object, self.schema)
 
-    def toJSON(self):
+    def to_JSON(self):
         return json.dumps(self, indent = 4, cls = ExperimentEncoder)
 
-    def to_file(self, filename, varname, append = False):
-        json_experiment = self.toJSON()
+    def to_file(self, filename, varname):
+        '''Validates the structure of the experiment and writes it as a JSON
+        object in a JavaScript file.'''
+        json_experiment = self.to_JSON()
         self.validate_json(json_experiment)
         to_write = 'var ' + varname + ' = ' + json_experiment
-        if append:
-            with open(filename, 'a') as f:
-                f.append(to_write)
+        with open(filename, 'w') as f:
+            f.write(to_write)
+
+    def install(self, experiment_name):
+        '''Validates the structure of the experiment, writes it as a JSON object
+        in a JavaScript file, and gives PsiTurk access to Speriment and the JSON
+        object.'''
+        filename = experiment_name + '.js'
+        varname = experiment_name
+        self.to_file('./static/js/' + filename, varname)
+        make_exp(filename)
+        make_task(varname)
+
+
+def make_task(varname):
+    '''Replace PsiTurk's example task.js with the standard Speriment task.js,
+    with the JSON object variable name inserted.'''
+    with open('./static/js/task.js', 'w') as task:
+        task.write('''$(document).ready(function(){
+    var mySperiment = ''' + varname + ''';
+    var psiturk = PsiTurk(uniqueId, adServerLoc);
+    psiturk.finishInstructions();
+    var speriment = new Experiment(mySperiment, condition, psiturk);
+    speriment.start();
+});''')
+
+def make_exp(filename):
+    '''Add script tags to PsiTurk's exp.html file so it can use speriment.js and
+    the JSON object.'''
+    exp_file = './templates/exp.html'
+    #TODO will change to static/lib/node_modules/speriment/speriment.js and maybe min
+    speriment_tag = '''\n\t\t<script src="/static/lib/speriment.js" type="text/javascript">'''
+    json_tag = '''\n\t\t<script src="/static/js/{0}" type="text/javascript">'''.format(filename)
+    new_contents = None
+    with open(exp_file, 'r') as exp:
+        exp_contents = exp.read()
+        script_tags = exp_contents.split('</script>')
+        # These scripts must go after PsiTurk and its dependencies but before
+        # task.js and the rest of the page
+        if script_tags[-4] == speriment_tag:
+            script_tags[-3] = json_tag
         else:
-            with open(filename, 'w') as f:
-                f.write(to_write)
+            script_tags = script_tags[:-2] + [speriment_tag] + [json_tag] + script_tags[-2:]
+        new_contents = '</script>'.join(script_tags)
+    with open(exp_file, 'w') as expw:
+        expw.write(new_contents)

@@ -55,7 +55,7 @@ with make_experiment(IDGenerator()):
     # the animal question in block1
     animal_question = pages1[0]
     cat_condition = RunIf(page = animal_question, option = animal_question.options[0])
-    block2 = Block(pages = pages2, runIf = cat_condition)
+    block2 = Block(pages = pages2, run_if = cat_condition)
 
     # Now I want to make another block just like block 1, and then just tweak it
     # a little bit.
@@ -83,13 +83,14 @@ with make_experiment(IDGenerator()):
     experiment = Experiment([block1, block2, block3, block4])
 
     # You can generate the JSON just to look at it, for instance by printing this
-    # variable.
+    # variable. This step is optional.
 
-    exp_json = experiment.toJSON()
+    exp_json = experiment.to_JSON()
 
-    # But you'll probably want to write it to a file. In doing so, the program will
-    # check the JSON against a schema, catching some but not all possible problems
-    # with the way you've written your script. This code writes the json to the
-    # variable my_experiment in the file my_exp.json.
-
-    experiment.to_file('../json/example_experiment.json', 'my_exp')
+    # Finally, run this line to make sure your experiment is written properly,
+    # convert it to JSON, write it to a file, and tell PsiTurk where to find
+    # Speriment and your JSON. Just make up a name for this experiment, which
+    # will be used to name the JSON object and the JavaScript file it's stored
+    # in. Make sure to run this script in the top level of your PsiTurk project
+    # directory so it can find the PsiTurk files that it needs to edit.
+    experiment.install('example_experiment')
