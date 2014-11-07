@@ -12,6 +12,7 @@ setup(name='speriment',
       ],
       keywords=['experiments psychology linguistics'],
       packages=['speriment'],
+      package_data={'speriment': ['sperimentschema.json']},
       scripts=['bin/speriment-output'],
       include_package_data=True,
       zip_safe=False)

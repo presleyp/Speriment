@@ -1,3 +1,3 @@
 include README.md
-include json/sperimentschema.json
+include speriment/sperimentschema.json
 include doc/speriment.html
