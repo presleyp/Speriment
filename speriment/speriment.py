@@ -3,6 +3,7 @@ Speriment.'''
 import json, jsonschema
 from collections import Counter
 import copy, csv
+import pkg_resources
 
 ### Reading CSV File
 
@@ -56,7 +57,8 @@ class ExperimentEncoder(json.JSONEncoder):
             # make keys follow JS conventions
             renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
             renamed_ri = self.rename_key(renamed_ls, 'run_if', 'runIf')
-            return renamed_ri
+            renamed_id = self.rename_key(renamed_ls, 'id_str', 'id')
+            return renamed_id
         if isinstance(obj, RunIf):
             return obj.__dict__
         # Let the base class default method raise the TypeError
@@ -412,12 +414,6 @@ class Experiment(Component):
     don't make your own IDs (IDs should be unique among pages, among options,
     and among blocks within one experiment), then use one IDGenerator per
     experiment.'''
-    # class variable schema holds the schema to validate your JSON against
-    schema = None
-    with open('json/sperimentschema.json', 'r') as f:
-        contents = f.read()
-        schema = json.loads(contents)
-
     def __init__(self, blocks, exchangeable = []):
         '''
         blocks: [Block], the contents of the experiment.
@@ -439,7 +435,9 @@ class Experiment(Component):
         pass
 
     def validate_json(self, json_object):
-        jsonschema.validate(json_object, self.schema)
+        contents = pkg_resources.resource_string(__name__, 'sperimentschema.json')
+        schema = json.loads(contents)
+        jsonschema.validate(json_object, schema)
 
     def to_JSON(self):
         return json.dumps(self, indent = 4, cls = ExperimentEncoder)
