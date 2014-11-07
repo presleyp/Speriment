@@ -1,0 +1,556 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module speriment</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>speriment</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/presley/Speriment/speriment/speriment.py">/Users/presley/Speriment/speriment/speriment.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;is&nbsp;the&nbsp;API&nbsp;you&nbsp;can&nbsp;use&nbsp;to&nbsp;write&nbsp;a&nbsp;Python&nbsp;script&nbsp;for&nbsp;use&nbsp;with<br>
+Speriment.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="copy.html">copy</a><br>
+</td><td width="25%" valign=top><a href="csv.html">csv</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="jsonschema.html">jsonschema</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="json.encoder.html#JSONEncoder">json.encoder.JSONEncoder</a>(<a href="__builtin__.html#object">__builtin__.object</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="speriment.html#ExperimentEncoder">ExperimentEncoder</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="speriment.html#Component">Component</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="speriment.html#Block">Block</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.html#Experiment">Experiment</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.html#Option">Option</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.html#Page">Page</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="speriment.html#ExperimentMaker">ExperimentMaker</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.html#IDGenerator">IDGenerator</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.html#RunIf">RunIf</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Block">class <strong>Block</strong></a>(<a href="speriment.html#Component">Component</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Block-__init__"><strong>__init__</strong></a>(self, pages<font color="#909090">=None</font>, groups<font color="#909090">=None</font>, blocks<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, exchangeable<font color="#909090">=[]</font>, latin_square<font color="#909090">=None</font>, pseudorandom<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>Exactly&nbsp;one&nbsp;of&nbsp;pages,&nbsp;groups,&nbsp;and&nbsp;blocks&nbsp;must&nbsp;be&nbsp;provided.<br>
+&nbsp;<br>
+pages:&nbsp;[<a href="#Page">Page</a>],&nbsp;the&nbsp;pages&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a>.<br>
+&nbsp;<br>
+groups:&nbsp;[[<a href="#Page">Page</a>]],&nbsp;the&nbsp;groups&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a>.&nbsp;One&nbsp;page&nbsp;from&nbsp;each<br>
+inner&nbsp;list&nbsp;of&nbsp;Pages&nbsp;will&nbsp;be&nbsp;displayed&nbsp;per&nbsp;participant.<br>
+&nbsp;<br>
+blocks:&nbsp;[<a href="#Block">Block</a>],&nbsp;the&nbsp;blocks&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a>.<br>
+&nbsp;<br>
+id_str:&nbsp;String,&nbsp;optional,&nbsp;identifier&nbsp;unique&nbsp;among&nbsp;the&nbsp;Blocks&nbsp;in&nbsp;this<br>
+experiment.<br>
+&nbsp;<br>
+exchangeable:&nbsp;[<a href="#Block">Block</a>],&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[<a href="#Block">Block</a>].&nbsp;A&nbsp;subset&nbsp;of<br>
+contents.&nbsp;The&nbsp;Blocks&nbsp;in&nbsp;this&nbsp;list&nbsp;are&nbsp;allowed&nbsp;to&nbsp;switch&nbsp;places&nbsp;with&nbsp;each<br>
+other.&nbsp;Blocks&nbsp;which&nbsp;are&nbsp;not&nbsp;exchangeable&nbsp;run&nbsp;only&nbsp;in&nbsp;the&nbsp;order&nbsp;in&nbsp;which<br>
+they&nbsp;were&nbsp;given.&nbsp;Exchangeable&nbsp;blocks&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;counterbalancing<br>
+designs.&nbsp;For&nbsp;example,&nbsp;if&nbsp;there&nbsp;are&nbsp;three&nbsp;blocks,&nbsp;A,&nbsp;B,&nbsp;and&nbsp;C,&nbsp;and&nbsp;A&nbsp;and<br>
+C&nbsp;are&nbsp;exchangeable,&nbsp;they&nbsp;can&nbsp;run&nbsp;in&nbsp;the&nbsp;order&nbsp;A,&nbsp;B,&nbsp;C&nbsp;or&nbsp;C,&nbsp;B,&nbsp;A.<br>
+&nbsp;<br>
+latin_square:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[<a href="#Page">Page</a>]],&nbsp;that&nbsp;is,<br>
+groups&nbsp;of&nbsp;Pages.&nbsp;If&nbsp;True,&nbsp;Pages&nbsp;are&nbsp;chosen&nbsp;from&nbsp;groups&nbsp;according&nbsp;to&nbsp;a<br>
+Latin&nbsp;Square.&nbsp;This&nbsp;process&nbsp;requires&nbsp;that&nbsp;all&nbsp;groups&nbsp;in&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;have<br>
+equal&nbsp;length.&nbsp;Additionally,&nbsp;the&nbsp;number&nbsp;of&nbsp;groups&nbsp;in&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;should&nbsp;be<br>
+a&nbsp;multiple&nbsp;of&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;in&nbsp;a&nbsp;group,&nbsp;and&nbsp;the&nbsp;Pages&nbsp;in&nbsp;each<br>
+group&nbsp;should&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;order&nbsp;in&nbsp;terms&nbsp;of&nbsp;their&nbsp;experimental<br>
+condition.&nbsp;The&nbsp;condition&nbsp;attribute&nbsp;of&nbsp;Pages&nbsp;is&nbsp;not&nbsp;used&nbsp;to&nbsp;check&nbsp;the<br>
+order.<br>
+&nbsp;<br>
+pseudorandom:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;or&nbsp;[Pages],&nbsp;<br>
+all&nbsp;Pages&nbsp;have&nbsp;a&nbsp;condition&nbsp;attribute&nbsp;specified,&nbsp;and&nbsp;there&nbsp;will&nbsp;be&nbsp;an&nbsp;equal<br>
+number&nbsp;of&nbsp;each&nbsp;Pages&nbsp;of&nbsp;each&nbsp;condition&nbsp;displayed&nbsp;(therefore&nbsp;it&nbsp;is&nbsp;not<br>
+valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;and&nbsp;latin_square&nbsp;is&nbsp;False,&nbsp;because&nbsp;there's<br>
+no&nbsp;guarantee&nbsp;about&nbsp;how&nbsp;many&nbsp;Pages&nbsp;of&nbsp;each&nbsp;condition&nbsp;will&nbsp;display).&nbsp;If&nbsp;True,<br>
+no&nbsp;two&nbsp;Pages&nbsp;with&nbsp;the&nbsp;same&nbsp;condition&nbsp;will&nbsp;display&nbsp;in&nbsp;a&nbsp;row.<br>
+&nbsp;<br>
+**kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
+&nbsp;<br>
+criterion:&nbsp;integer&nbsp;or&nbsp;float&nbsp;between&nbsp;0&nbsp;and&nbsp;1.&nbsp;If&nbsp;integer,&nbsp;it&nbsp;must&nbsp;be<br>
+less&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a><br>
+(currently&nbsp;it&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;on&nbsp;Blocks&nbsp;where&nbsp;contents&nbsp;is&nbsp;[<a href="#Page">Page</a>]&nbsp;or<br>
+[[<a href="#Page">Page</a>]],&nbsp;but&nbsp;eventually&nbsp;it&nbsp;will&nbsp;be&nbsp;usable&nbsp;with&nbsp;[<a href="#Block">Block</a>],&nbsp;and&nbsp;this<br>
+restriction&nbsp;will&nbsp;apply&nbsp;to&nbsp;the&nbsp;Pages&nbsp;that&nbsp;are&nbsp;ultimately&nbsp;contained&nbsp;by&nbsp;the<br>
+<a href="#Block">Block</a>)&nbsp;that&nbsp;have&nbsp;a&nbsp;specification&nbsp;for&nbsp;the&nbsp;correct&nbsp;attribute,&nbsp;or&nbsp;have<br>
+Options&nbsp;that&nbsp;do.&nbsp;The&nbsp;integer&nbsp;then&nbsp;represents&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;that<br>
+can&nbsp;be&nbsp;correct&nbsp;and&nbsp;were&nbsp;correct&nbsp;in&nbsp;a&nbsp;row&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>.&nbsp;The<br>
+idea&nbsp;is&nbsp;that&nbsp;participants&nbsp;may&nbsp;make&nbsp;mistakes&nbsp;at&nbsp;the&nbsp;beginning,&nbsp;but&nbsp;by&nbsp;the<br>
+end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;should&nbsp;give&nbsp;correct&nbsp;answers&nbsp;for&nbsp;this&nbsp;long&nbsp;of&nbsp;a&nbsp;streak<br>
+in&nbsp;order&nbsp;to&nbsp;show&nbsp;master.&nbsp;If&nbsp;it's&nbsp;a&nbsp;float,&nbsp;it&nbsp;represents&nbsp;a&nbsp;percentage&nbsp;of<br>
+Pages&nbsp;that&nbsp;can&nbsp;be&nbsp;correct&nbsp;that&nbsp;were&nbsp;correct&nbsp;out&nbsp;of&nbsp;the&nbsp;entire&nbsp;block,&nbsp;not<br>
+in&nbsp;a&nbsp;streak.&nbsp;Whether&nbsp;it's&nbsp;an&nbsp;integer&nbsp;or&nbsp;a&nbsp;float,&nbsp;this&nbsp;attribute&nbsp;signals<br>
+that&nbsp;a&nbsp;participant&nbsp;should&nbsp;see&nbsp;the&nbsp;(reshuffled)&nbsp;contents&nbsp;of&nbsp;this&nbsp;<a href="#Block">Block</a>&nbsp;as<br>
+many&nbsp;times&nbsp;as&nbsp;it&nbsp;takes&nbsp;to&nbsp;reach&nbsp;criterion&nbsp;before&nbsp;moving&nbsp;on&nbsp;to&nbsp;later<br>
+Blocks,&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;train&nbsp;participants&nbsp;before&nbsp;later&nbsp;testing&nbsp;them<br>
+on&nbsp;novel&nbsp;information.<br>
+&nbsp;<br>
+run_if:&nbsp;<a href="#RunIf">RunIf</a>,&nbsp;gives&nbsp;a&nbsp;condition&nbsp;that&nbsp;must&nbsp;be&nbsp;met&nbsp;in&nbsp;order&nbsp;for&nbsp;this&nbsp;<a href="#Block">Block</a><br>
+to&nbsp;display&nbsp;its&nbsp;contents,&nbsp;no&nbsp;matter&nbsp;the&nbsp;type&nbsp;of&nbsp;contents.&nbsp;See&nbsp;the&nbsp;<a href="#RunIf">RunIf</a><br>
+documentation&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<dl><dt><a name="Block-validate"><strong>validate</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Block-validate_contents"><strong>validate_contents</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Block-validate_latin_square"><strong>validate_latin_square</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Block-validate_pseudorandom"><strong>validate_pseudorandom</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><a name="Block-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<dl><dt><a name="Block-set_id"><strong>set_id</strong></a>(self, id_str<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Block-set_optional_args"><strong>set_optional_args</strong></a>(self, **kwargs)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Component">class <strong>Component</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;is&nbsp;the&nbsp;superclass&nbsp;of&nbsp;<a href="#Option">Option</a>,&nbsp;<a href="#Page">Page</a>,&nbsp;<a href="#Block">Block</a>,&nbsp;and&nbsp;<a href="#Experiment">Experiment</a>.&nbsp;You&nbsp;should<br>
+not&nbsp;instantiate&nbsp;this&nbsp;class.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Component-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<dl><dt><a name="Component-set_id"><strong>set_id</strong></a>(self, id_str<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Component-set_optional_args"><strong>set_optional_args</strong></a>(self, **kwargs)</dt></dl>
+
+<dl><dt><a name="Component-validate"><strong>validate</strong></a>(self)</dt><dd><tt>To&nbsp;be&nbsp;defined&nbsp;for&nbsp;each&nbsp;subtype.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Experiment">class <strong>Experiment</strong></a>(<a href="speriment.html#Component">Component</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>An&nbsp;<a href="#Experiment">Experiment</a>&nbsp;holds&nbsp;all&nbsp;the&nbsp;information&nbsp;describing&nbsp;one&nbsp;experiment.&nbsp;If&nbsp;you<br>
+don't&nbsp;make&nbsp;your&nbsp;own&nbsp;IDs&nbsp;(IDs&nbsp;should&nbsp;be&nbsp;unique&nbsp;among&nbsp;pages,&nbsp;among&nbsp;options,<br>
+and&nbsp;among&nbsp;blocks&nbsp;within&nbsp;one&nbsp;experiment),&nbsp;then&nbsp;use&nbsp;one&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;per<br>
+experiment.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Experiment-__init__"><strong>__init__</strong></a>(self, blocks, exchangeable<font color="#909090">=[]</font>)</dt><dd><tt>blocks:&nbsp;[<a href="#Block">Block</a>],&nbsp;the&nbsp;contents&nbsp;of&nbsp;the&nbsp;experiment.<br>
+&nbsp;<br>
+exchangeable:&nbsp;[<a href="#Block">Block</a>],&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;Blocks.&nbsp;These&nbsp;Blocks&nbsp;will&nbsp;be<br>
+considered&nbsp;exchangeable.&nbsp;See&nbsp;<a href="#Block">Block</a>&nbsp;documentation&nbsp;for&nbsp;more&nbsp;information.</tt></dd></dl>
+
+<dl><dt><a name="Experiment-install"><strong>install</strong></a>(self, experiment_name)</dt><dd><tt>Validates&nbsp;the&nbsp;structure&nbsp;of&nbsp;the&nbsp;experiment,&nbsp;writes&nbsp;it&nbsp;as&nbsp;a&nbsp;JSON&nbsp;object<br>
+in&nbsp;a&nbsp;JavaScript&nbsp;file,&nbsp;and&nbsp;gives&nbsp;PsiTurk&nbsp;access&nbsp;to&nbsp;Speriment&nbsp;and&nbsp;the&nbsp;JSON<br>
+object.</tt></dd></dl>
+
+<dl><dt><a name="Experiment-to_JSON"><strong>to_JSON</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Experiment-to_file"><strong>to_file</strong></a>(self, filename, varname)</dt><dd><tt>Validates&nbsp;the&nbsp;structure&nbsp;of&nbsp;the&nbsp;experiment&nbsp;and&nbsp;writes&nbsp;it&nbsp;as&nbsp;a&nbsp;JSON<br>
+object&nbsp;in&nbsp;a&nbsp;JavaScript&nbsp;file.</tt></dd></dl>
+
+<dl><dt><a name="Experiment-validate"><strong>validate</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Experiment-validate_json"><strong>validate_json</strong></a>(self, json_object)</dt></dl>
+
+<dl><dt><a name="Experiment-validate_option_tags"><strong>validate_option_tags</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Experiment-validate_page_tags"><strong>validate_page_tags</strong></a>(self)</dt></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>contents</strong> = '{<font color="#c040c0">\n</font>    "$schema": "http://json-schema.org/draft-0..."}<font color="#c040c0">\n</font>        }<font color="#c040c0">\n</font>    },<font color="#c040c0">\n</font>    "required": ["blocks"]<font color="#c040c0">\n</font>}<font color="#c040c0">\n</font>'</dl>
+
+<dl><dt><strong>f</strong> = &lt;closed file 'sperimentschema.json', mode 'r'&gt;</dl>
+
+<dl><dt><strong>schema</strong> = {u'$schema': u'http://json-schema.org/draft-04/schema#', u'definitions': {u'block': {u'description': u'A grouping of blocks, pages, or groups of pages....e same container can swap places with each other.', u'oneOf': [{u'properties': {u'criterion': {...}, u'id': {...}, u'pages': {...}, u'pseudorandom': {...}, u'runIf': {...}}, u'required': [u'id', u'pages']}, {u'properties': {u'criterion': {...}, u'groups': {...}, u'id': {...}, u'latinSquare': {...}, u'pseudorandom': {...}, u'runIf': {...}}, u'required': [u'id', u'groups']}, {u'properties': {u'blocks': {...}, u'criterion': {...}, u'exchangeable': {...}, u'id': {...}, u'runIf': {...}}, u'required': [u'id', u'blocks']}], u'type': u'object'}, u'correct': {u'description': u'Either whether this option is correct, or a regular expression that any correct response will match.', u'type': [u'string', u'boolean']}, u'criterion': {u'description': u'', u'type': u'number'}, u'exchangeable': {u'description': u'IDs of blocks that can swap positions with each ...ble, the possible orders are 1, 2, 3 and 3, 2, 1.', u'items': {u'description': u'Block ID', u'type': u'string'}, u'type': u'array'}, u'feedback': {u'description': u'The feedback to display after this page/if this option is chosen.', u'type': u'string'}, u'id': {u'description': u'Unique identifier for a component of the experiment.', u'type': u'string'}, u'option': {u'description': u'Option for user response.', u'properties': {u'correct': {u'$ref': u'#/definitions/correct'}, u'feedback': {u'$ref': u'#/definitions/feedback'}, u'id': {u'$ref': u'#/definitions/id'}, u'tags': {u'description': u'Array of descriptors. This array should be the s...the entire experiment, or absent for all options.', u'items': {u'$ref': u'#/definitions/tag'}, u'type': u'array'}, u'text': {u'$ref': u'#/definitions/text'}}, u'required': [u'id', u'text'], u'type': u'object'}, u'page': {u'description': u'A unit of the experiment to be showed at once, s...r a page or its options will be shown separately.', u'properties': {u'condition': {u'description': u'The experimental condition that this item belong... items of the same condition from being adjacent.', u'type': u'string'}, u'correct': {u'$ref': u'#/definitions/correct'}, u'exclusive': {u'description': u'Can only one of these options be chosen? Defaults to true.', u'type': u'boolean'}, u'feedback': {u'$ref': u'#/definitions/feedback'}, u'freetext': {u'description': u'Does this question have a text box option, as opposed to discrete choices? Defaults to false.', u'type': u'boolean'}, u'id': {u'$ref': u'#/definitions/id'}, u'ordered': {u'description': u'Are the options for this question ordered? Used ...mize the order of the options. Defaults to false.', u'type': u'boolean'}, u'tags': {u'description': u'Array of descriptors. This array should be the s...n the entire experiment, or absent for all pages.', u'items': {u'$ref': u'#/definitions/tag'}, u'type': u'array'}, u'text': {u'$ref': u'#/definitions/text'}}, u'required': [u'id', u'text'], u'type': u'object'}, u'pageID': {u'description': u'', u'type': u'string'}, u'pseudorandom': {u'description': u'', u'type': u'string'}, ...}, u'properties': {u'blocks': {u'description': u"Experiments are made up of blocks. Blocks are ma...ch you specify them, unless they're exchangeable.", u'items': {u'$ref': u'#/definitions/block'}, u'type': u'array'}, u'breakoff': {u'description': u'Does the experiment allow people to quit early and submit incomplete data?', u'type': u'boolean'}, u'exchangeable': {u'$ref': u'#/definitions/exchangeable'}}, u'required': [u'blocks'], u'title': u'Speriment Schema'}</dl>
+
+<hr>
+Methods inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><a name="Experiment-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<dl><dt><a name="Experiment-set_id"><strong>set_id</strong></a>(self, id_str<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Experiment-set_optional_args"><strong>set_optional_args</strong></a>(self, **kwargs)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ExperimentEncoder">class <strong>ExperimentEncoder</strong></a>(<a href="json.encoder.html#JSONEncoder">json.encoder.JSONEncoder</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;enables&nbsp;nested&nbsp;Python&nbsp;objects&nbsp;to&nbsp;be&nbsp;correctly&nbsp;serialized&nbsp;to&nbsp;JSON.<br>
+It&nbsp;also&nbsp;requires&nbsp;that&nbsp;non-schema&nbsp;validation&nbsp;pass&nbsp;before&nbsp;the&nbsp;JSON&nbsp;is<br>
+generated.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="speriment.html#ExperimentEncoder">ExperimentEncoder</a></dd>
+<dd><a href="json.encoder.html#JSONEncoder">json.encoder.JSONEncoder</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="ExperimentEncoder-default"><strong>default</strong></a>(self, obj)</dt></dl>
+
+<dl><dt><a name="ExperimentEncoder-rename_key"><strong>rename_key</strong></a>(self, dictionary, key, new_key)</dt></dl>
+
+<hr>
+Methods inherited from <a href="json.encoder.html#JSONEncoder">json.encoder.JSONEncoder</a>:<br>
+<dl><dt><a name="ExperimentEncoder-__init__"><strong>__init__</strong></a>(self, skipkeys<font color="#909090">=False</font>, ensure_ascii<font color="#909090">=True</font>, check_circular<font color="#909090">=True</font>, allow_nan<font color="#909090">=True</font>, sort_keys<font color="#909090">=False</font>, indent<font color="#909090">=None</font>, separators<font color="#909090">=None</font>, encoding<font color="#909090">='utf-8'</font>, default<font color="#909090">=None</font>)</dt><dd><tt>Constructor&nbsp;for&nbsp;<a href="json.encoder.html#JSONEncoder">JSONEncoder</a>,&nbsp;with&nbsp;sensible&nbsp;defaults.<br>
+&nbsp;<br>
+If&nbsp;skipkeys&nbsp;is&nbsp;false,&nbsp;then&nbsp;it&nbsp;is&nbsp;a&nbsp;TypeError&nbsp;to&nbsp;attempt<br>
+encoding&nbsp;of&nbsp;keys&nbsp;that&nbsp;are&nbsp;not&nbsp;str,&nbsp;int,&nbsp;long,&nbsp;float&nbsp;or&nbsp;None.&nbsp;&nbsp;If<br>
+skipkeys&nbsp;is&nbsp;True,&nbsp;such&nbsp;items&nbsp;are&nbsp;simply&nbsp;skipped.<br>
+&nbsp;<br>
+If&nbsp;*ensure_ascii*&nbsp;is&nbsp;true&nbsp;(the&nbsp;default),&nbsp;all&nbsp;non-ASCII<br>
+characters&nbsp;in&nbsp;the&nbsp;output&nbsp;are&nbsp;escaped&nbsp;with&nbsp;\uXXXX&nbsp;sequences,<br>
+and&nbsp;the&nbsp;results&nbsp;are&nbsp;str&nbsp;instances&nbsp;consisting&nbsp;of&nbsp;ASCII<br>
+characters&nbsp;only.&nbsp;&nbsp;If&nbsp;ensure_ascii&nbsp;is&nbsp;False,&nbsp;a&nbsp;result&nbsp;may&nbsp;be&nbsp;a<br>
+unicode&nbsp;instance.&nbsp;&nbsp;This&nbsp;usually&nbsp;happens&nbsp;if&nbsp;the&nbsp;input&nbsp;contains<br>
+unicode&nbsp;strings&nbsp;or&nbsp;the&nbsp;*encoding*&nbsp;parameter&nbsp;is&nbsp;used.<br>
+&nbsp;<br>
+If&nbsp;check_circular&nbsp;is&nbsp;true,&nbsp;then&nbsp;lists,&nbsp;dicts,&nbsp;and&nbsp;custom&nbsp;encoded<br>
+objects&nbsp;will&nbsp;be&nbsp;checked&nbsp;for&nbsp;circular&nbsp;references&nbsp;during&nbsp;encoding&nbsp;to<br>
+prevent&nbsp;an&nbsp;infinite&nbsp;recursion&nbsp;(which&nbsp;would&nbsp;cause&nbsp;an&nbsp;OverflowError).<br>
+Otherwise,&nbsp;no&nbsp;such&nbsp;check&nbsp;takes&nbsp;place.<br>
+&nbsp;<br>
+If&nbsp;allow_nan&nbsp;is&nbsp;true,&nbsp;then&nbsp;NaN,&nbsp;Infinity,&nbsp;and&nbsp;-Infinity&nbsp;will&nbsp;be<br>
+encoded&nbsp;as&nbsp;such.&nbsp;&nbsp;This&nbsp;behavior&nbsp;is&nbsp;not&nbsp;JSON&nbsp;specification&nbsp;compliant,<br>
+but&nbsp;is&nbsp;consistent&nbsp;with&nbsp;most&nbsp;JavaScript&nbsp;based&nbsp;encoders&nbsp;and&nbsp;decoders.<br>
+Otherwise,&nbsp;it&nbsp;will&nbsp;be&nbsp;a&nbsp;ValueError&nbsp;to&nbsp;encode&nbsp;such&nbsp;floats.<br>
+&nbsp;<br>
+If&nbsp;sort_keys&nbsp;is&nbsp;true,&nbsp;then&nbsp;the&nbsp;output&nbsp;of&nbsp;dictionaries&nbsp;will&nbsp;be<br>
+sorted&nbsp;by&nbsp;key;&nbsp;this&nbsp;is&nbsp;useful&nbsp;for&nbsp;regression&nbsp;tests&nbsp;to&nbsp;ensure<br>
+that&nbsp;JSON&nbsp;serializations&nbsp;can&nbsp;be&nbsp;compared&nbsp;on&nbsp;a&nbsp;day-to-day&nbsp;basis.<br>
+&nbsp;<br>
+If&nbsp;indent&nbsp;is&nbsp;a&nbsp;non-negative&nbsp;integer,&nbsp;then&nbsp;JSON&nbsp;array<br>
+elements&nbsp;and&nbsp;object&nbsp;members&nbsp;will&nbsp;be&nbsp;pretty-printed&nbsp;with&nbsp;that<br>
+indent&nbsp;level.&nbsp;&nbsp;An&nbsp;indent&nbsp;level&nbsp;of&nbsp;0&nbsp;will&nbsp;only&nbsp;insert&nbsp;newlines.<br>
+None&nbsp;is&nbsp;the&nbsp;most&nbsp;compact&nbsp;representation.&nbsp;&nbsp;Since&nbsp;the&nbsp;default<br>
+item&nbsp;separator&nbsp;is&nbsp;',&nbsp;',&nbsp;&nbsp;the&nbsp;output&nbsp;might&nbsp;include&nbsp;trailing<br>
+whitespace&nbsp;when&nbsp;indent&nbsp;is&nbsp;specified.&nbsp;&nbsp;You&nbsp;can&nbsp;use<br>
+separators=(',',&nbsp;':&nbsp;')&nbsp;to&nbsp;avoid&nbsp;this.<br>
+&nbsp;<br>
+If&nbsp;specified,&nbsp;separators&nbsp;should&nbsp;be&nbsp;a&nbsp;(item_separator,&nbsp;key_separator)<br>
+tuple.&nbsp;&nbsp;The&nbsp;default&nbsp;is&nbsp;(',&nbsp;',&nbsp;':&nbsp;').&nbsp;&nbsp;To&nbsp;get&nbsp;the&nbsp;most&nbsp;compact&nbsp;JSON<br>
+representation&nbsp;you&nbsp;should&nbsp;specify&nbsp;(',',&nbsp;':')&nbsp;to&nbsp;eliminate&nbsp;whitespace.<br>
+&nbsp;<br>
+If&nbsp;specified,&nbsp;default&nbsp;is&nbsp;a&nbsp;function&nbsp;that&nbsp;gets&nbsp;called&nbsp;for&nbsp;objects<br>
+that&nbsp;can't&nbsp;otherwise&nbsp;be&nbsp;serialized.&nbsp;&nbsp;It&nbsp;should&nbsp;return&nbsp;a&nbsp;JSON&nbsp;encodable<br>
+version&nbsp;of&nbsp;the&nbsp;object&nbsp;or&nbsp;raise&nbsp;a&nbsp;``TypeError``.<br>
+&nbsp;<br>
+If&nbsp;encoding&nbsp;is&nbsp;not&nbsp;None,&nbsp;then&nbsp;all&nbsp;input&nbsp;strings&nbsp;will&nbsp;be<br>
+transformed&nbsp;into&nbsp;unicode&nbsp;using&nbsp;that&nbsp;encoding&nbsp;prior&nbsp;to&nbsp;JSON-encoding.<br>
+The&nbsp;default&nbsp;is&nbsp;UTF-8.</tt></dd></dl>
+
+<dl><dt><a name="ExperimentEncoder-encode"><strong>encode</strong></a>(self, o)</dt><dd><tt>Return&nbsp;a&nbsp;JSON&nbsp;string&nbsp;representation&nbsp;of&nbsp;a&nbsp;Python&nbsp;data&nbsp;structure.<br>
+&nbsp;<br>
+&gt;&gt;&gt;&nbsp;<a href="json.encoder.html#JSONEncoder">JSONEncoder</a>().<a href="#ExperimentEncoder-encode">encode</a>({"foo":&nbsp;["bar",&nbsp;"baz"]})<br>
+'{"foo":&nbsp;["bar",&nbsp;"baz"]}'</tt></dd></dl>
+
+<dl><dt><a name="ExperimentEncoder-iterencode"><strong>iterencode</strong></a>(self, o, _one_shot<font color="#909090">=False</font>)</dt><dd><tt>Encode&nbsp;the&nbsp;given&nbsp;object&nbsp;and&nbsp;yield&nbsp;each&nbsp;string<br>
+representation&nbsp;as&nbsp;available.<br>
+&nbsp;<br>
+For&nbsp;example::<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for&nbsp;chunk&nbsp;in&nbsp;<a href="json.encoder.html#JSONEncoder">JSONEncoder</a>().<a href="#ExperimentEncoder-iterencode">iterencode</a>(bigobject):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mysocket.write(chunk)</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="json.encoder.html#JSONEncoder">json.encoder.JSONEncoder</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="json.encoder.html#JSONEncoder">json.encoder.JSONEncoder</a>:<br>
+<dl><dt><strong>item_separator</strong> = ', '</dl>
+
+<dl><dt><strong>key_separator</strong> = ': '</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ExperimentMaker">class <strong>ExperimentMaker</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>This&nbsp;class&nbsp;makes&nbsp;the&nbsp;"with"&nbsp;statement&nbsp;for&nbsp;automatic&nbsp;ID&nbsp;generation<br>
+possible.&nbsp;It&nbsp;sets&nbsp;an&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;as&nbsp;a&nbsp;class&nbsp;variable&nbsp;in&nbsp;<a href="#Component">Component</a>,&nbsp;making&nbsp;it<br>
+available&nbsp;to&nbsp;Options,&nbsp;Pages,&nbsp;and&nbsp;Blocks.&nbsp;At&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;with&nbsp;block,<br>
+it&nbsp;is&nbsp;removed&nbsp;and&nbsp;any&nbsp;errors&nbsp;encountered&nbsp;in&nbsp;the&nbsp;block&nbsp;are&nbsp;raised.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ExperimentMaker-__enter__"><strong>__enter__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="ExperimentMaker-__exit__"><strong>__exit__</strong></a>(self, etype, evalue, etrace)</dt></dl>
+
+<dl><dt><a name="ExperimentMaker-__init__"><strong>__init__</strong></a>(self, id_generator)</dt></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IDGenerator">class <strong>IDGenerator</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Creates&nbsp;an&nbsp;object&nbsp;to&nbsp;generate&nbsp;unique&nbsp;IDs&nbsp;for&nbsp;experimental&nbsp;components.&nbsp;You<br>
+should&nbsp;create&nbsp;exactly&nbsp;one&nbsp;per&nbsp;experiment&nbsp;so&nbsp;that&nbsp;all&nbsp;IDs&nbsp;in&nbsp;that&nbsp;experiment<br>
+will&nbsp;be&nbsp;distinct.<br>
+&nbsp;<br>
+Usage:<br>
+with&nbsp;<a href="#-make_experiment">make_experiment</a>(<a href="#IDGenerator">IDGenerator</a>()):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;experiment&nbsp;code&gt;<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="IDGenerator-__init__"><strong>__init__</strong></a>(self, seed<font color="#909090">=0</font>)</dt><dd><tt>seed:&nbsp;optional,&nbsp;an&nbsp;integer&nbsp;to&nbsp;start&nbsp;making&nbsp;IDs&nbsp;at.</tt></dd></dl>
+
+<dl><dt><a name="IDGenerator-next_id"><strong>next_id</strong></a>(self)</dt><dd><tt>Takes&nbsp;no&nbsp;arguments&nbsp;and&nbsp;returns&nbsp;a&nbsp;string,&nbsp;which&nbsp;is&nbsp;a&nbsp;new&nbsp;unique&nbsp;ID.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Option">class <strong>Option</strong></a>(<a href="speriment.html#Component">Component</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Option-__init__"><strong>__init__</strong></a>(self, text<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is&nbsp;the&nbsp;label&nbsp;for&nbsp;the&nbsp;<a href="#Option">Option</a><br>
+that&nbsp;will&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is<br>
+not&nbsp;currently&nbsp;used.<br>
+&nbsp;<br>
+id_str:&nbsp;String,&nbsp;optional,&nbsp;an&nbsp;identifier&nbsp;unique&nbsp;among&nbsp;all&nbsp;options&nbsp;in&nbsp;this<br>
+experiment.&nbsp;(Currently&nbsp;uniqueness&nbsp;in&nbsp;its&nbsp;page&nbsp;is&nbsp;sufficient&nbsp;but&nbsp;this&nbsp;may<br>
+change&nbsp;in&nbsp;the&nbsp;future.)<br>
+&nbsp;<br>
+**kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
+&nbsp;<br>
+feedback:&nbsp;string,&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed&nbsp;if&nbsp;this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;chosen.<br>
+&nbsp;<br>
+correct:&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;a&nbsp;boolean&nbsp;representing&nbsp;whether<br>
+this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;correct.&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box,&nbsp;a&nbsp;string<br>
+representing&nbsp;a&nbsp;regular&nbsp;expression&nbsp;that&nbsp;any&nbsp;correct&nbsp;answers&nbsp;will&nbsp;match.<br>
+For&nbsp;example,&nbsp;correct&nbsp;=&nbsp;'hi.*'&nbsp;would&nbsp;mean&nbsp;that&nbsp;'hi'&nbsp;and&nbsp;'high'&nbsp;are&nbsp;both<br>
+correct&nbsp;inputs.<br>
+&nbsp;<br>
+tags:&nbsp;[string],&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to&nbsp;associate&nbsp;with&nbsp;this&nbsp;<a href="#Option">Option</a>.&nbsp;It<br>
+will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,&nbsp;but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the<br>
+data&nbsp;file.&nbsp;All&nbsp;options&nbsp;in&nbsp;the&nbsp;entire&nbsp;experiment&nbsp;must&nbsp;have&nbsp;the&nbsp;same<br>
+number&nbsp;of&nbsp;tags&nbsp;so&nbsp;that&nbsp;they&nbsp;will&nbsp;stay&nbsp;aligned&nbsp;in&nbsp;the&nbsp;output&nbsp;file.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;the&nbsp;type&nbsp;of&nbsp;an&nbsp;<a href="#Option">Option</a>&nbsp;(radio&nbsp;button,&nbsp;check&nbsp;box,&nbsp;dropdown,&nbsp;or<br>
+text&nbsp;box)&nbsp;is&nbsp;determined&nbsp;based&nbsp;on&nbsp;its&nbsp;data&nbsp;and&nbsp;the&nbsp;attributes&nbsp;of&nbsp;its<br>
+containing&nbsp;<a href="#Page">Page</a>.&nbsp;It&nbsp;is&nbsp;not&nbsp;set&nbsp;directly&nbsp;in&nbsp;the&nbsp;<a href="#Option">Option</a>.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><a name="Option-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<dl><dt><a name="Option-set_id"><strong>set_id</strong></a>(self, id_str<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Option-set_optional_args"><strong>set_optional_args</strong></a>(self, **kwargs)</dt></dl>
+
+<dl><dt><a name="Option-validate"><strong>validate</strong></a>(self)</dt><dd><tt>To&nbsp;be&nbsp;defined&nbsp;for&nbsp;each&nbsp;subtype.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Page">class <strong>Page</strong></a>(<a href="speriment.html#Component">Component</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Page-__init__"><strong>__init__</strong></a>(self, text, options<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;The&nbsp;text&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+options:&nbsp;[<a href="#Option">Option</a>],&nbsp;optional,&nbsp;the&nbsp;answer&nbsp;choices&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the<br>
+page.<br>
+&nbsp;<br>
+id_str:&nbsp;String,&nbsp;optional,&nbsp;an&nbsp;identifier&nbsp;for&nbsp;this&nbsp;page&nbsp;unique&nbsp;among&nbsp;all<br>
+pages&nbsp;in&nbsp;the&nbsp;experiment.<br>
+&nbsp;<br>
+**kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
+&nbsp;<br>
+feedback:&nbsp;string,&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed&nbsp;after&nbsp;an&nbsp;answer&nbsp;is&nbsp;chosen.<br>
+&nbsp;<br>
+correct:&nbsp;If&nbsp;freetext&nbsp;is&nbsp;False,&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;id_str&nbsp;of&nbsp;the<br>
+correct&nbsp;<a href="#Option">Option</a>.&nbsp;If&nbsp;freetext&nbsp;is&nbsp;True,&nbsp;a&nbsp;string&nbsp;representing&nbsp;a&nbsp;regular<br>
+expression&nbsp;that&nbsp;a&nbsp;correct&nbsp;answer&nbsp;will&nbsp;match.<br>
+&nbsp;<br>
+tags:&nbsp;[string],&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to&nbsp;associate&nbsp;with&nbsp;this&nbsp;<a href="#Page">Page</a>.&nbsp;It<br>
+will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,&nbsp;but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the<br>
+data&nbsp;file.&nbsp;All&nbsp;pages&nbsp;in&nbsp;the&nbsp;entire&nbsp;experiment&nbsp;must&nbsp;have&nbsp;the&nbsp;same&nbsp;number<br>
+of&nbsp;tags&nbsp;so&nbsp;that&nbsp;they&nbsp;will&nbsp;stay&nbsp;aligned&nbsp;in&nbsp;the&nbsp;output&nbsp;file.<br>
+&nbsp;<br>
+condition:&nbsp;string,&nbsp;the&nbsp;condition&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;belongs&nbsp;to&nbsp;in&nbsp;the<br>
+experimental&nbsp;manipulation.&nbsp;Used&nbsp;if&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;is&nbsp;in&nbsp;a&nbsp;block&nbsp;where<br>
+pseudorandom&nbsp;is&nbsp;True,&nbsp;to&nbsp;keep&nbsp;Pages&nbsp;with&nbsp;the&nbsp;same&nbsp;condition&nbsp;from<br>
+appearing&nbsp;in&nbsp;a&nbsp;row.<br>
+&nbsp;<br>
+resources:&nbsp;[string],&nbsp;filenames&nbsp;of&nbsp;any&nbsp;images,&nbsp;audio,&nbsp;or&nbsp;video&nbsp;that<br>
+should&nbsp;display&nbsp;on&nbsp;the&nbsp;page.<br>
+&nbsp;<br>
+ordered:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;Options&nbsp;for&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;need&nbsp;to&nbsp;be&nbsp;kept&nbsp;in<br>
+the&nbsp;order&nbsp;in&nbsp;which&nbsp;they&nbsp;were&nbsp;given.&nbsp;If&nbsp;True,&nbsp;the&nbsp;Options&nbsp;may&nbsp;be&nbsp;reversed<br>
+but&nbsp;will&nbsp;not&nbsp;be&nbsp;shuffled.<br>
+&nbsp;<br>
+exclusive:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;participant&nbsp;can&nbsp;choose&nbsp;only&nbsp;one&nbsp;<a href="#Option">Option</a><br>
+as&nbsp;their&nbsp;response.<br>
+&nbsp;<br>
+freetext:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box&nbsp;rather&nbsp;than&nbsp;multiple<br>
+choice.</tt></dd></dl>
+
+<dl><dt><a name="Page-validate"><strong>validate</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Page-validate_freetext"><strong>validate_freetext</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Page-validate_resources"><strong>validate_resources</strong></a>(self)</dt></dl>
+
+<hr>
+Methods inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><a name="Page-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<dl><dt><a name="Page-set_id"><strong>set_id</strong></a>(self, id_str<font color="#909090">=None</font>)</dt></dl>
+
+<dl><dt><a name="Page-set_optional_args"><strong>set_optional_args</strong></a>(self, **kwargs)</dt></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RunIf">class <strong>RunIf</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="RunIf-__init__"><strong>__init__</strong></a>(self, page, option<font color="#909090">=None</font>, regex<font color="#909090">=None</font>)</dt><dd><tt>page:&nbsp;<a href="#Page">Page</a>,&nbsp;the&nbsp;<a href="#Page">Page</a>&nbsp;to&nbsp;look&nbsp;at&nbsp;to&nbsp;see&nbsp;which&nbsp;answer&nbsp;was&nbsp;given.<br>
+&nbsp;<br>
+option:&nbsp;<a href="#Option">Option</a>,&nbsp;optional.&nbsp;If&nbsp;given,&nbsp;the&nbsp;block&nbsp;containing&nbsp;this&nbsp;<a href="#RunIf">RunIf</a>&nbsp;will<br>
+only&nbsp;run&nbsp;if&nbsp;this&nbsp;<a href="#Option">Option</a>&nbsp;was&nbsp;chosen&nbsp;the&nbsp;last&nbsp;time&nbsp;page&nbsp;was&nbsp;displayed.<br>
+&nbsp;<br>
+regex:&nbsp;string,&nbsp;optional.&nbsp;If&nbsp;given,&nbsp;the&nbsp;block&nbsp;containing&nbsp;this&nbsp;<a href="#RunIf">RunIf</a>&nbsp;will<br>
+only&nbsp;run&nbsp;if&nbsp;a&nbsp;response&nbsp;matching&nbsp;a&nbsp;regular&nbsp;expression&nbsp;made&nbsp;from&nbsp;the<br>
+string&nbsp;regex&nbsp;was&nbsp;given&nbsp;the&nbsp;last&nbsp;time&nbsp;page&nbsp;was&nbsp;displayed.<br>
+&nbsp;<br>
+Exactly&nbsp;one&nbsp;of&nbsp;option&nbsp;and&nbsp;regex&nbsp;must&nbsp;be&nbsp;given.<br>
+&nbsp;<br>
+The&nbsp;reason&nbsp;RunIfs&nbsp;depend&nbsp;on&nbsp;"the&nbsp;last&nbsp;time"&nbsp;their&nbsp;page&nbsp;was&nbsp;displayed&nbsp;is<br>
+that&nbsp;Pages&nbsp;can&nbsp;display&nbsp;multiple&nbsp;times&nbsp;if&nbsp;they&nbsp;are&nbsp;in&nbsp;Blocks&nbsp;with&nbsp;a<br>
+criterion.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-get_dicts"><strong>get_dicts</strong></a>(csvfile)</dt><dd><tt>csvfile:&nbsp;string,&nbsp;a&nbsp;filename&nbsp;of&nbsp;a&nbsp;csv&nbsp;file.&nbsp;The&nbsp;file&nbsp;should&nbsp;have&nbsp;a&nbsp;header<br>
+row&nbsp;with&nbsp;column&nbsp;names.<br>
+&nbsp;<br>
+sep:&nbsp;string,&nbsp;the&nbsp;delimiter&nbsp;used&nbsp;to&nbsp;separate&nbsp;values&nbsp;in&nbsp;the&nbsp;csv&nbsp;file.&nbsp;Defaults<br>
+to&nbsp;comma.<br>
+&nbsp;<br>
+Returns:&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;file)&nbsp;of&nbsp;dictionaries&nbsp;mapping<br>
+strings&nbsp;(column&nbsp;names)&nbsp;to&nbsp;strings&nbsp;(cell&nbsp;values).</tt></dd></dl>
+ <dl><dt><a name="-get_rows"><strong>get_rows</strong></a>(csvfile)</dt><dd><tt>csvfile:&nbsp;string,&nbsp;a&nbsp;filename&nbsp;of&nbsp;a&nbsp;csv&nbsp;file.<br>
+&nbsp;<br>
+sep:&nbsp;string,&nbsp;the&nbsp;delimited&nbsp;used&nbsp;to&nbsp;separate&nbsp;values&nbsp;in&nbsp;the&nbsp;csv&nbsp;file.&nbsp;Defaults<br>
+to&nbsp;comma.<br>
+&nbsp;<br>
+Returns:&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;file)&nbsp;of&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;cell&nbsp;in<br>
+the&nbsp;row)&nbsp;of&nbsp;strings.</tt></dd></dl>
+ <dl><dt><a name="-make_exp"><strong>make_exp</strong></a>(filename)</dt><dd><tt>Add&nbsp;script&nbsp;tags&nbsp;to&nbsp;PsiTurk's&nbsp;exp.html&nbsp;file&nbsp;so&nbsp;it&nbsp;can&nbsp;use&nbsp;speriment.js&nbsp;and<br>
+the&nbsp;JSON&nbsp;object.</tt></dd></dl>
+ <dl><dt><a name="-make_experiment"><strong>make_experiment</strong></a>(id_generator)</dt><dd><tt>id_generator:&nbsp;<a href="#IDGenerator">IDGenerator</a>,&nbsp;an&nbsp;object&nbsp;that&nbsp;will&nbsp;make&nbsp;unique&nbsp;IDs&nbsp;for<br>
+everything&nbsp;in&nbsp;an&nbsp;<a href="#Experiment">Experiment</a>.<br>
+&nbsp;<br>
+side&nbsp;effect:&nbsp;puts&nbsp;id_generator&nbsp;in&nbsp;scope&nbsp;for&nbsp;the&nbsp;duration&nbsp;of&nbsp;the&nbsp;with&nbsp;block.<br>
+Options,&nbsp;Pages,&nbsp;and&nbsp;Blocks&nbsp;will&nbsp;automatically&nbsp;use&nbsp;it&nbsp;to&nbsp;create&nbsp;unique&nbsp;IDs.<br>
+&nbsp;<br>
+Usage:<br>
+with&nbsp;<a href="#-make_experiment">make_experiment</a>(<a href="#IDGenerator">IDGenerator</a>()):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;experiment&nbsp;code&gt;<br>
+&nbsp;<br>
+&lt;any&nbsp;code&nbsp;here&nbsp;will&nbsp;not&nbsp;use&nbsp;that&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;anymore&gt;</tt></dd></dl>
+ <dl><dt><a name="-make_task"><strong>make_task</strong></a>(varname)</dt><dd><tt>Replace&nbsp;PsiTurk's&nbsp;example&nbsp;task.js&nbsp;with&nbsp;the&nbsp;standard&nbsp;Speriment&nbsp;task.js,<br>
+with&nbsp;the&nbsp;JSON&nbsp;object&nbsp;variable&nbsp;name&nbsp;inserted.</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__warningregistry__</strong> = {("Not importing directory './json': missing __init__.py", &lt;type 'exceptions.ImportWarning'&gt;, 3): True, ("Not importing directory '/Users/presley/Speriment/json': missing __init__.py", &lt;type 'exceptions.ImportWarning'&gt;, 3): True}</td></tr></table>
+</body></html>

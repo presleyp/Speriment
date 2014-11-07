@@ -414,7 +414,7 @@ class Experiment(Component):
     experiment.'''
     # class variable schema holds the schema to validate your JSON against
     schema = None
-    with open('../json/sperimentschema.json', 'r') as f:
+    with open('json/sperimentschema.json', 'r') as f:
         contents = f.read()
         schema = json.loads(contents)
 
