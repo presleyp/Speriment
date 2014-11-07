@@ -63,7 +63,6 @@ def format_data(data, user_defined_columns):
     # push important information into 'trialdata' subobjects
     for participant in participants:
         for trial in participant['data']:
-            tags = trial['trialdata'][12:]
             trial['trialdata'] = trial['trialdata'][:num_trialdata_names] + [
                     trial['uniqueid'],
                     trial['current_trial'],
