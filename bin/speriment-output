@@ -1,9 +1,24 @@
 #!/usr/bin/env python
+'''
+Gets experimental results out of the database and table described in config.txt
+and writes the data to a csv file.
+
+Usage: speriment-output filename user-defined-columns excluded'''
+
+#TODO documentation, helpful error messages
 
 from sqlalchemy import create_engine, MetaData, Table
 import json
 import pandas as pd
 import sys
+from psiturk.psiturk_config import PsiturkConfig
+
+def get_credentials():
+    config = PsiturkConfig()
+    config.load_config()
+    DBURL = config.get('Database Parameters', 'database_url')
+    TABLENAME = config.get('Database Parameters', 'table_name')
+    return DBURL, TABLENAME
 
 def retrieve(db_url, table_name, exclude = []):
     # db_url = "mysql://username:password@host.org/database_name"
@@ -82,19 +97,16 @@ def format_data(data, user_defined_columns):
     return data_frame
 
 if __name__ == '__main__':
-    # usage: python retrieve_data db_url table_name filename user_defined_columns exclude
+    # usage: speriment-output filename user_defined_columns exclude
     # bash can't take lists as arguments so format lists like "item1 item2
     # item3"
-    db_url = sys.argv[1]
-    table_name = sys.argv[2]
-    filename = sys.argv[3]
-    user_defined_columns = ''
-    if len(sys.argv) > 4:
-        user_defined_columns = sys.argv[4]
-    exclude = ''
-    if len(sys.argv) > 5:
-        exclude = sys.argv[5]
+    #db_url = sys.argv[1]
+    #table_name = sys.argv[2]
+    filename = sys.argv[1]
+    user_defined_columns = sys.argv[2]
+    exclude = sys.argv[3]
 
+    (db_url, table_name) = get_credentials()
     data = retrieve(db_url, table_name, exclude)
     formatted = format_data(data, user_defined_columns)
     formatted.to_csv(filename)
