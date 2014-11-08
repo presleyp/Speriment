@@ -479,7 +479,8 @@ def make_exp(filename):
     the JSON object.'''
     exp_file = './templates/exp.html'
     #TODO will change to static/lib/node_modules/speriment/speriment.js and maybe min
-    speriment_tag = '''\n\t\t<script src="/static/lib/speriment.js" type="text/javascript">'''
+    speriment_tag = '''\n\t\t<script
+    src="/static/lib/node_modules/speriment/javascript/speriment.js" type="text/javascript">'''
     json_tag = '''\n\t\t<script src="/static/js/{0}" type="text/javascript">'''.format(filename)
     new_contents = None
     with open(exp_file, 'r') as exp:
