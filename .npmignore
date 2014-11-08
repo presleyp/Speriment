@@ -1,0 +1,7 @@
+MANIFEST.in
+bin/*
+build/*
+dist/*
+doc/*
+speriment/*
+speriment.egginfo
