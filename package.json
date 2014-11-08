@@ -1,0 +1,16 @@
+{
+    "name": "Speriment",
+    "version": "0.1.0",
+    "description": "Making experiments easier to express",
+    "keywords": ["experiment", "Mechanical Turk", "linguistics", "psychology", "social science"],
+    "bugs": "issues",
+    "license": "GPL-2.0",
+    "author": "Presley Pizzo",
+    "files": ["javascript/speriment.js", "LICENSE"],
+    "main": "javascript/speriment.js",
+    "dependencies": {"jquery": "2.1.0",
+        "underscore": "1.6.0"},
+    "devDependencies": {"typescript": "1.1.0-1", "qunitjs": "1.14.0"},
+    "scripts": {"prepublish": "tsc typescript/*.ts -out javascript/speriment.js"},
+    "repository": {"type": "git", "url": "http://github.com/presleyp/Speriment.git"}
+}
