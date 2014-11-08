@@ -3,15 +3,27 @@
 Gets experimental results out of the database and table described in config.txt
 and writes the data to a csv file.
 
-Usage: speriment-output filename user-defined-columns excluded'''
-
-#TODO documentation, helpful error messages
+Usage: speriment-output filename tags excluded'''
 
 from sqlalchemy import create_engine, MetaData, Table
 import json
 import pandas as pd
 import sys
 from psiturk.psiturk_config import PsiturkConfig
+import argparse
+
+def parse():
+    parser = argparse.ArgumentParser(description='''Retrieve and format the
+            data gathered in an experiment and write it to a csv file.''')
+    parser.add_argument('filename', type=str, help = '''File
+            to write experimental results to in csv format.''')
+    parser.add_argument('-t', '--tags', nargs='*',
+            default=[], help = '''Names of all page tags and option tags, in that
+            order, that were passed into the experiment.''')
+    parser.add_argument('-e', '--exclude', nargs='*',
+            default=[], help = '''Worker IDs of any participants whose data you don't
+            want to write to the output file.''')
+    return parser.parse_args()
 
 def get_credentials():
     config = PsiturkConfig()
@@ -40,16 +52,15 @@ def retrieve(db_url, table_name, exclude = []):
     data_column_name = 'datastring'
 
     # filter participants
-    excluded = exclude.split()
     data = [participant[data_column_name] for participant in rows
             if participant['status'] in statuses
-            and participant['uniqueid'] not in exclude]
+            and participant['uniqueid'].split(':')[0] not in exclude]
     return data
 
 def format_data(data, user_defined_columns):
     # parse each participant's datastring as json object
     participants = [json.loads(participant) for participant in data]
-    user_column_list = user_defined_columns.split()
+    user_defined_columns
 
     trialdata_column_names = [
         'PageID',
@@ -73,7 +84,7 @@ def format_data(data, user_defined_columns):
         'HIT',
         'WorkerID',
     ]
-    column_names = trialdata_column_names + trial_column_names + user_column_list
+    column_names = trialdata_column_names + trial_column_names + user_defined_columns
 
     # push important information into 'trialdata' subobjects
     for participant in participants:
@@ -102,10 +113,10 @@ if __name__ == '__main__':
     # item3"
     #db_url = sys.argv[1]
     #table_name = sys.argv[2]
-    filename = sys.argv[1]
-    user_defined_columns = sys.argv[2]
-    exclude = sys.argv[3]
-
+    args = parse()
+    filename = args.filename
+    user_defined_columns = args.tags
+    exclude = args.exclude
     (db_url, table_name) = get_credentials()
     data = retrieve(db_url, table_name, exclude)
     formatted = format_data(data, user_defined_columns)
