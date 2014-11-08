@@ -12,11 +12,6 @@ program. Instead of writing your own code to shuffle items, display HTML,
 record answers, and so on, you simply describe the structure and contents of
 your experiment.
 
-I am still getting it set up to work with PsiTurk, but you can test out your
-JSON file and Speriment's behavior in your browser.  Just edit
-test/viewpage.html to refer to your own JSON file and experiment, and then open
-viewpage.html file in your browser.
-
 ###The structure of a Speriment
 
 ####Blocks
@@ -31,8 +26,8 @@ each other in the (otherwise static) lineup.
 
 Blocks can also be run conditionally. This means some blocks will drop out of
 the lineup, simply being skipped over. This is based on the presence of a
-"runIf" attribute on the block. If there is no runIf on a block, it will
-definitely run (unless your participant quits!). If there is a runIf, it will
+`run_if` attribute on the block. If there is no `run_if` on a block, it will
+definitely run (unless your participant quits!). If there is a `run_if`, it will
 run only if the specified answer was given to the specified question. The
 details can be found under RunIf in the Python API. This feature is useful for
 two kinds of cases:
@@ -73,7 +68,7 @@ displayed each time a block is run. The choice can be made in two ways:
   condition, and across participants all items and conditions are evenly
   distributed.
 
-The choice is based on the latinSquare attribute of the enclosing block.
+The choice is based on the `latin_square` attribute of the enclosing block.
 
 ####Pages
 
@@ -89,14 +84,14 @@ chosen at a time. However, you can specify that the question is not exclusive
 The buttons will be converted into a dropdown if there are too many of them.
 
 The order of the pages in a block is always randomized, with the caveat that
-they are pseudorandomized if the block has pseudorandom set to True. If you
+they are pseudorandomized if the block has `pseudorandom` set to True. If you
 want to ensure that one page displays before another, put them in different
 blocks.
 
-The order of the options in a page is also randomized. If ordered is False,
-they will be shuffled each time the page is displayed. If ordered is True, the
+The order of the options in a page is also randomized. If `ordered` is False,
+they will be shuffled each time the page is displayed. If `ordered` is True, the
 list will be reversed half the time and left as is half the time. It's a good
-idea to set ordered to True if you have a Likert scale, for instance.
+idea to set `ordered` to True if you have a Likert scale, for instance.
 
 ####Options
 
@@ -110,8 +105,8 @@ The difference is due to the fact that a multiple choice option is simply
 selected or not, whereas a text box option has some string as the response that
 was given. Thus, for the purposes of determining whether an answer was correct
 (used in blocks with a criterion) and whether an answer was given (used in
-blocks with a runIf), text box options are compared to a regular expression.
-The regular expression is written in the correct attribute or runIf as a
+blocks with a `run_if`), text box options are compared to a regular expression.
+The regular expression is written in the `correct` attribute or `run_if` as a
 string, without any regular expression constructor. However, it can contain
 regular expression syntax.
 
@@ -126,14 +121,14 @@ Here are a few things Speriment can handle:
   blocks.
 - Latin squares. For each item set (conditions 1 to n of an item), make a group
   (a list of Pages). Keep the order of the conditions the same in each group.
-  Then set the block containing the groups to latinSquare = True. This feature
-  uses the "condition" variable set by PsiTurk, so remember to set that to your
+  Then set the block containing the groups to `latin_square = True`. This feature
+  uses the `condition` variable set by PsiTurk, so remember to set that to your
   number of conditions.
 - pseudorandomization. Specify the condition of each Page in a block, and then
-  set pseudorandom = True. The block will not run two items of the same
+  set `pseudorandom = True`. The block will not run two items of the same
   condition in a row.
 - training loops. Give the relevant pages in a block (or their options)
-  "correct" attributes. Then set a criterion for the block, as explained in the
+  `correct` attributes. Then set a criterion for the block, as explained in the
   Python API. The block will rerun itself until the participant performs as
   well as you specified in the criterion.
 - presentation of items conditioned on previous responses. Create a RunIf
@@ -145,7 +140,7 @@ Here are a few things Speriment can handle:
 The easiest way is to make up your materials in a csv file and then write a Python script
 to process the csv (or multiple csv files).
 
-See python/example.py to learn how to write this script. Basically, you need to
+See `doc/example.py` to learn how to write this script. Basically, you need to
 be comfortable accessing the contents of Python lists and dictionaries, and
 doing loops or list comprehensions. Other than that, not much programming
 prowess is needed.
@@ -154,47 +149,136 @@ Technically, the file will be a JavaScript file, not a JSON file. By assigning
 the JSON to a JavaScript variable, we make it simpler to load the data.
 
 ###How do I run an experiment?
+You'll still need to follow all of the [instructions for using PsiTurk](psiturk.readthedocs.org).
 
-You'll still need to follow all of the instructions for using PsiTurk: psiturk.readthedocs.org.
+But this is what the workflow will look like in your terminal:
 
-But instead of putting your own JavaScript code in task.js, take the following steps:
+1. Install PsiTurk and the Python component of Speriment. This only has to be done once, whereas future steps are done once per experiment.
+Another one-time installation you may want to consider is of a database like MySQL, as the database PsiTurk uses by default may lead to corrupt data
+if multiple participants try to submit data at once. See the PsiTurk documentation.
 
-1. Write a Python script based on example.py, and referring to the Speriment
-   Python API. Set it to write to a file in your PsiTurk project directory,
-   under static/js.
-2. Run the script.
-3. When you set up your PsiTurk directory, you ended up with a file
-   yourproject/static/js/task.js. Replace that file with Speriment's task.js.
-   In Speriment's task.js, set jsonExperiment equal to the variable name you
-   gave your JSON data.
-4. Put speriment.js inside your PsiTurk project directory under static/lib.
-5. When you set up your PsiTurk directory, you also ended up with a file
-   yourproject/templates/exp.html. It has a list of `<script>` tags. Add one
-   for speriment.js and one for the file containing your JSON data.
+    `sudo pip install psiturk`
 
-You can do these in any order, except that it helps to write the script before you run it.
+    `sudo pip install speriment`
 
-Now you can test and run your experiment just as PsiTurk describes.
+2. Make a project directory for this experiment. In this case I'm calling it `myproject`.
+    
+    `psiturk-setup-example`
 
-###How do I analyze my data?
+    `mv psiturk-example/ myproject/`
 
-Follow PsiTurk's instructions on retrieving your data. Speriment only records trial data, not unstructured data. PsiTurk records
-event data automatically, but only for a few kinds of events.
+3. Edit `config.txt` and the files in `templates`. Don't bother editing `exp.html` or `task.js` because Speriment will edit those.
 
-Speriment records trial data in the following order.
+4. Write a Python script to generate a Speriment from a csv of your experimental
+materials. Put the csv file and the Python script in `myproject` (or whatever
+you called the directory).
+
+5. Install the JavaScript component of Speriment.
+    
+    `cd ~/myproject/static/lib`
+   
+    `npm install speriment`
+
+6. Run your Python script.
+    
+    `cd ~/myproject`
+    
+    `python myscript`
+
+7. Enter the PsiTurk shell.
+    
+    `psiturk`
+
+8. In the PsiTurk shell, turn on the server and, if you're using a tunnel, open a tunnel.
+    
+    `server on`
+    
+    `tunnel on`
+
+9. Debug your experiment in your browser.
+    
+    `debug`
+
+10. Try out your experiment in the Mechanical Turk Sandbox. This command will ask you questions and then give you two links; follow the Sandbox link.
+    
+    `hit create`
+
+11. When you're ready, switch to live mode and make a HIT to put on the real Mechanical Turk.
+    
+    `mode`
+    
+    `hit create`
+
+    The PsiTurk shell also has other useful commands, so check out its documentation.
+
+12. Finally, use Speriment to retrieve and format your data, writing it to a
+    csv in your project directory that you can load into Python or R. Speriment
+    comes with a command-line tool `speriment-output` to make this easy. It
+    takes one required argument and two optional lists of arguments. The required argument is
+    the name of a file to write the results to. The options are --tags or -t and --exclude or -e.
+
+    The --tags option should be used if you passed tags into your Python script for pages and/or options.
+    Supply a name for each tag, starting with page tags and then option tags, in the order in which you supplied
+    the data in your script. You must use the same number of tags as you supplied.
+
+    The --exclude option should be used if you know already that you want to exclude data from certain workers. You
+    can exclude them after looking at the data, so this is just a convenience. Follow the flag with the worker IDs of
+    the workers you want to exclude.
+
+    Here, I'm imagining I have tags representing ItemType and Frequency, and I want to exclude the data that I generated
+    when I was debugging the experiment and was given worker ID debugALHLUO.
+    
+    `speriment-output myproject_results.csv --tags ItemType Frequency -e debugALHLUO`
+
+
+###What data does Speriment record?
+
+In terms of PsiTurk, Speriment only records trial data, not unstructured data.
+PsiTurk records event data automatically, but only for a few kinds of events.
+
+Speriment records the following trial data and `speriment-output` gives it these names:
 
 - PageID: ID given or automatically generated for the page
 - PageText: Text given to display on the page
 - BlockIDs: IDs of all blocks that enclose this page
-- StartTime: The time when the page displayed. This is in milliseconds since 1/1/1970, which makes it easy to subtract EndTime from it for reaction time.
+- StartTime: The time when the page displayed. This is in milliseconds since
+  1/1/1970, which makes it easy to subtract EndTime from it for reaction time.
 - EndTime: The time when the participant clicked Next.
-- Iteration: The number of times, counting from 1, that this page was displayed. Will always be 1 unless the page is in a block with a criterion.
+- Iteration: The number of times, counting from 1, that this page was
+  displayed. Will always be 1 unless the page is in a block with a criterion.
 - Condition: The experimental condition you supplied for the page.
 - SelectedID: The IDs of any options that the participant selected.
 - SelectedText: The text of any options that the participant selected.
-- Correct: The information you supplied about whether the option is correct or what a correct text answer will match.
-- OptionOrder: The option IDs in the order in which they were displayed. Options are shuffled and you may want to look at how they appeared on the page.
-- SelectedPosition: The position, left-to-right starting from 0 at the left, of any selected options.
-- User-defined columns: There will then be a column for each page tag you supplied followed by a column for each option tag you supplied. If you supplied none of a kind of tag, those columns will not be present. Note that, because you're allowed to make nonexclusive questions where participants can select multiple options, each option tag column will contain a list of one or more values, one for each option selected. If the page is exclusive, it will be a list containing one value rather than a bare value.
+- Correct: The information you supplied about whether the option is correct or
+  what a correct text answer will match.
+- OptionOrder: The option IDs in the order in which they were displayed.
+  Options are shuffled and you may want to look at how they appeared on the
+  page.
+- SelectedPosition: The position, left-to-right starting from 0 at the left, of
+  any selected options.
 
-PsiTurk provides information about the version of the experiment (which they call condition) that was used for the purpose of Latin squares, the worker ID, and the trial number. Note that it also supplies, with each trial, a field called "datetime", which is the time the trial was saved. All trials are saved at the end of the experiment, so this number is not informative for reaction times and does not reliably show trial order.
+`speriment-output` also returns the following columns from PsiTurk data:
+- UniqueID: The HIT ID and Worker ID
+- TrialNumber: Starting from 0, the number of this trial. Every page gets a
+  number, including instructions and feedback.
+- Version: If you set the "condition" variable in config.txt, this is the
+  version of the experiment that the participant saw. Used in Latin Square
+  designs.
+- HIT: HIT ID
+- WorkerID: Worker ID of the participant
+
+Finally, it returns the tags you included in your Python script:
+- User-defined columns: There will then be a column for each page tag you
+  supplied followed by a column for each option tag you supplied. If you
+  supplied none of a kind of tag, those columns will not be present. Note that,
+  because you're allowed to make nonexclusive questions where participants can
+  select multiple options, each option tag column will contain a list of one or
+  more values, one for each option selected. If the page is exclusive, it will
+  be a list containing one value rather than a bare value.
+
+PsiTurk provides information about the version of the experiment (which they
+call condition) that was used for the purpose of Latin squares, the worker ID,
+and the trial number. Note that it also supplies, with each trial, a field
+called "datetime", which is the time the trial was saved. All trials are saved
+at the end of the experiment, so this number is not informative for reaction
+times and does not reliably show trial order.
