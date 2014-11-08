@@ -20,7 +20,7 @@ interface Container{
 
 function makeBlocks(jsonBlocks, container: Container): Block[] {
     var blockList = _.map(jsonBlocks, (block):Block => {
-            if (block.groups || block.pages){
+            if (('groups' in block) || ('pages' in block)){
                 return new InnerBlock(block, container);
             } else {
                 return new OuterBlock(block, container);
