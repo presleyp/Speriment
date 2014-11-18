@@ -11,6 +11,7 @@
 interface Container{
     exchangeable;
     version;
+    permutation;
     contents;
 
     advance(experimentRecord: ExperimentRecord): void;
@@ -29,27 +30,57 @@ function makeBlocks(jsonBlocks, container: Container): Block[] {
     return blockList;
 }
 
-function orderBlocks(blocks: Block[], exchangeable: string[]): Block[] {
-    if (exchangeable.length < 2) { return blocks; }
+function orderBlocks(blocks: Block[], exchangeable: string[], permutation: number, counterbalance: string[]): Block[] {
+    var exchangedBlocks = reorderBlocks(blocks, exchangeable, (bs) => {_.shuffle(bs)});
+    var counterbalanceBlockIds = makePermuter(permutation);
+    var counterbalancedBlocks = reorderBlocks(exchangedBlocks, counterbalance, (bs) => {counterbalanceBlockIds(bs)});
+    return counterbalancedBlocks;
+}
 
-    // positions that can be swapped into
-    var exchangeableIndices: number[] = _.map(exchangeable, (id: string):number => {
-                                                  var blockids = _.pluck(blocks, 'id');
-                                                  return _.indexOf(blockids, id)
-                                              });
-    // ids of exchangeable blocks shuffled
-    var exchangedIds: string[] = _.shuffle<string>(exchangeable);
-    // exchangeable blocks in shuffled order
-    var exchangedBlocks = _.map(exchangedIds, (id:string):Block => {
-                                    return _.filter(blocks, (b:Block):boolean => {
-                                        return b.id === id
-                                    })[0]
-                                });
-    // pair up each available position with a block
-    var pairs = _.zip(exchangeableIndices, exchangedBlocks);
-    // fill each position with the block it's paired with
-    _.each(pairs, (pair:any[]):void => {blocks[pair[0]] = pair[1]});
+function reorderBlocks(blocks: Block[], blockIDs: string[], orderingFunction): Block[] {
+    var targetIndices: number[] = _.without(_.map(blocks, (b, i) => {
+        if (_.contains(blockIDs, b.id)) {
+            return i;
+        } else {
+            return null;
+        }
+    }), null);
+    var reorderedIDs: string[] = orderingFunction(blockIDs);
+    var blocksToReorder: Block[] = _.map(targetIndices, (i) => {return blocks[i]});
+    var reorderedBlocks: Block[] = blocksToReorder.sort((b1, b2) => {
+        return _.indexOf(reorderedIDs, b1.id) - _.indexOf(reorderedIDs, b2.id);
+    });
+    _.each(targetIndices, (index, i): void => {
+        blocks[index] = reorderedBlocks[i];
+    });
     return blocks;
+}
+
+
+function makePermuter(permutation: number) {
+
+    function counterbalanceBlockIds(exchangeable: string[]): string[] {
+        var f = [];
+        function factorial (n) { // performance?
+          if (n == 0 || n == 1)
+            return 1;
+          if (f[n] > 0)
+            return f[n];
+          return f[n] = factorial(n-1) * n;
+        }
+        var sortedBlockIds = exchangeable.concat().sort();
+        var orderedBlockIds = [];
+        _.times(sortedBlockIds.length, (i) => {
+            var size = sortedBlockIds.length;
+            var binSize = factorial(size - 1);
+            var index = Math.floor(permutation / binSize);
+            var nextBlockId = sortedBlockIds.splice(index, 1);
+            orderedBlockIds.push(nextBlockId);
+        });
+        return orderedBlockIds;
+    }
+
+    return counterbalanceBlockIds;
 }
 
 function getContainers(block: Block): string[] {

@@ -51,17 +51,21 @@ class Block{
 
 // an OuterBlock can only contain Blocks (InnerBlocks or OuterBlocks)
 class OuterBlock extends Block implements Container{
-    exchangeable;
+    exchangeable: string[];
+    counterbalance: string[];
     version: number;
+    permutation: number;
     contents: Block[];
 
     constructor(jsonBlock, public container: Container){
         super(jsonBlock);
-        jsonBlock = _.defaults(jsonBlock, {exchangeable: []});
+        jsonBlock = _.defaults(jsonBlock, {exchangeable: [], counterbalance: []});
         this.exchangeable = jsonBlock.exchangeable;
+        this.counterbalance = jsonBlock.counterbalance;
         this.version = container.version;
+        this.permutation = container.permutation;
         this.contents = makeBlocks(jsonBlock.blocks, this);
-        this.contents = orderBlocks(this.contents, this.exchangeable);
+        this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
     }
 
     tellLast(){
@@ -101,7 +105,6 @@ class InnerBlock extends Block{
     }
 
     tellLast(){
-        // _.last(this.contents).isLast = true;
         this.isLast = true;
     }
 

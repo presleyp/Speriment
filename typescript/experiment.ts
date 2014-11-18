@@ -1,10 +1,3 @@
-//TODO latin square using condition?
-//TODO preload audio
-//TODO placeholders
-//TODO other radio/check with text box
-//TODO maybe: allow option-by-option answers on nonexclusive questions
-//TODO (css) spread checkboxes out by default, it's hard to know which label is for which box
-
 /// <reference path="container.ts"/>
 /// <reference path="block.ts"/>
 /// <reference path="page.ts"/>
@@ -24,7 +17,9 @@ var PAGE = "p.question",
 class Experiment implements Container{
     public id: string;
     public exchangeable: string[];
+    public counterbalance: string[];
     public version: number;
+    public permutation: number;
     public contents: Block[];
     private showBreakoff: boolean;
     public experimentRecord: ExperimentRecord;
@@ -35,13 +30,15 @@ class Experiment implements Container{
         "paid depends on the results returned so far. Note that submitting partial " +
         "results does not guarantee payment.</p>";
 
-    constructor(jsonExperiment, version, psiturk){
+    constructor(jsonExperiment, version, permutation, psiturk){
         jsonExperiment = _.defaults(jsonExperiment, {breakoff: false, exchangeable: []});
         this.version = version;
+        this.permutation = permutation;
         this.exchangeable = jsonExperiment.exchangeable;
+        this.counterbalance = jsonExperiment.counterbalance;
         this.showBreakoff = jsonExperiment.breakoff;
         this.contents = makeBlocks(jsonExperiment.blocks, this);
-        this.contents = orderBlocks(this.contents, this.exchangeable);
+        this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
         this.experimentRecord = new ExperimentRecord(psiturk);
     }
 
