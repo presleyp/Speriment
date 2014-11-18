@@ -12,6 +12,9 @@ program. Instead of writing your own code to shuffle items, display HTML,
 record answers, and so on, you simply describe the structure and contents of
 your experiment.
 
+It's currently in beta. It should work on any Unix machine but has only been
+tested on a Mac. Please add an Issue if you find any bugs.
+
 ###The structure of a Speriment
 
 ####Blocks
@@ -21,7 +24,7 @@ pages.
 
 Blocks are generally run in the order in which you add them to the experiment
 or to their containing block. However, if you specify more than one block in a
-given container as "exchangeable", then those blocks can switch positions with
+given container as `exchangeable` or `counterbalance`, then those blocks can switch positions with
 each other in the (otherwise static) lineup.
 
 Blocks can also be run conditionally. This means some blocks will drop out of
@@ -118,7 +121,8 @@ Here are a few things Speriment can handle:
   to get treatment A first, and half to get treatment B first. Speriment can
   handle this in a probabilistic way. Put your A questions in one block and
   your B questions in another block and specify both of them as exchangeable
-  blocks.
+  blocks. It can also handle it in a deterministic way --- use `counterbalance` instead of `exchangeable`.
+  You'll also need to set your PsiTurk config file's `counterbalance` variable in this case.
 - Latin squares. For each item set (conditions 1 to n of an item), make a group
   (a list of Pages). Keep the order of the conditions the same in each group.
   Then set the block containing the groups to `latin_square = True`. This feature
@@ -282,3 +286,9 @@ and the trial number. Note that it also supplies, with each trial, a field
 called "datetime", which is the time the trial was saved. All trials are saved
 at the end of the experiment, so this number is not informative for reaction
 times and does not reliably show trial order.
+
+###How do I contribute?
+
+Contributions are super welcome. But before you start coding, start an Issue or
+comment on an existing one. There are lots of new features to add, and we want to
+make sure they'll play nice together before anyone spends time implementing stuff.
