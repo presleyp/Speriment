@@ -40,6 +40,15 @@
             }
         },
 
+        "counterbalance": {
+            "description": "IDs of blocks that can swap positions with each other. For instance, if I have blocks 1, 2, and 3 and blocks 1 and 3 are counterbalance blocks, the possible orders are 1, 2, 3 and 3, 2, 1.",
+            "type": "array",
+            "items": {
+                "description": "Block ID",
+                "type": "string"
+            }
+        },
+
         "pseudorandom": {
             "description": "",
             "type": "string"
@@ -184,6 +193,7 @@
                             "items": {"$ref": "#/definitions/block"}
                         },
                         "exchangeable": {"$ref": "#/definitions/exchangeable"},
+                        "counterbalance": {"$ref": "#/definitions/counterbalance"},
                         "runIf": {"$ref": "#/definitions/runIf"},
                         "criterion": {"$ref": "#/definitions/criterion"}
                     },
@@ -201,6 +211,7 @@
             "type": "boolean"
         },
         "exchangeable": {"$ref": "#/definitions/exchangeable"},
+        "counterbalance": {"$ref": "#/definitions/counterbalance"},
         "blocks": {
             "description": "Experiments are made up of blocks. Blocks are made up of either smaller blocks, or pages. Blocks are run in the order in which you specify them, unless they're exchangeable.",
             "type": "array",
