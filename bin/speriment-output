@@ -81,6 +81,7 @@ def format_data(data, user_defined_columns):
         'UniqueID',
         'TrialNumber',
         'Version',
+        'Permutation',
         'HIT',
         'WorkerID',
     ]
@@ -93,6 +94,7 @@ def format_data(data, user_defined_columns):
                     trial['uniqueid'],
                     trial['current_trial'],
                     participant['condition'],
+                    participant['counterbalance'],
                     participant['hitId'],
                     participant['workerId']
                 ] + trial['trialdata'][num_trialdata_names:]

@@ -289,7 +289,7 @@ class Page(Component):
 
 class Block(Component):
     def __init__(self, pages = None, groups = None, blocks = None, id_str = None,
-            exchangeable = [], latin_square = None, pseudorandom = None, **kwargs):
+            exchangeable = [], counterbalance = [], latin_square = None, pseudorandom = None, **kwargs):
         '''
         Exactly one of pages, groups, and blocks must be provided.
 
@@ -309,6 +309,13 @@ class Block(Component):
         they were given. Exchangeable blocks can be used for counterbalancing
         designs. For example, if there are three blocks, A, B, and C, and A and
         C are exchangeable, they can run in the order A, B, C or C, B, A.
+
+        counterbalance: [Block], only valid if contents is [Block]. Works like
+        exchangeable except exchangeable blocks are permuted randomly and
+        counterbalance blocks are permuted deterministically, so that
+        approximately the same number of participants will see each permutation.
+        There should be no overlap between the blocks in exchangeable and the
+        blocks in counterbalance.
 
         latin_square: boolean, only valid if contents is [[Page]], that is,
         groups of Pages. If True, Pages are chosen from groups according to a
@@ -363,6 +370,9 @@ class Block(Component):
 
         if exchangeable:
             self.exchangeable = [b.id for b in exchangeable]
+
+        if counterbalance:
+            self.counterbalance = [b.id for b in counterbalance]
 
         if latin_square:
             self.latin_square = latin_square
@@ -419,10 +429,14 @@ class Experiment(Component):
         blocks: [Block], the contents of the experiment.
 
         exchangeable: [Block], a subset of the Blocks. These Blocks will be
-        considered exchangeable. See Block documentation for more information.'''
+        considered exchangeable. See Block documentation for more information.
+
+        counterbalance: [Block], a subset of the Blocks. See Block documentation
+        for more information.'''
 
         self.blocks = [b for b in blocks]
         self.exchangeable = [b.id for b in exchangeable]
+        self.counterbalance = [b.id for b in counterbalance]
 
     def validate(self):
         self.validate_page_tags()
