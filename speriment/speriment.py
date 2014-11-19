@@ -369,10 +369,10 @@ class Block(Component):
         self.set_optional_args(**kwargs)
 
         if exchangeable:
-            self.exchangeable = [b.id for b in exchangeable]
+            self.exchangeable = [b.id_str for b in exchangeable]
 
         if counterbalance:
-            self.counterbalance = [b.id for b in counterbalance]
+            self.counterbalance = [b.id_str for b in counterbalance]
 
         if latin_square:
             self.latin_square = latin_square
@@ -424,7 +424,7 @@ class Experiment(Component):
     don't make your own IDs (IDs should be unique among pages, among options,
     and among blocks within one experiment), then use one IDGenerator per
     experiment.'''
-    def __init__(self, blocks, exchangeable = []):
+    def __init__(self, blocks, exchangeable = [], counterbalance = []):
         '''
         blocks: [Block], the contents of the experiment.
 
@@ -435,8 +435,8 @@ class Experiment(Component):
         for more information.'''
 
         self.blocks = [b for b in blocks]
-        self.exchangeable = [b.id for b in exchangeable]
-        self.counterbalance = [b.id for b in counterbalance]
+        self.exchangeable = [b.id_str for b in exchangeable]
+        self.counterbalance = [b.id_str for b in counterbalance]
 
     def validate(self):
         self.validate_page_tags()

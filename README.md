@@ -122,11 +122,11 @@ Here are a few things Speriment can handle:
   handle this in a probabilistic way. Put your A questions in one block and
   your B questions in another block and specify both of them as exchangeable
   blocks. It can also handle it in a deterministic way --- use `counterbalance` instead of `exchangeable`.
-  You'll also need to set your PsiTurk config file's `counterbalance` variable in this case.
+  You'll also need to set your PsiTurk config file's `num_counters` variable in this case.
 - Latin squares. For each item set (conditions 1 to n of an item), make a group
   (a list of Pages). Keep the order of the conditions the same in each group.
   Then set the block containing the groups to `latin_square = True`. This feature
-  uses the `condition` variable set by PsiTurk, so remember to set that to your
+  uses the `num_conds` variable set by PsiTurk, so remember to set that to your
   number of conditions.
 - pseudorandomization. Specify the condition of each Page in a block, and then
   set `pseudorandom = True`. The block will not run two items of the same
@@ -265,7 +265,7 @@ Speriment records the following trial data and `speriment-output` gives it these
 - UniqueID: The HIT ID and Worker ID
 - TrialNumber: Starting from 0, the number of this trial. Every page gets a
   number, including instructions and feedback.
-- Version: If you set the "condition" variable in config.txt, this is the
+- Version: If you set the `num_conds` variable in config.txt, this is the
   version of the experiment that the participant saw. Used in Latin Square
   designs.
 - HIT: HIT ID

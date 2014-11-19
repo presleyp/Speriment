@@ -79,8 +79,15 @@ with make_experiment(IDGenerator()):
     # Finally, wrap the Blocks in an Experiment. Remember that Pages take an
     # optional list of Options, Blocks take a list of Pages (or a list of lists of
     # Pages, or a list of Blocks), and Experiments take a list of Blocks.
+    # The counterbalance argument says that block1 and block3 will switch places
+    # for approximately half of participants. It needs to be used in conjunction
+    # with setting the counterbalance parameter in PsiTurk's config.txt,
+    # whereas the exchangeable argument could be used in the same way but
+    # without setting that parameter (but it will accordingly give a less even
+    # distribution across participants).
 
-    experiment = Experiment([block1, block2, block3, block4])
+    experiment = Experiment([block1, block2, block3, block4], counterbalance =
+            [block1, block3])
 
     # You can generate the JSON just to look at it, for instance by printing this
     # variable. This step is optional.
