@@ -11,7 +11,6 @@ class Page{
     public condition: string;
     public resources: string[];
     public tags: string[];
-    // public isLast: boolean;
     public record;
 
     constructor(jsonPage, public block){
@@ -29,22 +28,11 @@ class Page{
 
     public disableNext(){
         $(CONTINUE).prop({disabled: true});
-        // if (this.isLast){
-        //     $(BREAKOFF).show();
-        // }
     }
 
     public enableNext(){
         $(CONTINUE).prop({disabled: false});
-        // if (this.isLast){
-        //     $(BREAKOFF).hide();
-        // }
     }
-
-    // public nextToSubmit(experimentRecord){
-    //     $(CONTINUE).attr({type: "submit", value: "Submit"});
-    //     $(CONTINUE).off('click').click((m:MouseEvent) => {this.finish(experimentRecord)});
-    // }
 
     private makeResource(resource: string): string{ //TODO ogg can also be video, need to disambiguate
         var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
@@ -61,21 +49,11 @@ class Page{
     }
 
     public display(experimentRecord){
-        // if (this.isLast){
-        //     this.nextToSubmit(experimentRecord);
-        // } 
-        // else {
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
-        // }
         this.disableNext();
         $(OPTIONS).empty();
         $(PAGE).empty().append(this.text, this.resources);
     }
-
-    // public finish(experimentRecord) {
-    //     this.save(experimentRecord);
-    //     experimentRecord.submitRecords();
-    // }
 
 }
 

@@ -11,8 +11,6 @@ var PAGE = "p.question",
     OPTIONS = "p.answer",
     NAVIGATION = "div.navigation",
     CONTINUE = "#continue", // Next or Submit button
-    BREAKOFF = "div.breakoff";
-
 
 class Experiment implements Container{
     public id: string;
@@ -21,22 +19,14 @@ class Experiment implements Container{
     public version: number;
     public permutation: number;
     public contents: Block[];
-    private showBreakoff: boolean;
     public experimentRecord: ExperimentRecord;
-    private static breakoffNotice: string = "<p>This experiment will allow you to " +
-        "submit partial responses. The minimum payment is the quantity listed. " +
-        "However, you will be compensated more for completing more of the experiment " +
-        "in the form of bonuses, at the completion of this study. The quantity " +
-        "paid depends on the results returned so far. Note that submitting partial " +
-        "results does not guarantee payment.</p>";
 
     constructor(jsonExperiment, version, permutation, psiturk){
-        jsonExperiment = _.defaults(jsonExperiment, {breakoff: false, exchangeable: [], counterbalance: []});
+        jsonExperiment = _.defaults(jsonExperiment, {exchangeable: [], counterbalance: []});
         this.version = version;
         this.permutation = permutation;
         this.exchangeable = jsonExperiment.exchangeable;
         this.counterbalance = jsonExperiment.counterbalance;
-        this.showBreakoff = jsonExperiment.breakoff;
         this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
         this.experimentRecord = new ExperimentRecord(psiturk);
@@ -45,11 +35,7 @@ class Experiment implements Container{
     public start(){
         this.tellLast();
         this.addElements();
-        if (this.showBreakoff){
-            this.showBreakoffNotice();
-        } else {
-            this.advance(this.experimentRecord);
-        }
+        this.advance(this.experimentRecord);
     }
 
     private tellLast(){
@@ -69,23 +55,12 @@ class Experiment implements Container{
         var navigationDiv = document.createElement('div');
         $(navigationDiv).addClass('navigation');
 
-        var breakoffDiv = document.createElement('div');
-        $(breakoffDiv).addClass('breakoff');
-
         var nextButton = document.createElement("input");
         $(nextButton).attr({type: "button", id: "continue", value: "Next"});
 
         $('body').append(experimentDiv);
-        $(experimentDiv).append(questionPar, answerPar, navigationDiv, breakoffDiv);
+        $(experimentDiv).append(questionPar, answerPar, navigationDiv);
         $(navigationDiv).append(nextButton);
-    }
-
-    private showBreakoffNotice(){
-        var breakoff = new Statement({text: Experiment.breakoffNotice, id: "breakoffnotice"}, this);
-        var breakoffButton = document.createElement("input");
-        $(breakoffButton).attr({type: "submit", value: "Submit Early"});
-        $(BREAKOFF).append(breakoffButton);
-        breakoff.display(this.experimentRecord);
     }
 
     public advance(experimentRecord: ExperimentRecord){
