@@ -31,7 +31,7 @@ class Experiment implements Container{
         "results does not guarantee payment.</p>";
 
     constructor(jsonExperiment, version, permutation, psiturk){
-        jsonExperiment = _.defaults(jsonExperiment, {breakoff: false, exchangeable: []});
+        jsonExperiment = _.defaults(jsonExperiment, {breakoff: false, exchangeable: [], counterbalance: []});
         this.version = version;
         this.permutation = permutation;
         this.exchangeable = jsonExperiment.exchangeable;

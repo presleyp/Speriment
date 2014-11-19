@@ -118,7 +118,7 @@ CustomError.prototype.toString = function() {
     return this.message;
 };
 
-var fakeContainer = {version: 0, advance: function(){throw new CustomError("I advanced");}};
+var fakeContainer = {version: 0, permutation: 0, advance: function(){throw new CustomError("I advanced");}};
 var fakePsiTurk = {recordTrialData: function(){throw new CustomError("Would save data here");}};
 
 
@@ -373,12 +373,13 @@ test('create outerblock', function(){
 
 test("create survey", function(){
     // setupForm();
-    var s = new Experiment(jsons, 0);
+    var s = new Experiment(jsons, 0, 0);
 
     strictEqual(s.contents.length, 2, "survey should have two blocks");
     ok(s.contents[0] instanceof InnerBlock, 'survey should detect that first block is inner block');
     ok(s.contents[1] instanceof OuterBlock, 'survey should detect that second block is outer block');
     strictEqual(s.exchangeable.length, 0, 'exchangeable should be set to default');
+    strictEqual(s.counterbalance.length, 0, 'counterbalance should be set to default');
     strictEqual(s.showBreakoff, false, 'showBreakoff should be set to default');
 
     cleanUp();
@@ -391,7 +392,7 @@ test("order blocks", function(){
 
     function testOrderBlocks(exchangeable){
         var blockOrders = _.map(_.range(15), function(i){
-            return orderBlocks([b1, b2, b3], exchangeable);
+            return orderBlocks([b1, b2, b3], exchangeable, 0, []);
         });
         var blockIds = _.map(blockOrders, function(bo){
             return _.pluck(bo, 'id');
@@ -431,12 +432,60 @@ test("order blocks", function(){
     ok(_.isEmpty(_.difference(firsts, ['b1', 'b2', 'b5'])), "every block should appear first sometimes when they're all exchangeable");
 });
 
+test("counterbalancing: first permutation", function(){
+    var b1 = new OuterBlock({id: 'b2', blocks: [
+            {id: 'b3', pages: pgs2},
+            {id: 'b4', pages: pgs3}
+        ], counterbalance: ['b3', 'b4'] }, {permutation: 0});
+
+    strictEqual(b1.contents[0].id, 'b3', 'b3 comes before b4 in first permutation');
+    strictEqual(b1.contents[1].id, 'b4', 'blocks not duplicated');
+    strictEqual(b1.contents.length, 2, "reordering doesn't affect length");
+});
+
+test("counterbalancing: second permutation", function(){
+    var b1 = new OuterBlock({id: 'b2', blocks: [
+            {id: 'b3', pages: pgs2},
+            {id: 'b4', pages: pgs3},
+            {id: 'b5', pages: pgs}
+        ], counterbalance: ['b3', 'b4', 'b5'] }, {permutation: 1});
+
+    strictEqual(b1.contents[0].id, 'b3', 'b3 comes first in second permutation');
+    strictEqual(b1.contents[1].id, 'b5', 'b5 comes second');
+    strictEqual(b1.contents[2].id, 'b4', 'b4 comes last');
+    strictEqual(b1.contents.length, 3, "reordering doesn't affect length");
+});
+
+test("counterbalancing: no permutation", function(){
+    var b1 = new OuterBlock({id: 'b2', blocks: [
+            {id: 'b3', pages: pgs2},
+            {id: 'b4', pages: pgs3}
+        ], counterbalance: ['b3'] }, {permutation: 1});
+
+    strictEqual(b1.contents[0].id, 'b3', 'no reordering if only one counterbalance block');
+    strictEqual(b1.contents[1].id, 'b4', 'blocks not duplicated');
+    strictEqual(b1.contents.length, 2, "reordering doesn't affect length");
+});
+
+test("counterbalancing and exchanging", function(){
+    var b1 = new OuterBlock({id: 'b2', blocks: [
+            {id: 'b3', pages: pgs2},
+            {id: 'b4', pages: pgs3},
+            {id: 'b5', pages: pgs},
+            {id: 'b6', pages: pgs4}
+        ], counterbalance: ['b3', 'b5'], exchangeable: ['b4', 'b6'] }, {permutation: 1});
+
+    strictEqual(b1.contents[0].id, 'b5', 'b5 before b3 in permutation 1');
+    strictEqual(b1.contents[2].id, 'b3', 'b3 should switch with b5');
+    strictEqual(b1.contents.length, 4, "reordering doesn't affect length");
+});
+
 test('run blocks conditionally: when condition is satisfied', function(){
     // setupForm();
     cleanUp();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
-    var runBoth = new Experiment({blocks: [b1, b2]}, 0, fakePsiTurk);
+    var runBoth = new Experiment({blocks: [b1, b2]}, 0, 0, fakePsiTurk);
 
     runBoth.start();
     // clickNext(); // breakoff notice
