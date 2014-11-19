@@ -164,7 +164,7 @@ class Component:
         they can coexist in an experiment and won't be confused with each other,
         for instance if one is referred to in a RunIf.'''
         new_component = copy.deepcopy(self)
-        new_component.id = self.id_generator.next_id()
+        new_component.id_str = self.id_generator.next_id()
         for att in ['blocks', 'pages', 'options']:
             if hasattr(new_component, att):
                 setattr(new_component, att, [item.new()
@@ -484,7 +484,7 @@ def make_task(varname):
     var mySperiment = ''' + varname + ''';
     var psiturk = PsiTurk(uniqueId, adServerLoc);
     psiturk.finishInstructions();
-    var speriment = new Experiment(mySperiment, condition, psiturk);
+    var speriment = new Experiment(mySperiment, condition, counterbalance, psiturk);
     speriment.start();
 });''')
 
