@@ -15,7 +15,7 @@ class Page{
 
     constructor(jsonPage, public block){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
-        this.id = setOrSample(jsonPage.id, this.block);
+        this.id = jsonPage.id;
         this.text = setOrSample(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
         this.resources = _.map(jsonPage.resources, this.makeResource);
@@ -71,7 +71,7 @@ class Question extends Page{
         this.exclusive = jQuestion.exclusive;
         this.freetext = jQuestion.freetext;
         if (!_.isUndefined(jQuestion.feedback)){ //TODO will probably want to use resources in feedback
-            this.feedback = new Statement({text: jQuestion.feedback, id: this.id + "_feedback"}, block);
+            this.feedback = new Statement({text: setOrSample(jQuestion.feedback, block), id: this.id + "_feedback"}, block);
         }
         this.options = _.map(jQuestion.options, (o):ResponseOption => { // TODO setOrSample text and resources
             if (jQuestion.options.length > Page.dropdownThreshold){
