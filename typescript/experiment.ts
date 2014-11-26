@@ -10,7 +10,7 @@
 var PAGE = "p.question",
     OPTIONS = "p.answer",
     NAVIGATION = "div.navigation",
-    CONTINUE = "#continue", // Next or Submit button
+    CONTINUE = "#continue"; // Next or Submit button
 
 class Experiment implements Container{
     public id: string;
@@ -19,10 +19,12 @@ class Experiment implements Container{
     public version: number;
     public permutation: number;
     public contents: Block[];
+    public containerIDs: string[] = [];
     public experimentRecord: ExperimentRecord;
+    public banks;
 
     constructor(jsonExperiment, version, permutation, psiturk){
-        jsonExperiment = _.defaults(jsonExperiment, {exchangeable: [], counterbalance: []});
+        jsonExperiment = _.defaults(jsonExperiment, {exchangeable: [], counterbalance: [], banks: {}});
         this.version = version;
         this.permutation = permutation;
         this.exchangeable = jsonExperiment.exchangeable;
@@ -30,6 +32,7 @@ class Experiment implements Container{
         this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
         this.experimentRecord = new ExperimentRecord(psiturk);
+        this.banks = shuffleBanks(jsonExperiment.banks);
     }
 
     public start(){

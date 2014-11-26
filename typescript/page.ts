@@ -15,13 +15,12 @@ class Page{
 
     constructor(jsonPage, public block){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
-        this.id = jsonPage.id;
-        this.text = jsonPage.text;
-        this.condition = jsonPage.condition;
+        this.id = setOrSample(jsonPage.id, this.block);
+        this.text = setOrSample(jsonPage.text, this.block);
+        this.condition = setOrSample(jsonPage.condition, this.block);
         this.resources = _.map(jsonPage.resources, this.makeResource);
-        this.tags = jsonPage.tags;
-        var containers = getContainers(block);
-        this.record = new TrialRecord(this.id, this.text, this.condition, containers, this.tags);
+        this.tags = jsonPage.tags; //TODO can be sampled?
+        this.record = new TrialRecord(this.id, this.text, this.condition, this.block.containerIDs, this.tags);
     }
 
     public advance(experimentRecord):void {}
@@ -34,10 +33,11 @@ class Page{
         $(CONTINUE).prop({disabled: false});
     }
 
-    private makeResource(resource: string): string{ //TODO ogg can also be video, need to disambiguate
+    private makeResource(jsonResource: string): string{ //TODO ogg can also be video, need to disambiguate
         var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
             'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4':
             'video', 'webm': 'video'};
+        var resource = setOrSample(jsonResource, this.block);
         var extension = resource.split('.').pop().toLowerCase();
         var fileType = fileTypeMap[extension];
         if (fileType === 'img') {
@@ -73,7 +73,7 @@ class Question extends Page{
         if (!_.isUndefined(jQuestion.feedback)){ //TODO will probably want to use resources in feedback
             this.feedback = new Statement({text: jQuestion.feedback, id: this.id + "_feedback"}, block);
         }
-        this.options = _.map(jQuestion.options, (o):ResponseOption => {
+        this.options = _.map(jQuestion.options, (o):ResponseOption => { // TODO setOrSample text and resources
             if (jQuestion.options.length > Page.dropdownThreshold){
                 return new DropDownOption(o, this, this.exclusive);
             } else if (this.freetext){

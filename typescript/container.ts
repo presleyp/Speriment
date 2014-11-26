@@ -9,10 +9,12 @@
 
 // A Container contains Blocks, so Experiments and OuterBlocks are Containers.
 interface Container{
-    exchangeable;
-    version;
-    permutation;
+    exchangeable: string[];
+    version: number;
+    permutation: number;
     contents;
+    containerIDs: string[];
+    banks;
 
     advance(experimentRecord: ExperimentRecord): void;
 }
@@ -83,15 +85,34 @@ function makePermuter(permutation: number) {
     return counterbalanceBlockIds;
 }
 
-function getContainers(block: Block): string[] {
-    function getC(current, acc){
-        if (current.container && current.container.id){
-            return getC(current.container, acc.concat([current.container.id]));
-        } else {
-            return acc;
-        }
-    }
-
-    return getC(block, [block.id]);
+function shuffleBanks(banks){
+    _.each(banks, (bankList, bankName) => {banks[bankName] = _.shuffle(bankList)});
 }
 
+function setOrSample(property, block: Block){
+    if (_.has(property, 'sampleFrom')){
+        return sampleFromBank(block, property.sampleFrom);
+    } else {
+        return property;
+    }
+}
+    //TODO validation that bank will exist is important
+function sampleFromBank(ancestor, bankName){
+    if (_.has(ancestor.banks, bankName)){
+        return ancestor.banks[bankName].pop();
+    } else {
+        return sampleFromBank(ancestor.container, bankName);
+    }
+}
+
+// function getContainers(block: Block): string[] {
+//     function getC(current, acc){
+//         if (current.container && current.container.id){
+//             return getC(current.container, acc.concat([current.container.id]));
+//         } else {
+//             return acc;
+//         }
+//     }
+
+//     return getC(block, [block.id]);
+// }
