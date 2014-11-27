@@ -3,8 +3,8 @@
 ##Making experiments easier to express
 
 ###What is Speriment?
-Speriment is a package to help you write an online experiment for use with
-PsiTurk. PsiTurk describes itself as a tape player --- it can run any "tape",
+Speriment is a package, inspired by [SurveyMan](https://github.com/SurveyMan/SurveyMan), to help you write an online experiment for use with
+[PsiTurk](https://psiturk.org/). PsiTurk describes itself as a tape player - it can run any "tape",
 that is, JavaScript program, as an online experiment on Mechanical Turk. But
 you have to provide the tape. Speriment allows you to write a simple Python
 script, using only the most basic programming skills, to create that JavaScript
