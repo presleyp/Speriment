@@ -90,7 +90,7 @@ function shuffleBanks(banks){
 }
 
 function setOrSample(property, block: Block){
-    if (_.has(property, 'sampleFrom')){
+    if (_.isObject(property) && _.has(property, 'sampleFrom')){
         return sampleFromBank(block, property.sampleFrom);
     } else {
         return property;
