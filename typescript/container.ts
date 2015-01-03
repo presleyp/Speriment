@@ -86,7 +86,7 @@ function makePermuter(permutation: number) {
 }
 
 function shuffleBanks(banks){
-    _.each(banks, (bankList, bankName) => {banks[bankName] = _.shuffle(bankList)});
+    return _.each(banks, (bankList, bankName) => {banks[bankName] = _.shuffle(bankList)});
 }
 
 function setOrSample(property, block: Block){
@@ -98,6 +98,8 @@ function setOrSample(property, block: Block){
 }
     //TODO validation that bank will exist is important
 function sampleFromBank(ancestor, bankName){
+    console.log(ancestor);
+    console.log(bankName);
     if (_.has(ancestor.banks, bankName)){
         return ancestor.banks[bankName].pop();
     } else {

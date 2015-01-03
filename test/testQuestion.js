@@ -26,6 +26,22 @@ test("question initialization", function(){
     ok(q.options[0].question instanceof Question, "question not sending right 'this' to options");
 });
 
+test("page with sampling", function(){
+    var jsonq = {'text': {'sampleFrom': 'questions'}, id: 'q1', condition: {'sampleFrom': 'conds'},
+        resources: ['resource1.jpg', {sampleFrom: 'resourcebank'}],
+        options: [{text: {sampleFrom: 'optiontext'}, id: 'o1'}, {text: 'option2', id: 'o2', feedback: {sampleFrom: 'optionfeedback'}}]};
+    var block = {'id': 'b', 'banks': {'questions': ['one', 'two'], 'conds': ['a', 'b', 'c'], 'resourcebank': ['r1.mp3', 'r2.mp3'],
+    'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no']}};
+    var q = new Question(jsonq, block);
+    // bank shuffling is done at the block level; pages always pop from banks
+    strictEqual(q.text, 'two', 'text is last element of text bank');
+    strictEqual(q.condition, 'c', 'condition is last element of condition bank');
+    strictEqual(q.resources[0], '<img src="resource1.jpg" alt="resource1.jpg">', 'unsampled resource made correctly');
+    strictEqual(q.resources[1], '<audio controls><source src="r2.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
+    strictEqual(q.options[0].text, 'that', 'option text sampled correctly');
+    strictEqual(q.options[1].text, 'option2', 'unsampled option text intact');
+    strictEqual(q.options[1].getFeedback().text, 'no', 'option feedback sampled correctly');
+});
 
 test("checkbox options", function(){
     // exclusive is false and number of options is low so should be checkboxes

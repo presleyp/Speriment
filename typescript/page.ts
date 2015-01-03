@@ -18,7 +18,7 @@ class Page{
         this.id = jsonPage.id;
         this.text = setOrSample(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
-        this.resources = _.map(jsonPage.resources, this.makeResource);
+        this.resources = _.map(jsonPage.resources, (r: string):string => {return this.makeResource(r, this.block)});
         this.tags = jsonPage.tags; //TODO can be sampled?
         this.record = new TrialRecord(this.id, this.text, this.condition, this.block.containerIDs, this.tags);
     }
@@ -33,11 +33,11 @@ class Page{
         $(CONTINUE).prop({disabled: false});
     }
 
-    private makeResource(jsonResource: string): string{ //TODO ogg can also be video, need to disambiguate
+    private makeResource(jsonResource: string, block: Block): string{ //TODO ogg can also be video, need to disambiguate
         var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
             'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4':
             'video', 'webm': 'video'};
-        var resource = setOrSample(jsonResource, this.block);
+        var resource = setOrSample(jsonResource, block);
         var extension = resource.split('.').pop().toLowerCase();
         var fileType = fileTypeMap[extension];
         if (fileType === 'img') {

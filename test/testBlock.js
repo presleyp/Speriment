@@ -7,16 +7,25 @@ function cleanUp(){
 }
 
 test("shuffle banks", function(){
+    //operates in place but I assign to the result so I need to test the return value
     var b = {};
-    shuffleBanks(b);
-    ok(_.isEmpty(b), "shuffle banks should work on empty object");
+    var sb = shuffleBanks(b);
+    ok(_.isEmpty(sb), "shuffle banks should work on empty object");
     var c = {'bank1': ['one', 'two'], 'bank2': ['three', 'four', 'five']};
-    shuffleBanks(c);
-    strictEqual(c.bank1.length, 2, 'shuffle banks should keep first list intact');
-    strictEqual(c.bank2.length, 3, 'shuffle banks should keep second list intact');
+    var sc = shuffleBanks(c);
+    strictEqual(sc.bank1.length, 2, 'shuffle banks should keep first list intact');
+    strictEqual(sc.bank2.length, 3, 'shuffle banks should keep second list intact');
     var d = {'bank1': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']};
-    shuffleBanks(d);
-    notEqual(d.bank1, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'], 'shuffle banks should shuffle');
+    var sd = shuffleBanks(d);
+    notEqual(sd.bank1, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'], 'shuffle banks should shuffle');
+});
+
+test("sampling without replacement", function(){
+    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps'}}, {id: 'p2', text: {sampleFrom: 'ps'}},
+        {id: 'p3', text: {sampleFrom: 'ps'}}], banks: {'ps': ['one', 'two', 'three']}};
+    var b = new InnerBlock(jsonb, fakeContainer);
+    var texts = _.pluck(b.contents, 'text');
+    strictEqual(_.unique(texts).length, 3, 'sampling is without replacement');
 });
 
 test("create inner block", function(){
