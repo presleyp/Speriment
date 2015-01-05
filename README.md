@@ -197,7 +197,7 @@ you called the directory).
     
     `server on`
     
-    `tunnel on`
+    `tunnel open`
 
 9. Debug your experiment in your browser.
     
