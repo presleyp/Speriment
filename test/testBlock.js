@@ -10,7 +10,7 @@ test("shuffle banks", function(){
     //operates in place but I assign to the result so I need to test the return value
     var b = {};
     var sb = shuffleBanks(b);
-    ok(_.isEmpty(sb), "shuffle banks should work on empty object");
+    ok(_.isEmpty(sb) && _.isObject(sb), "shuffle banks should work on empty object");
     var c = {'bank1': ['one', 'two'], 'bank2': ['three', 'four', 'five']};
     var sc = shuffleBanks(c);
     strictEqual(sc.bank1.length, 2, 'shuffle banks should keep first list intact');
