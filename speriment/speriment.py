@@ -7,20 +7,20 @@ import pkg_resources
 
 ### Reading CSV File
 
-def get_rows(csvfile):
+def get_rows(csvfile, sep = ','):
     '''csvfile: string, a filename of a csv file.
 
-    sep: string, the delimited used to separate values in the csv file. Defaults
+    sep: string, the delimiter used to separate values in the csv file. Defaults
     to comma.
 
     Returns: lists (one for each row in the file) of lists (one for each cell in
     the row) of strings.'''
 
     with open(csvfile, 'r') as f:
-        rows = csv.reader(f)
+        rows = csv.reader(f, delimiter = sep)
         return list(rows)
 
-def get_dicts(csvfile):
+def get_dicts(csvfile, sep = ','):
     '''csvfile: string, a filename of a csv file. The file should have a header
     row with column names.
 
@@ -31,7 +31,7 @@ def get_dicts(csvfile):
     strings (column names) to strings (cell values).'''
 
     with open(csvfile, 'r') as f:
-        dicts = csv.DictReader(f)
+        dicts = csv.DictReader(f, delimiter = sep)
         return list(dicts)
 
 ### Writing objects to JSON
@@ -61,6 +61,8 @@ class ExperimentEncoder(json.JSONEncoder):
             return renamed_id
         if isinstance(obj, RunIf):
             return obj.__dict__
+        if isinstance(obj, SampleFrom):
+            return {"sampleFrom": obj.bank}
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
@@ -117,7 +119,7 @@ class ExperimentMaker():
         Component.id_generator = None
         return False # False means if you encountered errors, raise them
 
-### Special kind of experimental component (not in the hierarchy)
+### Special kind of experimental components (not in the hierarchy)
 
 class RunIf:
     def __init__(self, page, option = None, regex = None):
@@ -141,6 +143,15 @@ class RunIf:
             self.option_id = option.id_str
         elif regex != None:
             self.regex = regex
+
+class SampleFrom:
+    def __init__(self, bank):
+        '''bank: string, the name of an information bank to sample from.
+        Sampling is per-participant, random, and without replacement during an
+        experiment. Once sampled, the choice will remain in place for all
+        iterations of the block. Sampling happens after pages are chosen from
+        groups.'''
+        self.bank = bank
 
 #### Experiment Components
 
@@ -188,7 +199,7 @@ class Option(Component):
         '''
         text: If the Option is not a text box, this is the label for the Option
         that will be displayed on the page. If the Option is a text box, this is
-        not currently used.
+        not currently used. Can also be SampleFrom.
 
         id_str: String, optional, an identifier unique among all options in this
         experiment. (Currently uniqueness in its page is sufficient but this may
@@ -197,6 +208,7 @@ class Option(Component):
         **kwargs: optional keyword arguments, which can include:
 
         feedback: string, the feedback to be displayed if this Option is chosen.
+        Can also be SampleFrom.
 
         correct: If the Option is not a text box, a boolean representing whether
         this Option is correct. If the Option is a text box, a string
@@ -221,7 +233,7 @@ class Option(Component):
 class Page(Component):
     def __init__(self, text, options = None, id_str = None, **kwargs):
         '''
-        text: The text to be displayed on the page.
+        text: The text to be displayed on the page. Can also be SampleFrom.
 
         options: [Option], optional, the answer choices to be displayed on the
         page.
@@ -231,7 +243,8 @@ class Page(Component):
 
         **kwargs: optional keyword arguments, which can include:
 
-        feedback: string, the feedback to be displayed after an answer is chosen.
+        feedback: string, the feedback to be displayed after an answer is
+        chosen. Can also be SampleFrom.
 
         correct: If freetext is False, a string representing the id_str of the
         correct Option. If freetext is True, a string representing a regular
@@ -245,10 +258,10 @@ class Page(Component):
         condition: string, the condition this Page belongs to in the
         experimental manipulation. Used if this Page is in a block where
         pseudorandom is True, to keep Pages with the same condition from
-        appearing in a row.
+        appearing in a row. Can also be SampleFrom.
 
         resources: [string], filenames of any images, audio, or video that
-        should display on the page.
+        should display on the page. Any resource can be SampleFrom.
 
         ordered: boolean, whether the Options for this Page need to be kept in
         the order in which they were given. If True, the Options may be reversed
@@ -355,7 +368,14 @@ class Block(Component):
 
         run_if: RunIf, gives a condition that must be met in order for this Block
         to display its contents, no matter the type of contents. See the RunIf
-        documentation for more information.'''
+        documentation for more information.
+
+        banks: {string: [string]}, a dictionary mapping bank names to banks,
+        where a bank is a list of pieces of information. Within a bank, all
+        items should be for the same purpose. Bank information can be used for
+        page text, option text, page feedback, option feedback, resource
+        filenames, or page condition.
+        '''
 
         self.set_id(id_str)
         self.set_optional_args(**kwargs)
@@ -424,7 +444,8 @@ class Experiment(Component):
     don't make your own IDs (IDs should be unique among pages, among options,
     and among blocks within one experiment), then use one IDGenerator per
     experiment.'''
-    def __init__(self, blocks, exchangeable = [], counterbalance = []):
+    def __init__(self, blocks, exchangeable = [], counterbalance = [], banks =
+            {}):
         '''
         blocks: [Block], the contents of the experiment.
 
@@ -432,11 +453,21 @@ class Experiment(Component):
         considered exchangeable. See Block documentation for more information.
 
         counterbalance: [Block], a subset of the Blocks. See Block documentation
-        for more information.'''
+        for more information.
+
+        banks: {string: [string]}, a dictionary mapping bank names to banks,
+        where a bank is a list of pieces of information. Within a bank, all
+        items should be for the same purpose. Bank information can be used for
+        page text, option text, page feedback, option feedback, resource
+        filenames, or page condition.
+        '''
 
         self.blocks = [b for b in blocks]
-        self.exchangeable = [b.id_str for b in exchangeable]
+        if exchangeable:
+            self.exchangeable = [b.id_str for b in exchangeable]
         self.counterbalance = [b.id_str for b in counterbalance]
+        if banks:
+            self.banks = banks
 
     def validate(self):
         self.validate_page_tags()
