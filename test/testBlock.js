@@ -28,6 +28,18 @@ test("sampling without replacement", function(){
     strictEqual(_.unique(texts).length, 3, 'sampling is without replacement');
 });
 
+test("sampling from outer block", function(){
+    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps'}}, {id: 'p2', text: {sampleFrom: 'ps'}},
+        {id: 'p3', text: {sampleFrom: 'ps'}}]};
+    var jsonb2 = {id: 'b2', pages: [{id: 'p4', text: {sampleFrom: 'ps'}}, {id: 'p5', text: {sampleFrom: 'ps'}},
+        {id: 'p6', text: {sampleFrom: 'ps'}}]};
+    var outerb = {id: 'b3', blocks: [jsonb, jsonb2], banks: {'ps': ['one', 'two', 'three', 'four', 'five', 'six']}};
+    var b = new OuterBlock(outerb, fakeContainer);
+    var texts1 = _.pluck(b.contents[0].contents, 'text');
+    var texts2 = _.pluck(b.contents[1].contents, 'text');
+    strictEqual(_.unique(_.union(texts1, texts2)).length, 6, 'sampling is without replacement');
+});
+
 test("create inner block", function(){
     setupForm();
     var jsonb = {id: "b1", pages:[{text:"one", id:"p1"}, {text:"two", id:"p2", freetext: true, options: [{id: "o1"}]}]};
