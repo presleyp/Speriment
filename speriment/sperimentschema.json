@@ -12,13 +12,23 @@
         },
 
         "text": {
-            "description": "The text to display for a component of the experiment.",
-            "type": "string"
+            "description": "The text to display for a component of the experiment. Can also be a sampler.",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {"$ref": "#/definitions/sampler"}
+            ]
         },
 
         "feedback": {
-            "description": "The feedback to display after this page/if this option is chosen.",
-            "type": "string"
+            "description": "The feedback to display after this page/if this option is chosen. Can also be a sampler.",
+             "oneOf": [
+                {
+                    "type": "string"
+                },
+                {"$ref": "#/definitions/sampler"}
+            ]
         },
 
         "correct": {
@@ -29,6 +39,52 @@
         "tag": {
             "description": "A descriptor for a page or option that is not acted upon, but passed into the record of the experiment for purposes of analysis.",
             "type": "string"
+        },
+
+        "resources": {
+            "description": "Array of filenames of images, audio, or video to be displayed on the page.",
+            "type": "array",
+            "items": {
+                "description": "Filename for media. Must include extension. Can also be a sampler.",
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {"$ref": "#/definitions/sampler"}
+                ]
+            }
+        },
+
+        "sampler": {
+            "description": "An object that occurs in place of a string as a property of a page or option, indicating that the property should be sampled from a bank.",
+            "type": "object",
+            "properties": {
+                "sampleFrom": {
+                    "description": "Name of the bank to sample the property from.",
+                    "type": "string"
+                }
+            }
+        },
+
+        "bank": {
+            "description": "A list of pieces of information to be used as page or option properties.",
+            "type": "array",
+            "items": {
+                "description": "A piece of information to be used as a page or option property.",
+                "type": "string"
+            }
+        },
+
+        "banks": {
+            "description": "A mapping from bank names to arrays of data.",
+            "type": "object",
+            "properties": {
+                "additionalProperties": {
+                    "description": "Banks can contain any number of members with any unique strings as keys. But they must always have arrays of strings as values.",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/bank"}
+                }
+            }
         },
 
         "exchangeable": {
@@ -116,6 +172,7 @@
                 "text": {"$ref": "#/definitions/text"},
                 "feedback": {"$ref": "#/definitions/feedback"},
                 "correct": {"$ref": "#/definitions/correct"},
+                "resources": {"$ref": "#/definitions/resources"},
                 "condition": {
                     "description": "The experimental condition that this item belongs to. Used for constrained randomization, to keep items of the same condition from being adjacent.",
                     "type": "string"
@@ -156,7 +213,8 @@
                         },
                         "pseudorandom": {"$ref": "#/definitions/pseudorandom"},
                         "runIf": {"$ref": "#/definitions/runIf"},
-                        "criterion": {"$ref": "#/definitions/criterion"}
+                        "criterion": {"$ref": "#/definitions/criterion"},
+                        "banks": {"$ref": "#/definitions/banks"}
                     },
                     "required": ["id", "pages"]
                 },
@@ -179,7 +237,8 @@
                         },
                         "pseudorandom": {"$ref": "#/definitions/pseudorandom"},
                         "runIf": {"$ref": "#/definitions/runIf"},
-                        "criterion": {"$ref": "#/definitions/criterion"}
+                        "criterion": {"$ref": "#/definitions/criterion"},
+                        "banks": {"$ref": "#/definitions/banks"}
                     },
                     "required": ["id", "groups"]
                 },
@@ -195,7 +254,8 @@
                         "exchangeable": {"$ref": "#/definitions/exchangeable"},
                         "counterbalance": {"$ref": "#/definitions/counterbalance"},
                         "runIf": {"$ref": "#/definitions/runIf"},
-                        "criterion": {"$ref": "#/definitions/criterion"}
+                        "criterion": {"$ref": "#/definitions/criterion"},
+                        "banks": {"$ref": "#/definitions/banks"}
                     },
                     "required": ["id", "blocks"]
                 }
@@ -212,6 +272,7 @@
         },
         "exchangeable": {"$ref": "#/definitions/exchangeable"},
         "counterbalance": {"$ref": "#/definitions/counterbalance"},
+        "banks": {"$ref": "#/definitions/banks"},
         "blocks": {
             "description": "Experiments are made up of blocks. Blocks are made up of either smaller blocks, or pages. Blocks are run in the order in which you specify them, unless they're exchangeable.",
             "type": "array",

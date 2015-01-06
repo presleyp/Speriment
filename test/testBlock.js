@@ -1,12 +1,49 @@
 
+var fakeContainer = {version: 0, permutation: 0, advance: function(){throw new CustomError("I advanced");}, containerIDs: []};
+var fakePsiTurk = {recordTrialData: function(){throw new CustomError("Would save data here");}};
+
 function cleanUp(){
     $('#experimentDiv').remove();
 }
 
+test("shuffle banks", function(){
+    //operates in place but I assign to the result so I need to test the return value
+    var b = {};
+    var sb = shuffleBanks(b);
+    ok(_.isEmpty(sb) && _.isObject(sb), "shuffle banks should work on empty object");
+    var c = {'bank1': ['one', 'two'], 'bank2': ['three', 'four', 'five']};
+    var sc = shuffleBanks(c);
+    strictEqual(sc.bank1.length, 2, 'shuffle banks should keep first list intact');
+    strictEqual(sc.bank2.length, 3, 'shuffle banks should keep second list intact');
+    var d = {'bank1': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']};
+    var sd = shuffleBanks(d);
+    notEqual(sd.bank1, ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'], 'shuffle banks should shuffle');
+});
+
+test("sampling without replacement", function(){
+    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps'}}, {id: 'p2', text: {sampleFrom: 'ps'}},
+        {id: 'p3', text: {sampleFrom: 'ps'}}], banks: {'ps': ['one', 'two', 'three']}};
+    var b = new InnerBlock(jsonb, fakeContainer);
+    var texts = _.pluck(b.contents, 'text');
+    strictEqual(_.unique(texts).length, 3, 'sampling is without replacement');
+});
+
+test("sampling from outer block", function(){
+    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps'}}, {id: 'p2', text: {sampleFrom: 'ps'}},
+        {id: 'p3', text: {sampleFrom: 'ps'}}]};
+    var jsonb2 = {id: 'b2', pages: [{id: 'p4', text: {sampleFrom: 'ps'}}, {id: 'p5', text: {sampleFrom: 'ps'}},
+        {id: 'p6', text: {sampleFrom: 'ps'}}]};
+    var outerb = {id: 'b3', blocks: [jsonb, jsonb2], banks: {'ps': ['one', 'two', 'three', 'four', 'five', 'six']}};
+    var b = new OuterBlock(outerb, fakeContainer);
+    var texts1 = _.pluck(b.contents[0].contents, 'text');
+    var texts2 = _.pluck(b.contents[1].contents, 'text');
+    strictEqual(_.unique(_.union(texts1, texts2)).length, 6, 'sampling is without replacement');
+});
+
 test("create inner block", function(){
     setupForm();
     var jsonb = {id: "b1", pages:[{text:"one", id:"p1"}, {text:"two", id:"p2", freetext: true, options: [{id: "o1"}]}]};
-    var b = new InnerBlock(jsonb);
+    var b = new InnerBlock(jsonb, fakeContainer);
     strictEqual(b.contents.length, 2, "are pages initialized properly?");
     _.each(b.contents, function(p){
         if (p.id === "p1"){
@@ -19,12 +56,12 @@ test("create inner block", function(){
     var er = new ExperimentRecord();
     strictEqual(b.shouldRun(er), true, "shouldRun not defaulting to true");
     jsonb.runIf = {"pageID": "p2", "optionID": "o3"};
-    var b2 = new InnerBlock(jsonb);
+    var b2 = new InnerBlock(jsonb, fakeContainer);
     strictEqual(b2.runIf.optionID, "o3", "runIf not set properly");
     er.addRecord("p2", {'blockID': 'b1', 'startTime': 0, 'endTime': 0, 'selected': ['o1'], 'correct': 'o1'});
     strictEqual(b2.shouldRun(er), false, "shouldRun not working");
     var jsongroup = {id: "b1", groups:[[{text: "page1", id: "p1"}, {text:"page2", id:"p2", options: [{id: "o1"}]}]]};
-    var b3 = new InnerBlock(jsongroup, {version: 0});
+    var b3 = new InnerBlock(jsongroup, {version: 0, containerIDs: []});
     strictEqual(b3.contents.length, 1, "initialization from groups");
     _.each(b3.contents, function(p){
         if (p.id === "p1"){
@@ -44,18 +81,18 @@ test("choosing pages", function(){
                                  }
                     );
     var jsonb = {id: "b1", groups: grps};
-    var b = new InnerBlock(jsonb, {version: 0});
+    var b = new InnerBlock(jsonb, {version: 0, containerIDs: []});
     strictEqual(b.contents.length, 6, "did it choose one page per group?");
     var choices = (_.map(_.range(10), function(i){
-            var bl = new InnerBlock(jsonb, {version: 0});
+            var bl = new InnerBlock(jsonb, {version: 0, containerIDs: []});
             return _.pluck(bl.contents, "id");
         }));
     ok(_.each(_.range(18), function(id){return _.contains(_.flatten(choices), id.toString());}), "no page is systematically avoided in random sampling");
 
     jsonb.latinSquare = true;
-    var b2 = new InnerBlock(jsonb, {version: 0});
-    var b3 = new InnerBlock(jsonb, {version: 1});
-    var b4 = new InnerBlock(jsonb, {version: 2});
+    var b2 = new InnerBlock(jsonb, {version: 0, containerIDs: []});
+    var b3 = new InnerBlock(jsonb, {version: 1, containerIDs: []});
+    var b4 = new InnerBlock(jsonb, {version: 2, containerIDs: []});
     strictEqual(b2.latinSquare, true, "latin square variable getting set");
     strictEqual(b2.contents.length, 6, "did it choose one page per group with latinSquare set to true?");
     var condgroups = _.groupBy(b2.contents, "condition");
@@ -85,17 +122,17 @@ test("ordering pages", function(){
                     );
     var jsonb = {id: "b1", groups: grps, latinSquare: true};
     var firstconditions = _.map(_.range(20), function(){
-        var b = new InnerBlock(jsonb, {version: 0});
+        var b = new InnerBlock(jsonb, fakeContainer);
         var conditions = _.pluck(b.contents, "condition");
         return conditions[0];
     });
     strictEqual(_.unique(firstconditions).length, 3, "any condition should be able to end up first (but randomness means this will fail occasionally)");
 
     jsonb.pseudorandom = true;
-    var b2 = new InnerBlock(jsonb, {version: 0});
+    var b2 = new InnerBlock(jsonb, fakeContainer);
     var contentLengths = [];
     var firstconditions2 = _.map(_.range(20), function(){
-        var b = new InnerBlock(jsonb, {version: 0});
+        var b = new InnerBlock(jsonb, fakeContainer);
         var conditions = _.pluck(b.contents, "condition");
         contentLengths.push(conditions.length);
         return conditions[0];
@@ -118,8 +155,6 @@ CustomError.prototype.toString = function() {
     return this.message;
 };
 
-var fakeContainer = {version: 0, permutation: 0, advance: function(){throw new CustomError("I advanced");}};
-var fakePsiTurk = {recordTrialData: function(){throw new CustomError("Would save data here");}};
 
 
 test("statement calling advance", function(){
@@ -380,7 +415,7 @@ test("create survey", function(){
     ok(s.contents[1] instanceof OuterBlock, 'survey should detect that second block is outer block');
     strictEqual(s.exchangeable.length, 0, 'exchangeable should be set to default');
     strictEqual(s.counterbalance.length, 0, 'counterbalance should be set to default');
-    strictEqual(s.showBreakoff, false, 'showBreakoff should be set to default');
+    // strictEqual(s.showBreakoff, false, 'showBreakoff should be set to default');
 
     cleanUp();
 });
@@ -436,7 +471,7 @@ test("counterbalancing: first permutation", function(){
     var b1 = new OuterBlock({id: 'b2', blocks: [
             {id: 'b3', pages: pgs2},
             {id: 'b4', pages: pgs3}
-        ], counterbalance: ['b3', 'b4'] }, {permutation: 0});
+        ], counterbalance: ['b3', 'b4'] }, {containerIDs: [], permutation: 0});
 
     strictEqual(b1.contents[0].id, 'b3', 'b3 comes before b4 in first permutation');
     strictEqual(b1.contents[1].id, 'b4', 'blocks not duplicated');
@@ -448,7 +483,7 @@ test("counterbalancing: second permutation", function(){
             {id: 'b3', pages: pgs2},
             {id: 'b4', pages: pgs3},
             {id: 'b5', pages: pgs}
-        ], counterbalance: ['b3', 'b4', 'b5'] }, {permutation: 1});
+        ], counterbalance: ['b3', 'b4', 'b5'] }, {permutation: 1, containerIDs: []});
 
     strictEqual(b1.contents[0].id, 'b3', 'b3 comes first in second permutation');
     strictEqual(b1.contents[1].id, 'b5', 'b5 comes second');
@@ -460,7 +495,7 @@ test("counterbalancing: no permutation", function(){
     var b1 = new OuterBlock({id: 'b2', blocks: [
             {id: 'b3', pages: pgs2},
             {id: 'b4', pages: pgs3}
-        ], counterbalance: ['b3'] }, {permutation: 1});
+        ], counterbalance: ['b3'] }, {permutation: 1, containerIDs: []});
 
     strictEqual(b1.contents[0].id, 'b3', 'no reordering if only one counterbalance block');
     strictEqual(b1.contents[1].id, 'b4', 'blocks not duplicated');
@@ -473,7 +508,7 @@ test("counterbalancing and exchanging", function(){
             {id: 'b4', pages: pgs3},
             {id: 'b5', pages: pgs},
             {id: 'b6', pages: pgs4}
-        ], counterbalance: ['b3', 'b5'], exchangeable: ['b4', 'b6'] }, {permutation: 1});
+        ], counterbalance: ['b3', 'b5'], exchangeable: ['b4', 'b6'] }, {permutation: 1, containerIDs: []});
 
     strictEqual(b1.contents[0].id, 'b5', 'b5 before b3 in permutation 1');
     strictEqual(b1.contents[2].id, 'b3', 'b3 should switch with b5');
@@ -560,7 +595,7 @@ var ps = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}
 
 test('recording multiple iterations of the same question', function(){
     setupForm();
-    var b1 = new InnerBlock({id: 'b1', pages: [ps[0], ps[0], ps[0]]}, {version: 0});
+    var b1 = new InnerBlock({id: 'b1', pages: [ps[0], ps[0], ps[0]]}, {version: 0, containerIDs: []});
     var er = new ExperimentRecord();
     b1.advance(er);
     $('#o1').prop('checked', true);

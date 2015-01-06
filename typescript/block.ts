@@ -8,18 +8,20 @@
 class Block{
 
     id: string;
-    container: Container;
+    containerIDs: string[];
     contents;
     runIf;
+    banks;
     oldContents;
 
-    constructor(jsonBlock){
-        jsonBlock = _.defaults(jsonBlock, {runIf: null});
+    constructor(jsonBlock, public container: Container){
+        jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}});
         this.runIf = jsonBlock.runIf; // {pageID, optionID | regex}
         this.id = jsonBlock.id;
+        this.banks = shuffleBanks(jsonBlock.banks);
         this.oldContents = [];
+        this.containerIDs = this.container.containerIDs.concat(this.id);
     }
-
 
     tellLast(): void{}
 
@@ -58,7 +60,7 @@ class OuterBlock extends Block implements Container{
     contents: Block[];
 
     constructor(jsonBlock, public container: Container){
-        super(jsonBlock);
+        super(jsonBlock, container);
         jsonBlock = _.defaults(jsonBlock, {exchangeable: [], counterbalance: []});
         this.exchangeable = jsonBlock.exchangeable;
         this.counterbalance = jsonBlock.counterbalance;
@@ -87,7 +89,7 @@ class InnerBlock extends Block{
     private isLast: boolean = false;
 
     constructor(jsonBlock, public container: Container){
-        super(jsonBlock);
+        super(jsonBlock, container);
         jsonBlock = _.defaults(jsonBlock, {latinSquare: false, pseudorandom: false, criterion: null});
         this.latinSquare = jsonBlock.latinSquare;
         this.pseudorandom = jsonBlock.pseudorandom;

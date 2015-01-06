@@ -15,7 +15,7 @@ class ResponseOption{
     constructor(jsonOption, public question: Question){
         jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null});
         this.id = jsonOption.id;
-        this.text = jsonOption.text;
+        this.text = setOrSample(jsonOption.text, this.question.block);
         this.feedback = jsonOption.feedback;
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         this.tags = jsonOption.tags;
@@ -41,7 +41,8 @@ class ResponseOption{
 
     public getFeedback(){
         if (this.feedback){
-            return new Statement({text: this.feedback, id: this.id + "_feedback"}, this.question.block);
+            return new Statement({text: setOrSample(this.feedback, this.question.block), id: this.id + "_feedback"},
+                    this.question.block);
         } else {
             return null;
         }

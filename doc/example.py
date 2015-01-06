@@ -57,37 +57,51 @@ with make_experiment(IDGenerator()):
     cat_condition = RunIf(page = animal_question, option = animal_question.options[0])
     block2 = Block(pages = pages2, run_if = cat_condition)
 
+    # Let's make a block where the texts of pages are combined with the other
+    # data for the page differently across participants. We need to replace the text string
+    # in these pages with a SampleFrom object naming a bank, and put a bank with
+    # the possible text strings in a block that encloses all the pages that
+    # sample from that bank (or the entire experiment). It's very important to
+    # spell the name of the bank the same in all places, and to put enough
+    # strings in the bank that you won't run out, because each SampleFrom object
+    # will take a string that hasn't been used before for that participant.
+
+    sampled_pages = [Page(SampleFrom('bank1'), condition = row['Condition'])
+            for row in items2]
+    block3 = Block(pages = sampled_pages, banks = {'bank1': ['sampled1',
+        'sampled2']})
+
     # Now I want to make another block just like block 1, and then just tweak it
     # a little bit.
     # The "new" method ensures they get separate IDs, which can be important for how
     # the experiment runs. Do this whenever you copy an option, page, or block
     # if you're using the "with" statement.
 
-    block3 = block1.new()
+    block4 = block1.new()
 
-    # I just want block3 to have one more page. This page doesn't have options,
+    # I just want block4 to have one more page. This page doesn't have options,
     # which is fine; it'll just show some text.
 
-    block3.pages.append(Page('This is almost the last block.'))
+    block4.pages.append(Page('This is almost the last block.'))
 
-    # That page will occur somewhere in block 3, but we don't know exactly where.
+    # That page will occur somewhere in block 4, but we don't know exactly where.
     # Blocks stay put unless they're exchangeable, but questions move around in
     # their blocks. Here's a block with just one page so we know it'll come last.
 
-    block4 = Block(pages = [Page('Goodbye!')])
+    block5 = Block(pages = [Page('Goodbye!')])
 
     # Finally, wrap the Blocks in an Experiment. Remember that Pages take an
     # optional list of Options, Blocks take a list of Pages (or a list of lists of
     # Pages, or a list of Blocks), and Experiments take a list of Blocks.
-    # The counterbalance argument says that block1 and block3 will switch places
+    # The counterbalance argument says that block1 and block4 will switch places
     # for approximately half of participants. It needs to be used in conjunction
     # with setting the counterbalance parameter in PsiTurk's config.txt,
     # whereas the exchangeable argument could be used in the same way but
     # without setting that parameter (but it will accordingly give a less even
     # distribution across participants).
 
-    experiment = Experiment([block1, block2, block3, block4], counterbalance =
-            [block1, block3])
+    experiment = Experiment([block1, block2, block3, block4, block5], counterbalance =
+            [block1, block4])
 
     # You can generate the JSON just to look at it, for instance by printing this
     # variable. This step is optional.
