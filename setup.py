@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='speriment',
-      version='0.1',
+      version='0.2.1',
       description='Making experiments easier to express',
       url='http://github.com/presleyp/speriment',
       author='Presley Pizzo',
@@ -14,5 +14,6 @@ setup(name='speriment',
       packages=['speriment'],
       package_data={'speriment': ['sperimentschema.json']},
       scripts=['bin/speriment-output'],
+      install_requires=['jsonschema'],
       include_package_data=True,
       zip_safe=False)
