@@ -54,6 +54,15 @@ training block. This says that they will keep working on the questions in the
 training block until they perform well enough that you consider them fully
 trained. Then, they will  move on to the next block.
 
+Blocks can contain a dictionary called `banks`. This dictionary maps bank names to
+banks, or lists of strings. These strings can represent page text, option text, 
+page resources, or page conditions. These are useful if you want to assign these fields
+to pages or options differently across participants. Pages and options can contain a
+SampleFrom object in place of a string in these fields. The SampleFrom object takes one
+argument, the name of the bank that the text or other information should be sampled from.
+This sampling will happen independently for each participant, and a given participant will only
+see a given item from a bank once in the experiment - that is, the sampling is done without replacement.
+
 ####Groups
 
 Groups are simply lists of pages. There is no special Group class in the API;
@@ -138,6 +147,9 @@ Here are a few things Speriment can handle:
 - presentation of items conditioned on previous responses. Create a RunIf
   object and put it in the block that you want to run only under a certain
   condition.
+- distribution of text and resources to pages on a per-participant basis. This uses
+  `banks` defined in a block or the experiment, and `SampleFrom` objects in place of
+  the string to be sampled from a bank.
 
 ###How do I make the JSON file?
 
