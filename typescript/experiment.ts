@@ -31,7 +31,7 @@ class Experiment implements Container{
         this.counterbalance = jsonExperiment.counterbalance;
         this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
-        this.experimentRecord = new ExperimentRecord(psiturk);
+        this.experimentRecord = new ExperimentRecord(psiturk, permutation);
         this.banks = shuffleBanks(jsonExperiment.banks);
     }
 

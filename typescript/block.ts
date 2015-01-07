@@ -2,6 +2,7 @@
 /// <reference path="container.ts"/>
 /// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
+/// <reference path="runif.ts"/>
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
@@ -16,7 +17,20 @@ class Block{
 
     constructor(jsonBlock, public container: Container){
         jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}});
-        this.runIf = jsonBlock.runIf; // {pageID, optionID | regex}
+        this.runIf = jsonBlock.runIf;
+        if (jsonBlock.runIf){
+            if (_.has(jsonBlock.runIf, 'optionID')){
+                this.runIf = new RunIfSelected(jsonBlock.runIf.pageID, jsonBlock.runIf.optionID);
+            } else if (_.has(jsonBlock.runIf, 'regex')){
+                this.runIf = new RunIfMatched(jsonBlock.runIf.pageID, jsonBlock.runIf.regex);
+            } else if (_.has(jsonBlock.runIf, 'permutation')){
+                this.runIf = new RunIfPermutation(jsonBlock.runIf.permutation);
+            } else {
+                this.runIf = new RunIf();
+            }
+        } else {
+            this.runIf = new RunIf();
+        }
         this.id = jsonBlock.id;
         this.banks = shuffleBanks(jsonBlock.banks);
         this.oldContents = [];
@@ -27,17 +41,8 @@ class Block{
 
     run(nextUp, experimentRecord: ExperimentRecord){}
 
-    // whether this block should run, depending on a previous answer
-    shouldRun(experimentRecord: ExperimentRecord): boolean {
-        if (this.runIf){
-            return experimentRecord.responseGiven(this.runIf);
-        } else {
-            return true;
-        }
-    }
-
     advance(experimentRecord: ExperimentRecord): void {
-        if (!_.isEmpty(this.contents) && this.shouldRun(experimentRecord)){
+        if (!_.isEmpty(this.contents) && this.runIf.shouldRun(experimentRecord)){
             var nextUp = this.contents.shift();
             this.oldContents.push(nextUp);
             this.run(nextUp, experimentRecord);
