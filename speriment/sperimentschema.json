@@ -138,6 +138,12 @@
                         }
                     },
                     "required": ["pageID"]
+                },
+                {
+                    "properties": {
+                        "permutation": "number"
+                    },
+                    "required": ["permutation"]
                 }
             ]
         },
