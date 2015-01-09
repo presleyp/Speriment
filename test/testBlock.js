@@ -111,6 +111,47 @@ test("choosing pages", function(){
     ok(_.every(condgroups4, function(g){return g.length === 2;}), "check latin square");
 });
 
+test("test latin square", function(){
+    var gps = [[{id: '1a', text: '1a'}, {id: '1b', text: '1b'}], [{id: '2a', text: '2a'}, {id: '2b', text: '2b'}]];
+    var b1 = new InnerBlock({id: 'b1', groups: gps, latinSquare: true}, {version: 0, containerIDs: []});
+    var ids = _.pluck(b1.contents, 'id');
+    ids.sort();
+    ok(_.isEqual(ids, ['1a', '2b']), 'Latin Square should work on version 0.');
+    var b2 = new InnerBlock({id: 'b2', groups: gps, latinSquare: true}, {version: 1, containerIDs: []});
+    var ids2 = _.pluck(b2.contents, 'id');
+    ids2.sort();
+    ok(_.isEqual(ids2, ['1b', '2a']), 'Latin Square should work on version 1.');
+
+    var jb3 = {
+            "latinSquare": true, 
+            "groups": [
+                [
+                    {
+                        "text": "1A", 
+                        "id": "15"
+                    }, 
+                    {
+                        "text": "1B", 
+                        "id": "16"
+                    }
+                ], 
+                [
+                    {
+                        "text": "2A", 
+                        "id": "17"
+                    }, 
+                    {
+                        "text": "2B", 
+                        "id": "18"
+                    }
+                ]
+            ], 
+            "id": "19"
+        };
+    var b3 = new InnerBlock(jb3, {version: 0, containerIDs: []});
+    ok(_.isEqual(_.pluck(b3.contents, 'text'), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
+});
+
 test("ordering pages", function(){
     // groups with three conditions each, in the same order
     var grps = _.map(_.range(6), function(i){
@@ -384,6 +425,7 @@ var jsons = {blocks:[
 ] };
 
 test('create outerblock', function(){
+    setupForm();
     var jsonb = {id:'b1', blocks:[
             { id:'b3', pages: pgs2 },
             { id:'b4', pages: pgs3 }
@@ -403,6 +445,21 @@ test('create outerblock', function(){
     jsonb2.runIf = {'pageID': 'p1', 'optionID': 'o1'};
     var b3 = new OuterBlock(jsonb2, fakeContainer);
     strictEqual(b3.runIf.optionID, 'o1', 'runIf should be set when passed in');
+
+    b.advance(new ExperimentRecord());
+    //p3
+    clickNext();
+    clickNext();
+    //p4
+    clickNext();
+    clickNext();
+    //p5
+    clickNext();
+    clickNext();
+    //p6
+    clickNext();
+    throws(clickNext, CustomError, "should call container's advance");
+    cleanUp();
 });
 
 
