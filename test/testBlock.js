@@ -149,7 +149,7 @@ test("test latin square", function(){
             "id": "19"
         };
     var b3 = new InnerBlock(jb3, {version: 0, containerIDs: []});
-    ok(_.isEqual(_.pluck(b3.contents, 'text'), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
+    ok(_.isEqual(_.pluck(b3.contents, 'text').sort(), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
 });
 
 test("ordering pages", function(){
