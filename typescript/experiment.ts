@@ -25,13 +25,13 @@ class Experiment implements Container{
 
     constructor(jsonExperiment, version, permutation, psiturk){
         jsonExperiment = _.defaults(jsonExperiment, {exchangeable: [], counterbalance: [], banks: {}});
-        this.version = version;
-        this.permutation = permutation;
+        this.version = parseInt(version);
+        this.permutation = parseInt(permutation);
         this.exchangeable = jsonExperiment.exchangeable;
         this.counterbalance = jsonExperiment.counterbalance;
         this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
-        this.experimentRecord = new ExperimentRecord(psiturk);
+        this.experimentRecord = new ExperimentRecord(psiturk, this.permutation);
         this.banks = shuffleBanks(jsonExperiment.banks);
     }
 

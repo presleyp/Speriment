@@ -52,14 +52,14 @@ test("create inner block", function(){
             ok(p instanceof Question, "should be a Question");
         }
     });
-    strictEqual(b.runIf, null, "runIf default not working properly");
+    strictEqual(b.runIf.shouldRun({}), true, "runIf defaults to returning true");
     var er = new ExperimentRecord();
-    strictEqual(b.shouldRun(er), true, "shouldRun not defaulting to true");
+    strictEqual(b.runIf.shouldRun(er), true, "shouldRun not defaulting to true");
     jsonb.runIf = {"pageID": "p2", "optionID": "o3"};
     var b2 = new InnerBlock(jsonb, fakeContainer);
     strictEqual(b2.runIf.optionID, "o3", "runIf not set properly");
     er.addRecord("p2", {'blockID': 'b1', 'startTime': 0, 'endTime': 0, 'selected': ['o1'], 'correct': 'o1'});
-    strictEqual(b2.shouldRun(er), false, "shouldRun not working");
+    strictEqual(b2.runIf.shouldRun(er), false, "shouldRun not working");
     var jsongroup = {id: "b1", groups:[[{text: "page1", id: "p1"}, {text:"page2", id:"p2", options: [{id: "o1"}]}]]};
     var b3 = new InnerBlock(jsongroup, {version: 0, containerIDs: []});
     strictEqual(b3.contents.length, 1, "initialization from groups");
@@ -109,6 +109,47 @@ test("choosing pages", function(){
     var condgroups4 = _.groupBy(b4.contents, "condition");
     ok(_.every(condgroups3, function(g){return g.length === 2;}), "check latin square");
     ok(_.every(condgroups4, function(g){return g.length === 2;}), "check latin square");
+});
+
+test("test latin square", function(){
+    var gps = [[{id: '1a', text: '1a'}, {id: '1b', text: '1b'}], [{id: '2a', text: '2a'}, {id: '2b', text: '2b'}]];
+    var b1 = new InnerBlock({id: 'b1', groups: gps, latinSquare: true}, {version: 0, containerIDs: []});
+    var ids = _.pluck(b1.contents, 'id');
+    ids.sort();
+    ok(_.isEqual(ids, ['1a', '2b']), 'Latin Square should work on version 0.');
+    var b2 = new InnerBlock({id: 'b2', groups: gps, latinSquare: true}, {version: 1, containerIDs: []});
+    var ids2 = _.pluck(b2.contents, 'id');
+    ids2.sort();
+    ok(_.isEqual(ids2, ['1b', '2a']), 'Latin Square should work on version 1.');
+
+    var jb3 = {
+            "latinSquare": true, 
+            "groups": [
+                [
+                    {
+                        "text": "1A", 
+                        "id": "15"
+                    }, 
+                    {
+                        "text": "1B", 
+                        "id": "16"
+                    }
+                ], 
+                [
+                    {
+                        "text": "2A", 
+                        "id": "17"
+                    }, 
+                    {
+                        "text": "2B", 
+                        "id": "18"
+                    }
+                ]
+            ], 
+            "id": "19"
+        };
+    var b3 = new InnerBlock(jb3, {version: 0, containerIDs: []});
+    ok(_.isEqual(_.pluck(b3.contents, 'text').sort(), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
 });
 
 test("ordering pages", function(){
@@ -384,6 +425,7 @@ var jsons = {blocks:[
 ] };
 
 test('create outerblock', function(){
+    setupForm();
     var jsonb = {id:'b1', blocks:[
             { id:'b3', pages: pgs2 },
             { id:'b4', pages: pgs3 }
@@ -391,7 +433,7 @@ test('create outerblock', function(){
     var b = new OuterBlock(jsonb, fakeContainer);
     strictEqual(b.id, 'b1', 'block id should be set');
     strictEqual(b.exchangeable.length, 0, 'exchangeable default should be set');
-    strictEqual(b.runIf, null, 'runIf default should be set');
+    strictEqual(b.runIf.shouldRun(), true, 'runIf default should be set');
     strictEqual(b.contents.length, 2, 'contents should be set');
     ok(b.contents[0] instanceof InnerBlock, 'contents should be InnerBlock');
 
@@ -400,9 +442,24 @@ test('create outerblock', function(){
     var b2 = new OuterBlock(jsonb2, fakeContainer);
     deepEqual(b2.exchangeable, ['b3', 'b4'], 'exchangeable should be set when passed in');
 
-    jsonb2.runIf = 'o1';
+    jsonb2.runIf = {'pageID': 'p1', 'optionID': 'o1'};
     var b3 = new OuterBlock(jsonb2, fakeContainer);
-    strictEqual(b3.runIf, 'o1', 'runIf should be set when passed in');
+    strictEqual(b3.runIf.optionID, 'o1', 'runIf should be set when passed in');
+
+    b.advance(new ExperimentRecord());
+    //p3
+    clickNext();
+    clickNext();
+    //p4
+    clickNext();
+    clickNext();
+    //p5
+    clickNext();
+    clickNext();
+    //p6
+    clickNext();
+    throws(clickNext, CustomError, "should call container's advance");
+    cleanUp();
 });
 
 
@@ -571,7 +628,7 @@ test('run blocks conditionally: when text has been entered', function(){
     $('#o1').val('hello');
     clickNext();
     // b2 should run
-    ok(runBoth.experimentRecord.responseGiven({'pageID': 'p1', 'regex': 'hello'}), 'record should note that a matching response was given');
+    ok(runBoth.experimentRecord.textMatch('p1', 'hello'), 'record should note that a matching response was given');
     strictEqual($('p.question').text(), 'page2', 'block 2 runs because hello was given as text answer');
 
     cleanUp();
@@ -584,9 +641,24 @@ test('run blocks conditionally: when condition is unsatisfied', function(){
     var runOne = new Experiment({blocks: [b2, b1]}, 0);
     runOne.start();
 
-    clickNext(); //breakoff notice
+    clickNext();
     ok(_.contains(['page1', 'page2'], $('p.question').text()), 'b1 should run, skipping b2 because o1 has not been chosen');
 
+    cleanUp();
+});
+
+test('run blocks conditionally: based on permutation', function(){
+    var b1 = {id: 'b1', pages: pgs, runIf: {permutation: 0}};
+    var b2 = {id: 'b2', pages: pgs2};
+
+    var runOne = new Experiment({blocks: [b1, b2]}, 0, 1);
+    runOne.start();
+    ok(_.contains(['page3', 'page4'], $('p.question').text()), "b2 should run because b1's runIf is not satisfied");
+    cleanUp();
+
+    var runBoth = new Experiment({blocks: [b1, b2]}, 0, 0);
+    runBoth.start();
+    ok(_.contains(['page1', 'page2'], $('p.question').text()), 'b1 should run because its runIf is satisfied');
     cleanUp();
 });
 

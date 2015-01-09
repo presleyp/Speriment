@@ -38,10 +38,12 @@ class TrialRecord {
 class ExperimentRecord {
     private trialRecords; // {pageID: TrialRecord[]}
     private psiturk;
+    private permutation;
 
-    constructor(psiturk){
+    constructor(psiturk, permutation){
         this.psiturk = psiturk;
         this.trialRecords = {};
+        this.permutation = permutation;
     }
 
     public addRecord(trialRecord: TrialRecord){
@@ -54,21 +56,54 @@ class ExperimentRecord {
         }
     }
 
-    public responseGiven(runIf){
-        if (_.has(this.trialRecords, runIf.pageID)) {
-            var pageResponses: TrialRecord[] = this.trialRecords[runIf.pageID];
-            var response: TrialRecord = _.last(pageResponses);
-            if (runIf.optionID){
-                return _.contains(response.selectedID, runIf.optionID);
-            } else if (runIf.regex && response.selectedID.length === 1){
-                return response.selectedText[0].search(runIf.regex) >= 0;
-            } else {
-                throw "runIf does not contain optionID or regex.";
-            }
+    getPermutation(){
+        return this.permutation;
+    }
+
+    private getLatestPageInfo(pageID: string): TrialRecord {
+        if (_.has(this.trialRecords, pageID)) {
+            var pageResponses: TrialRecord[] = this.trialRecords[pageID];
+            return _.last(pageResponses);
+        } else {
+            return null;
+        }
+    }
+
+    responseGiven(pageID: string, optionID: string): boolean {
+        var pageInfo = this.getLatestPageInfo(pageID);
+        if (pageInfo) {
+            return _.contains(pageInfo.selectedID, optionID);
         } else {
             return false;
         }
     }
+
+    textMatch(pageID: string, regex: string): boolean {
+        var pageInfo = this.getLatestPageInfo(pageID);
+        if (pageInfo && pageInfo.selectedID.length === 1) {
+            return pageInfo.selectedText[0].search(regex) >= 0;
+        } else {
+            return false;
+        }
+    }
+
+    // public responseGiven(runIf){
+    //     if (_.has(this.trialRecords, runIf.pageID)) {
+    //         var pageResponses: TrialRecord[] = this.trialRecords[runIf.pageID];
+    //         var response: TrialRecord = _.last(pageResponses);
+    //         if (runIf.optionID){
+    //             return _.contains(response.selectedID, runIf.optionID);
+    //         } else if (runIf.regex && response.selectedID.length === 1){
+    //             return response.selectedText[0].search(runIf.regex) >= 0;
+    //         } else if (runIf.counterbalance){
+    //             return runIf.counterbalance === this.permutation;
+    //         } else {
+    //             throw "runIf does not contain optionID or regex.";
+    //         }
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
     public getBlockGrades(blockID: string): boolean[] {
         // get the last iteration of each page

@@ -50,17 +50,29 @@ class ExperimentEncoder(json.JSONEncoder):
         else:
             return dictionary
 
+    def compile_treatments(self, obj):
+        '''Treatments are lists of lists of blocks to run conditionally. Remove
+        this variable and add RunIf objects to those blocks.'''
+        for i, treatment in enumerate(obj.treatments):
+            for block in treatment:
+                block.run_if = RunIf(permutation = i)
+        del obj.treatments
+        return obj
+
     def default(self, obj):
         if isinstance(obj, Component):
+            if hasattr(obj, 'treatments'):
+                obj = self.compile_treatments(obj)
             obj.validate()
-            dict_copy = copy.deepcopy(obj.__dict__)
             # make keys follow JS conventions
             renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
             renamed_ri = self.rename_key(renamed_ls, 'run_if', 'runIf')
-            renamed_id = self.rename_key(renamed_ls, 'id_str', 'id')
+            renamed_id = self.rename_key(renamed_ri, 'id_str', 'id')
             return renamed_id
         if isinstance(obj, RunIf):
-            return obj.__dict__
+            renamed_option = self.rename_key(obj.__dict__, 'option_id', 'optionID')
+            renamed_page = self.rename_key(renamed_option, 'page_id', 'pageID')
+            return renamed_page
         if isinstance(obj, SampleFrom):
             return {"sampleFrom": obj.bank}
         # Let the base class default method raise the TypeError
@@ -122,7 +134,8 @@ class ExperimentMaker():
 ### Special kind of experimental components (not in the hierarchy)
 
 class RunIf:
-    def __init__(self, page, option = None, regex = None):
+    def __init__(self, page = None, option = None, regex = None, permutation =
+            None):
         '''
         page: Page, the Page to look at to see which answer was given.
 
@@ -133,16 +146,22 @@ class RunIf:
         only run if a response matching a regular expression made from the
         string regex was given the last time page was displayed.
 
-        Exactly one of option and regex must be given.
+        permutation: integer, optional. If given, the block containing this
+        RunIf will only run if PsiTurk gives the experiment a permutation
+        variable matching this integer. This requires editing the counterbalance
+        setting in config.txt.
 
         The reason RunIfs depend on "the last time" their page was displayed is
         that Pages can display multiple times if they are in Blocks with a
         criterion.'''
-        self.page_id = page.id_str
+        if page != None:
+            self.page_id = page.id_str
         if option != None:
             self.option_id = option.id_str
         elif regex != None:
             self.regex = regex
+        if permutation != None:
+            self.permutation = permutation
 
 class SampleFrom:
     def __init__(self, bank):
@@ -302,7 +321,7 @@ class Page(Component):
 
 class Block(Component):
     def __init__(self, pages = None, groups = None, blocks = None, id_str = None,
-            exchangeable = [], counterbalance = [], latin_square = None, pseudorandom = None, **kwargs):
+            exchangeable = [], counterbalance = [], treatments = [], latin_square = None, pseudorandom = None, **kwargs):
         '''
         Exactly one of pages, groups, and blocks must be provided.
 
@@ -400,12 +419,29 @@ class Block(Component):
 
         if pseudorandom:
             self.pseudorandom = pseudorandom
-            self.validate_pseudorandom()
+
+        # TODO what about mutated blocks
+        if treatments:
+            self.treatments = treatments
+            # for (i, treatment) in enumerate(treatments):
+            #     for block in treatment:
+            #         block.run_if = RunIf(permutation = i)
 
     def validate(self):
         self.validate_contents()
         self.validate_pseudorandom()
         self.validate_latin_square()
+        self.validate_counterbalancing()
+
+    def validate_counterbalancing(self):
+        if hasattr(self, 'counterbalance') and hasattr(self, 'treatments'):
+            print '''Warning: counterbalance and treatments depend on the same
+            variable, so using both in one experiment will cause
+            correlations between which blocks are used and how blocks are
+            ordered. If you want these to be decided independently, change
+            'counterbalance' to 'exchangeable' so the order will be decided
+            randomly for each participant.'''
+
 
     def validate_contents(self):
         content_types = [attribute for attribute in
@@ -415,25 +451,26 @@ class Block(Component):
             and blocks.'''
 
     def validate_pseudorandom(self):
-        if hasattr(self, 'groups'):
-            if self.latin_square == False:
-                raise ValueError, '''Can't choose pages from groups randomly and
-                ensure that pseudorandomization will work. Supply pages instead of
-                groups, change latin_square to True, or change pseudorandom to
-                False.'''
-            try:
-                conditions = [page.condition for group in self.groups for page in
-                    group]
-            except AttributeError:
-                raise ValueError, '''Can't pseudorandomize pages without
-                conditions.'''
-            cond_counter = Counter(conditions)
-            cond_counts = cond_counter.values()
-            num_cond_counts = len(set(cond_counts))
-            if num_cond_counts != 1:
-                raise ValueError, '''Can't pseudorandomize pages if not all
-                conditions are represented the same number of times in the
-                block.'''
+        if hasattr(self, 'pseudorandom'):
+            if hasattr(self, 'groups'):
+                if self.latin_square == False:
+                    raise ValueError, '''Can't choose pages from groups randomly and
+                    ensure that pseudorandomization will work. Supply pages instead of
+                    groups, change latin_square to True, or change pseudorandom to
+                    False.'''
+                try:
+                    conditions = [page.condition for group in self.groups for page in
+                        group]
+                except AttributeError:
+                    raise ValueError, '''In block {0}, can't pseudorandomize pages without
+                    conditions.'''.format(self.id_str)
+                cond_counter = Counter(conditions)
+                cond_counts = cond_counter.values()
+                num_cond_counts = len(set(cond_counts))
+                if num_cond_counts != 1:
+                    raise ValueError, '''Can't pseudorandomize pages if not all
+                    conditions are represented the same number of times in the
+                    block.'''
         #TODO elif hasattr('pages')
 
     def validate_latin_square(self):
@@ -465,7 +502,8 @@ class Experiment(Component):
         self.blocks = [b for b in blocks]
         if exchangeable:
             self.exchangeable = [b.id_str for b in exchangeable]
-        self.counterbalance = [b.id_str for b in counterbalance]
+        if counterbalance:
+            self.counterbalance = [b.id_str for b in counterbalance]
         if banks:
             self.banks = banks
 
