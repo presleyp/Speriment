@@ -64,14 +64,15 @@ class ExperimentEncoder(json.JSONEncoder):
             if hasattr(obj, 'treatments'):
                 obj = self.compile_treatments(obj)
             obj.validate()
-            dict_copy = copy.deepcopy(obj.__dict__)
             # make keys follow JS conventions
             renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
             renamed_ri = self.rename_key(renamed_ls, 'run_if', 'runIf')
             renamed_id = self.rename_key(renamed_ri, 'id_str', 'id')
             return renamed_id
         if isinstance(obj, RunIf):
-            return obj.__dict__
+            renamed_option = self.rename_key(obj.__dict__, 'option_id', 'optionID')
+            renamed_page = self.rename_key(renamed_option, 'page_id', 'pageID')
+            return renamed_page
         if isinstance(obj, SampleFrom):
             return {"sampleFrom": obj.bank}
         # Let the base class default method raise the TypeError
@@ -418,7 +419,6 @@ class Block(Component):
 
         if pseudorandom:
             self.pseudorandom = pseudorandom
-            self.validate_pseudorandom()
 
         # TODO what about mutated blocks
         if treatments:
@@ -451,25 +451,26 @@ class Block(Component):
             and blocks.'''
 
     def validate_pseudorandom(self):
-        if hasattr(self, 'groups'):
-            if self.latin_square == False:
-                raise ValueError, '''Can't choose pages from groups randomly and
-                ensure that pseudorandomization will work. Supply pages instead of
-                groups, change latin_square to True, or change pseudorandom to
-                False.'''
-            try:
-                conditions = [page.condition for group in self.groups for page in
-                    group]
-            except AttributeError:
-                raise ValueError, '''Can't pseudorandomize pages without
-                conditions.'''
-            cond_counter = Counter(conditions)
-            cond_counts = cond_counter.values()
-            num_cond_counts = len(set(cond_counts))
-            if num_cond_counts != 1:
-                raise ValueError, '''Can't pseudorandomize pages if not all
-                conditions are represented the same number of times in the
-                block.'''
+        if hasattr(self, 'pseudorandom'):
+            if hasattr(self, 'groups'):
+                if self.latin_square == False:
+                    raise ValueError, '''Can't choose pages from groups randomly and
+                    ensure that pseudorandomization will work. Supply pages instead of
+                    groups, change latin_square to True, or change pseudorandom to
+                    False.'''
+                try:
+                    conditions = [page.condition for group in self.groups for page in
+                        group]
+                except AttributeError:
+                    raise ValueError, '''In block {0}, can't pseudorandomize pages without
+                    conditions.'''.format(self.id_str)
+                cond_counter = Counter(conditions)
+                cond_counts = cond_counter.values()
+                num_cond_counts = len(set(cond_counts))
+                if num_cond_counts != 1:
+                    raise ValueError, '''Can't pseudorandomize pages if not all
+                    conditions are represented the same number of times in the
+                    block.'''
         #TODO elif hasattr('pages')
 
     def validate_latin_square(self):
