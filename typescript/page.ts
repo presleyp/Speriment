@@ -6,6 +6,7 @@
 
 class Page{
     public static dropdownThreshold: number = 7;
+    public static SPACEKEY = 32;
     public text: string;
     public id: string;
     public condition: string;
@@ -19,7 +20,7 @@ class Page{
         this.text = setOrSample(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
         this.resources = _.map(jsonPage.resources, (r: string):string => {return this.makeResource(r, this.block)});
-        this.tags = jsonPage.tags; //TODO can be sampled?
+        this.tags = jsonPage.tags;
         this.record = new TrialRecord(this.id, this.text, this.condition, this.block.containerIDs, this.tags);
     }
 
@@ -50,30 +51,47 @@ class Page{
 
     public display(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
+        $(document).off('keyup').keyup((k:KeyboardEvent) => {
+            if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
+                this.advance(experimentRecord);
+            }
+        });
         this.disableNext();
         $(OPTIONS).empty();
         $(PAGE).empty().append(this.text, this.resources);
+        $(CONTINUE).show();
     }
 
 }
 
 class Question extends Page{
+    private static LEFTKEY = 70;
+    private static RIGHTKEY = 74;
     private ordered: boolean;
     private exclusive: boolean;
     private freetext: boolean;
+    private keyboard: number[];
     private options: ResponseOption[];
     private feedback: Statement;
 
     constructor(jsonQuestion, block){
         super(jsonQuestion, block);
-        var jQuestion = _.defaults(jsonQuestion, {ordered: false, exclusive: true, freetext: false});
+        var jQuestion = _.defaults(jsonQuestion, {ordered: false, exclusive: true, freetext: false, keyboard: null});
         this.ordered = jQuestion.ordered;
         this.exclusive = jQuestion.exclusive;
         this.freetext = jQuestion.freetext;
+        if (jQuestion.keyboard){
+            if (_.isBoolean(jQuestion.keyboard)){ // true -> default mappings
+                jQuestion.keyboard = [Question.LEFTKEY, Question.RIGHTKEY];
+            } else if (jQuestion.keyboard.length !== jQuestion.options.length){ // TODO python validation
+                jQuestion.keyboard = null;
+            }
+        }
+        this.keyboard = jQuestion.keyboard;
         if (!_.isUndefined(jQuestion.feedback)){ //TODO will probably want to use resources in feedback
             this.feedback = new Statement({text: setOrSample(jQuestion.feedback, block), id: this.id + "_feedback"}, block);
         }
-        this.options = _.map(jQuestion.options, (o):ResponseOption => { // TODO setOrSample text and resources
+        this.options = _.map(jQuestion.options, (o):ResponseOption => {
             if (jQuestion.options.length > Page.dropdownThreshold){
                 return new DropDownOption(o, this, this.exclusive);
             } else if (this.freetext){
@@ -90,6 +108,10 @@ class Question extends Page{
         super.display(experimentRecord);
         this.orderOptions();
         _.each(this.options, (o:ResponseOption):void => {o.display()});
+        if (this.keyboard){
+            $(CONTINUE).hide();
+            _.each(this.options, (o, i) => {o.useKey(this.keyboard[i])});
+        }
         this.record.startTime = new Date().getTime();
     }
 
@@ -111,7 +133,7 @@ class Question extends Page{
         }
     }
 
-    public recordResponses(selected: ResponseOption[]){
+    private recordResponses(selected: ResponseOption[]){
         // ids of selections and value of text
         var responses: string[][] = _.map(selected, (s) => {return s.getResponse()});
         var response_parts = _.zip.apply(_, responses);
@@ -121,11 +143,11 @@ class Question extends Page{
         this.record.optionTags = _.zip.apply(_, _.pluck(selected, 'tags'));
     }
 
-    public recordCorrect(selected: ResponseOption[]){
+    private recordCorrect(selected: ResponseOption[]){
         this.record.correct = _.map(selected, (s) => {return s.isCorrect()});
     }
 
-    public orderOptions(): void{
+    private orderOptions(): void{
         if (this.ordered){
             if (Math.random() > 0.5){
                 this.options = this.options.reverse();
@@ -136,7 +158,7 @@ class Question extends Page{
         this.recordOptionOrder();
     }
 
-    public recordOptionOrder(){
+    private recordOptionOrder(){
         this.record.optionOrder = _.pluck(this.options, 'id');
     }
 

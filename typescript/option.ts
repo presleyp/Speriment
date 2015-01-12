@@ -52,6 +52,16 @@ class ResponseOption{
         return this.correct;
     }
 
+    public useKey(key: number){
+        var elem = '#' + this.id;
+        $(elem).prop('disabled', 'true');
+        $(document).keyup((k: KeyboardEvent) => {
+            if (k.which === key){
+                $(elem).prop('checked', 'true');
+                this.onChange();
+            }
+        });
+    }
 }
 
 class RadioOption extends ResponseOption{
@@ -99,8 +109,11 @@ class TextOption extends ResponseOption{
     display(){
         var input = document.createElement("input");
         $(input).attr({type: "text", id: this.id, name: this.question.id});
-        $(input).keyup((m:MouseEvent) => {this.onChange();});
-
+        $(input).keyup((k:KeyboardEvent) => {
+            // space shouldn't trigger clicking next
+            k.stopPropagation();
+            this.onChange();
+        });
         $(OPTIONS).append(input);
     }
 
