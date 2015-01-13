@@ -51,7 +51,7 @@ class Page{
 
     public display(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
-        $(document).off('keyup').keyup((k:KeyboardEvent) => {
+        $(document).off('keyup').keypress((k:KeyboardEvent) => {
             if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
                 this.advance(experimentRecord);
             }
@@ -65,12 +65,12 @@ class Page{
 }
 
 class Question extends Page{
-    private static LEFTKEY = 70;
-    private static RIGHTKEY = 74;
+    private static LEFTKEY = 'f';
+    private static RIGHTKEY = 'j';
     private ordered: boolean;
     private exclusive: boolean;
     private freetext: boolean;
-    private keyboard: number[];
+    private keyboard: string[];
     private options: ResponseOption[];
     private feedback: Statement;
 
@@ -109,8 +109,7 @@ class Question extends Page{
         this.orderOptions();
         _.each(this.options, (o:ResponseOption):void => {o.display()});
         if (this.keyboard){
-            $(CONTINUE).hide();
-            _.each(this.options, (o, i) => {o.useKey(this.keyboard[i])});
+            _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
         }
         this.record.startTime = new Date().getTime();
     }

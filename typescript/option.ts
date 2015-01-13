@@ -53,15 +53,17 @@ class ResponseOption{
     }
 
     public useKey(key: number){
+        $(CONTINUE).hide();
         var elem = '#' + this.id;
         $(elem).prop('disabled', 'true');
-        $(document).keyup((k: KeyboardEvent) => {
+        $(document).keypress((k: KeyboardEvent) => {
             if (k.which === key){
-                $(elem).prop('checked', 'true');
+                $(elem).prop('checked', (i, val) => {return !val});
                 this.onChange();
             }
         });
     }
+
 }
 
 class RadioOption extends ResponseOption{
@@ -115,6 +117,7 @@ class TextOption extends ResponseOption{
             this.onChange();
         });
         $(OPTIONS).append(input);
+        $(input).focus();
     }
 
     public getResponse(){
@@ -140,6 +143,8 @@ class TextOption extends ResponseOption{
             return null;
         }
     }
+
+    useKey(key: number): void {} // nonsensical for text
 
 }
 
