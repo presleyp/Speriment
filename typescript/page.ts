@@ -51,9 +51,10 @@ class Page{
 
     public display(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
-        $(document).off('keyup').keypress((k:KeyboardEvent) => {
+        $(document).off('keypress').keypress((k:KeyboardEvent) => {
             if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
                 this.advance(experimentRecord);
+                k.preventDefault();
             }
         });
         this.disableNext();

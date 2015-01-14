@@ -111,26 +111,21 @@ class TextOption extends ResponseOption{
     display(){
         var input = document.createElement("input");
         $(input).attr({type: "text", id: this.id, name: this.question.id});
-        $(input).keyup((k:KeyboardEvent) => {
+        $(OPTIONS).append(input);
+        $(input).keypress((k:KeyboardEvent) => {
             // space shouldn't trigger clicking next
             k.stopPropagation();
-            this.onChange();
+            // this.onChange();
         });
-        $(OPTIONS).append(input);
         $(input).focus();
+        this.question.enableNext(); // currently text options don't require answers
     }
 
     public getResponse(){
         return [this.id, $("#"+this.id).val()];
     }
 
-    public onChange(){
-        if (this.getResponse()){
-            this.question.enableNext();
-        } else {
-            this.question.disableNext();
-        }
-    }
+    public onChange(){} // currently text options don't require answers
 
     public selected(){
         return this.getResponse()[1].length > 0;
@@ -170,6 +165,18 @@ class DropDownOption extends ResponseOption{
         $(option).attr("id", this.id);
         $(option).append(this.text);
         $(OPTIONS+" select").append(option);
+    }
+
+    useKey(key: number){
+        $(CONTINUE).hide();
+        var elem = '#' + this.id;
+        $(elem).prop('disabled', 'true');
+        $(document).keypress((k: KeyboardEvent) => {
+            if (k.which === key){
+                $(elem).prop('selected', (i, val) => {return !val});
+                this.onChange();
+            }
+        });
     }
 
 }
