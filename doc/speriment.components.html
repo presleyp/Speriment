@@ -1,0 +1,347 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module speriment.components</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="speriment.html"><font color="#ffffff">speriment</font></a>.components</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/presley/Speriment/speriment/components.py">/Users/presley/Speriment/speriment/components.py</a></font></td></tr></table>
+    <p><tt>These&nbsp;are&nbsp;the&nbsp;constructors&nbsp;for&nbsp;all&nbsp;objects&nbsp;that&nbsp;make&nbsp;up&nbsp;experiments.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="copy.html">copy</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="jsonschema.html">jsonschema</a><br>
+</td><td width="25%" valign=top><a href="pkg_resources.html">pkg_resources</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="speriment.components.html#Component">Component</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="speriment.components.html#Block">Block</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.components.html#Experiment">Experiment</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.components.html#Option">Option</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.components.html#Page">Page</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="speriment.components.html#RunIf">RunIf</a>
+</font></dt><dt><font face="helvetica, arial"><a href="speriment.components.html#SampleFrom">SampleFrom</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Block">class <strong>Block</strong></a>(<a href="speriment.components.html#Component">Component</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Block-__init__"><strong>__init__</strong></a>(self, pages<font color="#909090">=None</font>, groups<font color="#909090">=None</font>, blocks<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, exchangeable<font color="#909090">=[]</font>, counterbalance<font color="#909090">=[]</font>, treatments<font color="#909090">=[]</font>, latin_square<font color="#909090">=None</font>, pseudorandom<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>Exactly&nbsp;one&nbsp;of&nbsp;pages,&nbsp;groups,&nbsp;and&nbsp;blocks&nbsp;must&nbsp;be&nbsp;provided.<br>
+&nbsp;<br>
+pages:&nbsp;[<a href="#Page">Page</a>],&nbsp;the&nbsp;pages&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a>.<br>
+&nbsp;<br>
+groups:&nbsp;[[<a href="#Page">Page</a>]],&nbsp;the&nbsp;groups&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a>.&nbsp;One&nbsp;page&nbsp;from&nbsp;each<br>
+inner&nbsp;list&nbsp;of&nbsp;Pages&nbsp;will&nbsp;be&nbsp;displayed&nbsp;per&nbsp;participant.<br>
+&nbsp;<br>
+blocks:&nbsp;[<a href="#Block">Block</a>],&nbsp;the&nbsp;blocks&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a>.<br>
+&nbsp;<br>
+id_str:&nbsp;String,&nbsp;optional,&nbsp;identifier&nbsp;unique&nbsp;among&nbsp;the&nbsp;Blocks&nbsp;in&nbsp;this<br>
+experiment.<br>
+&nbsp;<br>
+exchangeable:&nbsp;[<a href="#Block">Block</a>],&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[<a href="#Block">Block</a>].&nbsp;A&nbsp;subset&nbsp;of<br>
+contents.&nbsp;The&nbsp;Blocks&nbsp;in&nbsp;this&nbsp;list&nbsp;are&nbsp;allowed&nbsp;to&nbsp;switch&nbsp;places&nbsp;with&nbsp;each<br>
+other.&nbsp;Blocks&nbsp;which&nbsp;are&nbsp;not&nbsp;exchangeable&nbsp;run&nbsp;only&nbsp;in&nbsp;the&nbsp;order&nbsp;in&nbsp;which<br>
+they&nbsp;were&nbsp;given.&nbsp;Exchangeable&nbsp;blocks&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;counterbalancing<br>
+designs.&nbsp;For&nbsp;example,&nbsp;if&nbsp;there&nbsp;are&nbsp;three&nbsp;blocks,&nbsp;A,&nbsp;B,&nbsp;and&nbsp;C,&nbsp;and&nbsp;A&nbsp;and<br>
+C&nbsp;are&nbsp;exchangeable,&nbsp;they&nbsp;can&nbsp;run&nbsp;in&nbsp;the&nbsp;order&nbsp;A,&nbsp;B,&nbsp;C&nbsp;or&nbsp;C,&nbsp;B,&nbsp;A.<br>
+&nbsp;<br>
+counterbalance:&nbsp;[<a href="#Block">Block</a>],&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[<a href="#Block">Block</a>].&nbsp;Works&nbsp;like<br>
+exchangeable&nbsp;except&nbsp;exchangeable&nbsp;blocks&nbsp;are&nbsp;permuted&nbsp;randomly&nbsp;and<br>
+counterbalance&nbsp;blocks&nbsp;are&nbsp;permuted&nbsp;deterministically,&nbsp;so&nbsp;that<br>
+approximately&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;participants&nbsp;will&nbsp;see&nbsp;each&nbsp;permutation.<br>
+There&nbsp;should&nbsp;be&nbsp;no&nbsp;overlap&nbsp;between&nbsp;the&nbsp;blocks&nbsp;in&nbsp;exchangeable&nbsp;and&nbsp;the<br>
+blocks&nbsp;in&nbsp;counterbalance.<br>
+&nbsp;<br>
+latin_square:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[<a href="#Page">Page</a>]],&nbsp;that&nbsp;is,<br>
+groups&nbsp;of&nbsp;Pages.&nbsp;If&nbsp;True,&nbsp;Pages&nbsp;are&nbsp;chosen&nbsp;from&nbsp;groups&nbsp;according&nbsp;to&nbsp;a<br>
+Latin&nbsp;Square.&nbsp;This&nbsp;process&nbsp;requires&nbsp;that&nbsp;all&nbsp;groups&nbsp;in&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;have<br>
+equal&nbsp;length.&nbsp;Additionally,&nbsp;the&nbsp;number&nbsp;of&nbsp;groups&nbsp;in&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;should&nbsp;be<br>
+a&nbsp;multiple&nbsp;of&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;in&nbsp;a&nbsp;group,&nbsp;and&nbsp;the&nbsp;Pages&nbsp;in&nbsp;each<br>
+group&nbsp;should&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;order&nbsp;in&nbsp;terms&nbsp;of&nbsp;their&nbsp;experimental<br>
+condition.&nbsp;The&nbsp;condition&nbsp;attribute&nbsp;of&nbsp;Pages&nbsp;is&nbsp;not&nbsp;used&nbsp;to&nbsp;check&nbsp;the<br>
+order.<br>
+&nbsp;<br>
+pseudorandom:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;or&nbsp;[Pages],&nbsp;<br>
+all&nbsp;Pages&nbsp;have&nbsp;a&nbsp;condition&nbsp;attribute&nbsp;specified,&nbsp;and&nbsp;there&nbsp;will&nbsp;be&nbsp;an&nbsp;equal<br>
+number&nbsp;of&nbsp;each&nbsp;Pages&nbsp;of&nbsp;each&nbsp;condition&nbsp;displayed&nbsp;(therefore&nbsp;it&nbsp;is&nbsp;not<br>
+valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;and&nbsp;latin_square&nbsp;is&nbsp;False,&nbsp;because&nbsp;there's<br>
+no&nbsp;guarantee&nbsp;about&nbsp;how&nbsp;many&nbsp;Pages&nbsp;of&nbsp;each&nbsp;condition&nbsp;will&nbsp;display).&nbsp;If&nbsp;True,<br>
+no&nbsp;two&nbsp;Pages&nbsp;with&nbsp;the&nbsp;same&nbsp;condition&nbsp;will&nbsp;display&nbsp;in&nbsp;a&nbsp;row.<br>
+&nbsp;<br>
+**kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
+&nbsp;<br>
+criterion:&nbsp;integer&nbsp;or&nbsp;float&nbsp;between&nbsp;0&nbsp;and&nbsp;1.&nbsp;If&nbsp;integer,&nbsp;it&nbsp;must&nbsp;be<br>
+less&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a><br>
+(currently&nbsp;it&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;on&nbsp;Blocks&nbsp;where&nbsp;contents&nbsp;is&nbsp;[<a href="#Page">Page</a>]&nbsp;or<br>
+[[<a href="#Page">Page</a>]],&nbsp;but&nbsp;eventually&nbsp;it&nbsp;will&nbsp;be&nbsp;usable&nbsp;with&nbsp;[<a href="#Block">Block</a>],&nbsp;and&nbsp;this<br>
+restriction&nbsp;will&nbsp;apply&nbsp;to&nbsp;the&nbsp;Pages&nbsp;that&nbsp;are&nbsp;ultimately&nbsp;contained&nbsp;by&nbsp;the<br>
+<a href="#Block">Block</a>)&nbsp;that&nbsp;have&nbsp;a&nbsp;specification&nbsp;for&nbsp;the&nbsp;correct&nbsp;attribute,&nbsp;or&nbsp;have<br>
+Options&nbsp;that&nbsp;do.&nbsp;The&nbsp;integer&nbsp;then&nbsp;represents&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;that<br>
+can&nbsp;be&nbsp;correct&nbsp;and&nbsp;were&nbsp;correct&nbsp;in&nbsp;a&nbsp;row&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>.&nbsp;The<br>
+idea&nbsp;is&nbsp;that&nbsp;participants&nbsp;may&nbsp;make&nbsp;mistakes&nbsp;at&nbsp;the&nbsp;beginning,&nbsp;but&nbsp;by&nbsp;the<br>
+end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;should&nbsp;give&nbsp;correct&nbsp;answers&nbsp;for&nbsp;this&nbsp;long&nbsp;of&nbsp;a&nbsp;streak<br>
+in&nbsp;order&nbsp;to&nbsp;show&nbsp;master.&nbsp;If&nbsp;it's&nbsp;a&nbsp;float,&nbsp;it&nbsp;represents&nbsp;a&nbsp;percentage&nbsp;of<br>
+Pages&nbsp;that&nbsp;can&nbsp;be&nbsp;correct&nbsp;that&nbsp;were&nbsp;correct&nbsp;out&nbsp;of&nbsp;the&nbsp;entire&nbsp;block,&nbsp;not<br>
+in&nbsp;a&nbsp;streak.&nbsp;Whether&nbsp;it's&nbsp;an&nbsp;integer&nbsp;or&nbsp;a&nbsp;float,&nbsp;this&nbsp;attribute&nbsp;signals<br>
+that&nbsp;a&nbsp;participant&nbsp;should&nbsp;see&nbsp;the&nbsp;(reshuffled)&nbsp;contents&nbsp;of&nbsp;this&nbsp;<a href="#Block">Block</a>&nbsp;as<br>
+many&nbsp;times&nbsp;as&nbsp;it&nbsp;takes&nbsp;to&nbsp;reach&nbsp;criterion&nbsp;before&nbsp;moving&nbsp;on&nbsp;to&nbsp;later<br>
+Blocks,&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;train&nbsp;participants&nbsp;before&nbsp;later&nbsp;testing&nbsp;them<br>
+on&nbsp;novel&nbsp;information.<br>
+&nbsp;<br>
+run_if:&nbsp;<a href="#RunIf">RunIf</a>,&nbsp;gives&nbsp;a&nbsp;condition&nbsp;that&nbsp;must&nbsp;be&nbsp;met&nbsp;in&nbsp;order&nbsp;for&nbsp;this&nbsp;<a href="#Block">Block</a><br>
+to&nbsp;display&nbsp;its&nbsp;contents,&nbsp;no&nbsp;matter&nbsp;the&nbsp;type&nbsp;of&nbsp;contents.&nbsp;See&nbsp;the&nbsp;<a href="#RunIf">RunIf</a><br>
+documentation&nbsp;for&nbsp;more&nbsp;information.<br>
+&nbsp;<br>
+banks:&nbsp;{string:&nbsp;[string]},&nbsp;a&nbsp;dictionary&nbsp;mapping&nbsp;bank&nbsp;names&nbsp;to&nbsp;banks,<br>
+where&nbsp;a&nbsp;bank&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;pieces&nbsp;of&nbsp;information.&nbsp;Within&nbsp;a&nbsp;bank,&nbsp;all<br>
+items&nbsp;should&nbsp;be&nbsp;for&nbsp;the&nbsp;same&nbsp;purpose.&nbsp;Bank&nbsp;information&nbsp;can&nbsp;be&nbsp;used&nbsp;for<br>
+page&nbsp;text,&nbsp;option&nbsp;text,&nbsp;page&nbsp;feedback,&nbsp;option&nbsp;feedback,&nbsp;resource<br>
+filenames,&nbsp;or&nbsp;page&nbsp;condition.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><a name="Block-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;IDGenerator&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Experiment">class <strong>Experiment</strong></a>(<a href="speriment.components.html#Component">Component</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>An&nbsp;<a href="#Experiment">Experiment</a>&nbsp;holds&nbsp;all&nbsp;the&nbsp;information&nbsp;describing&nbsp;one&nbsp;experiment.&nbsp;If&nbsp;you<br>
+don't&nbsp;make&nbsp;your&nbsp;own&nbsp;IDs&nbsp;(IDs&nbsp;should&nbsp;be&nbsp;unique&nbsp;among&nbsp;pages,&nbsp;among&nbsp;options,<br>
+and&nbsp;among&nbsp;blocks&nbsp;within&nbsp;one&nbsp;experiment),&nbsp;then&nbsp;use&nbsp;one&nbsp;IDGenerator&nbsp;per<br>
+experiment.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Experiment-__init__"><strong>__init__</strong></a>(self, blocks, exchangeable<font color="#909090">=[]</font>, counterbalance<font color="#909090">=[]</font>, banks<font color="#909090">={}</font>)</dt><dd><tt>blocks:&nbsp;[<a href="#Block">Block</a>],&nbsp;the&nbsp;contents&nbsp;of&nbsp;the&nbsp;experiment.<br>
+&nbsp;<br>
+exchangeable:&nbsp;[<a href="#Block">Block</a>],&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;Blocks.&nbsp;These&nbsp;Blocks&nbsp;will&nbsp;be<br>
+considered&nbsp;exchangeable.&nbsp;See&nbsp;<a href="#Block">Block</a>&nbsp;documentation&nbsp;for&nbsp;more&nbsp;information.<br>
+&nbsp;<br>
+counterbalance:&nbsp;[<a href="#Block">Block</a>],&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;Blocks.&nbsp;See&nbsp;<a href="#Block">Block</a>&nbsp;documentation<br>
+for&nbsp;more&nbsp;information.<br>
+&nbsp;<br>
+banks:&nbsp;{string:&nbsp;[string]},&nbsp;a&nbsp;dictionary&nbsp;mapping&nbsp;bank&nbsp;names&nbsp;to&nbsp;banks,<br>
+where&nbsp;a&nbsp;bank&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;pieces&nbsp;of&nbsp;information.&nbsp;Within&nbsp;a&nbsp;bank,&nbsp;all<br>
+items&nbsp;should&nbsp;be&nbsp;for&nbsp;the&nbsp;same&nbsp;purpose.&nbsp;Bank&nbsp;information&nbsp;can&nbsp;be&nbsp;used&nbsp;for<br>
+page&nbsp;text,&nbsp;option&nbsp;text,&nbsp;page&nbsp;feedback,&nbsp;option&nbsp;feedback,&nbsp;resource<br>
+filenames,&nbsp;or&nbsp;page&nbsp;condition.</tt></dd></dl>
+
+<dl><dt><a name="Experiment-install"><strong>install</strong></a>(self, experiment_name)</dt><dd><tt>validates&nbsp;the&nbsp;structure&nbsp;of&nbsp;the&nbsp;experiment,&nbsp;writes&nbsp;it&nbsp;as&nbsp;a&nbsp;JSON&nbsp;object<br>
+in&nbsp;a&nbsp;JavaScript&nbsp;file,&nbsp;and&nbsp;gives&nbsp;PsiTurk&nbsp;access&nbsp;to&nbsp;Speriment&nbsp;and&nbsp;the&nbsp;JSON<br>
+object.</tt></dd></dl>
+
+<dl><dt><a name="Experiment-to_JSON"><strong>to_JSON</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Experiment-to_file"><strong>to_file</strong></a>(self, filename, varname)</dt><dd><tt>validates&nbsp;the&nbsp;structure&nbsp;of&nbsp;the&nbsp;experiment&nbsp;and&nbsp;writes&nbsp;it&nbsp;as&nbsp;a&nbsp;JSON<br>
+object&nbsp;in&nbsp;a&nbsp;JavaScript&nbsp;file.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><a name="Experiment-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;IDGenerator&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Option">class <strong>Option</strong></a>(<a href="speriment.components.html#Component">Component</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Option-__init__"><strong>__init__</strong></a>(self, text<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is&nbsp;the&nbsp;label&nbsp;for&nbsp;the&nbsp;<a href="#Option">Option</a><br>
+that&nbsp;will&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is<br>
+not&nbsp;currently&nbsp;used.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+&nbsp;<br>
+id_str:&nbsp;String,&nbsp;optional,&nbsp;an&nbsp;identifier&nbsp;unique&nbsp;among&nbsp;all&nbsp;options&nbsp;in&nbsp;this<br>
+experiment.&nbsp;(Currently&nbsp;uniqueness&nbsp;in&nbsp;its&nbsp;page&nbsp;is&nbsp;sufficient&nbsp;but&nbsp;this&nbsp;may<br>
+change&nbsp;in&nbsp;the&nbsp;future.)<br>
+&nbsp;<br>
+**kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
+&nbsp;<br>
+feedback:&nbsp;string,&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed&nbsp;if&nbsp;this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;chosen.<br>
+Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+&nbsp;<br>
+correct:&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;a&nbsp;boolean&nbsp;representing&nbsp;whether<br>
+this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;correct.&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box,&nbsp;a&nbsp;string<br>
+representing&nbsp;a&nbsp;regular&nbsp;expression&nbsp;that&nbsp;any&nbsp;correct&nbsp;answers&nbsp;will&nbsp;match.<br>
+For&nbsp;example,&nbsp;correct&nbsp;=&nbsp;'hi.*'&nbsp;would&nbsp;mean&nbsp;that&nbsp;'hi'&nbsp;and&nbsp;'high'&nbsp;are&nbsp;both<br>
+correct&nbsp;inputs.<br>
+&nbsp;<br>
+tags:&nbsp;[string],&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to&nbsp;associate&nbsp;with&nbsp;this&nbsp;<a href="#Option">Option</a>.&nbsp;It<br>
+will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,&nbsp;but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the<br>
+data&nbsp;file.&nbsp;All&nbsp;options&nbsp;in&nbsp;the&nbsp;entire&nbsp;experiment&nbsp;must&nbsp;have&nbsp;the&nbsp;same<br>
+number&nbsp;of&nbsp;tags&nbsp;so&nbsp;that&nbsp;they&nbsp;will&nbsp;stay&nbsp;aligned&nbsp;in&nbsp;the&nbsp;output&nbsp;file.<br>
+&nbsp;<br>
+Note&nbsp;that&nbsp;the&nbsp;type&nbsp;of&nbsp;an&nbsp;<a href="#Option">Option</a>&nbsp;(radio&nbsp;button,&nbsp;check&nbsp;box,&nbsp;dropdown,&nbsp;or<br>
+text&nbsp;box)&nbsp;is&nbsp;determined&nbsp;based&nbsp;on&nbsp;its&nbsp;data&nbsp;and&nbsp;the&nbsp;attributes&nbsp;of&nbsp;its<br>
+containing&nbsp;<a href="#Page">Page</a>.&nbsp;It&nbsp;is&nbsp;not&nbsp;set&nbsp;directly&nbsp;in&nbsp;the&nbsp;<a href="#Option">Option</a>.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><a name="Option-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;IDGenerator&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Page">class <strong>Page</strong></a>(<a href="speriment.components.html#Component">Component</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Page-__init__"><strong>__init__</strong></a>(self, text, options<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;The&nbsp;text&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+&nbsp;<br>
+options:&nbsp;[<a href="#Option">Option</a>],&nbsp;optional,&nbsp;the&nbsp;answer&nbsp;choices&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the<br>
+page.<br>
+&nbsp;<br>
+id_str:&nbsp;String,&nbsp;optional,&nbsp;an&nbsp;identifier&nbsp;for&nbsp;this&nbsp;page&nbsp;unique&nbsp;among&nbsp;all<br>
+pages&nbsp;in&nbsp;the&nbsp;experiment.<br>
+&nbsp;<br>
+**kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
+&nbsp;<br>
+feedback:&nbsp;string,&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed&nbsp;after&nbsp;an&nbsp;answer&nbsp;is<br>
+chosen.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+&nbsp;<br>
+correct:&nbsp;If&nbsp;freetext&nbsp;is&nbsp;False,&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;id_str&nbsp;of&nbsp;the<br>
+correct&nbsp;<a href="#Option">Option</a>.&nbsp;If&nbsp;freetext&nbsp;is&nbsp;True,&nbsp;a&nbsp;string&nbsp;representing&nbsp;a&nbsp;regular<br>
+expression&nbsp;that&nbsp;a&nbsp;correct&nbsp;answer&nbsp;will&nbsp;match.<br>
+&nbsp;<br>
+tags:&nbsp;[string],&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to&nbsp;associate&nbsp;with&nbsp;this&nbsp;<a href="#Page">Page</a>.&nbsp;It<br>
+will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,&nbsp;but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the<br>
+data&nbsp;file.&nbsp;All&nbsp;pages&nbsp;in&nbsp;the&nbsp;entire&nbsp;experiment&nbsp;must&nbsp;have&nbsp;the&nbsp;same&nbsp;number<br>
+of&nbsp;tags&nbsp;so&nbsp;that&nbsp;they&nbsp;will&nbsp;stay&nbsp;aligned&nbsp;in&nbsp;the&nbsp;output&nbsp;file.<br>
+&nbsp;<br>
+condition:&nbsp;string,&nbsp;the&nbsp;condition&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;belongs&nbsp;to&nbsp;in&nbsp;the<br>
+experimental&nbsp;manipulation.&nbsp;Used&nbsp;if&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;is&nbsp;in&nbsp;a&nbsp;block&nbsp;where<br>
+pseudorandom&nbsp;is&nbsp;True,&nbsp;to&nbsp;keep&nbsp;Pages&nbsp;with&nbsp;the&nbsp;same&nbsp;condition&nbsp;from<br>
+appearing&nbsp;in&nbsp;a&nbsp;row.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+&nbsp;<br>
+resources:&nbsp;[string],&nbsp;filenames&nbsp;of&nbsp;any&nbsp;images,&nbsp;audio,&nbsp;or&nbsp;video&nbsp;that<br>
+should&nbsp;display&nbsp;on&nbsp;the&nbsp;page.&nbsp;Any&nbsp;resource&nbsp;can&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+&nbsp;<br>
+ordered:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;Options&nbsp;for&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;need&nbsp;to&nbsp;be&nbsp;kept&nbsp;in<br>
+the&nbsp;order&nbsp;in&nbsp;which&nbsp;they&nbsp;were&nbsp;given.&nbsp;If&nbsp;True,&nbsp;the&nbsp;Options&nbsp;may&nbsp;be&nbsp;reversed<br>
+but&nbsp;will&nbsp;not&nbsp;be&nbsp;shuffled.<br>
+&nbsp;<br>
+exclusive:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;participant&nbsp;can&nbsp;choose&nbsp;only&nbsp;one&nbsp;<a href="#Option">Option</a><br>
+as&nbsp;their&nbsp;response.<br>
+&nbsp;<br>
+freetext:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box&nbsp;rather&nbsp;than&nbsp;multiple<br>
+choice.<br>
+&nbsp;<br>
+keyboard:&nbsp;boolean&nbsp;or&nbsp;[character],&nbsp;representing&nbsp;how&nbsp;Options&nbsp;are&nbsp;to&nbsp;be<br>
+selected.&nbsp;If&nbsp;False,&nbsp;they&nbsp;are&nbsp;selected&nbsp;with&nbsp;the&nbsp;mouse.&nbsp;If&nbsp;True&nbsp;and&nbsp;there<br>
+are&nbsp;exactly&nbsp;two&nbsp;Options,&nbsp;the&nbsp;left&nbsp;is&nbsp;selected&nbsp;with&nbsp;the&nbsp;f&nbsp;key&nbsp;and&nbsp;the<br>
+right&nbsp;with&nbsp;the&nbsp;j&nbsp;key.&nbsp;If&nbsp;a&nbsp;list&nbsp;of&nbsp;characters,&nbsp;there&nbsp;must&nbsp;be&nbsp;as&nbsp;many<br>
+characters&nbsp;as&nbsp;options.&nbsp;They&nbsp;will&nbsp;be&nbsp;mapped&nbsp;onto&nbsp;the&nbsp;options&nbsp;from&nbsp;left&nbsp;to<br>
+right,&nbsp;as&nbsp;the&nbsp;options&nbsp;are&nbsp;displayed&nbsp;on&nbsp;the&nbsp;screen&nbsp;in&nbsp;shuffled&nbsp;order.</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><a name="Page-new"><strong>new</strong></a>(self)</dt><dd><tt>Use&nbsp;this&nbsp;method&nbsp;to&nbsp;return&nbsp;a&nbsp;new&nbsp;experimental&nbsp;component&nbsp;with&nbsp;the&nbsp;same<br>
+data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you're&nbsp;using&nbsp;an&nbsp;IDGenerator&nbsp;to<br>
+handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
+they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
+for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
+
+<hr>
+Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
+<dl><dt><strong>id_generator</strong> = None</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="RunIf">class <strong>RunIf</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="RunIf-__init__"><strong>__init__</strong></a>(self, page<font color="#909090">=None</font>, option<font color="#909090">=None</font>, regex<font color="#909090">=None</font>, permutation<font color="#909090">=None</font>)</dt><dd><tt>page:&nbsp;<a href="#Page">Page</a>,&nbsp;the&nbsp;<a href="#Page">Page</a>&nbsp;to&nbsp;look&nbsp;at&nbsp;to&nbsp;see&nbsp;which&nbsp;answer&nbsp;was&nbsp;given.<br>
+&nbsp;<br>
+option:&nbsp;<a href="#Option">Option</a>,&nbsp;optional.&nbsp;If&nbsp;given,&nbsp;the&nbsp;block&nbsp;containing&nbsp;this&nbsp;<a href="#RunIf">RunIf</a>&nbsp;will<br>
+only&nbsp;run&nbsp;if&nbsp;this&nbsp;<a href="#Option">Option</a>&nbsp;was&nbsp;chosen&nbsp;the&nbsp;last&nbsp;time&nbsp;page&nbsp;was&nbsp;displayed.<br>
+&nbsp;<br>
+regex:&nbsp;string,&nbsp;optional.&nbsp;If&nbsp;given,&nbsp;the&nbsp;block&nbsp;containing&nbsp;this&nbsp;<a href="#RunIf">RunIf</a>&nbsp;will<br>
+only&nbsp;run&nbsp;if&nbsp;a&nbsp;response&nbsp;matching&nbsp;a&nbsp;regular&nbsp;expression&nbsp;made&nbsp;from&nbsp;the<br>
+string&nbsp;regex&nbsp;was&nbsp;given&nbsp;the&nbsp;last&nbsp;time&nbsp;page&nbsp;was&nbsp;displayed.<br>
+&nbsp;<br>
+permutation:&nbsp;integer,&nbsp;optional.&nbsp;If&nbsp;given,&nbsp;the&nbsp;block&nbsp;containing&nbsp;this<br>
+<a href="#RunIf">RunIf</a>&nbsp;will&nbsp;only&nbsp;run&nbsp;if&nbsp;PsiTurk&nbsp;gives&nbsp;the&nbsp;experiment&nbsp;a&nbsp;permutation<br>
+variable&nbsp;matching&nbsp;this&nbsp;integer.&nbsp;This&nbsp;requires&nbsp;editing&nbsp;the&nbsp;counterbalance<br>
+setting&nbsp;in&nbsp;config.txt.<br>
+&nbsp;<br>
+The&nbsp;reason&nbsp;RunIfs&nbsp;depend&nbsp;on&nbsp;"the&nbsp;last&nbsp;time"&nbsp;their&nbsp;page&nbsp;was&nbsp;displayed&nbsp;is<br>
+that&nbsp;Pages&nbsp;can&nbsp;display&nbsp;multiple&nbsp;times&nbsp;if&nbsp;they&nbsp;are&nbsp;in&nbsp;Blocks&nbsp;with&nbsp;a<br>
+criterion.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="SampleFrom">class <strong>SampleFrom</strong></a></font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="SampleFrom-__init__"><strong>__init__</strong></a>(self, bank)</dt><dd><tt>bank:&nbsp;string,&nbsp;the&nbsp;name&nbsp;of&nbsp;an&nbsp;information&nbsp;bank&nbsp;to&nbsp;sample&nbsp;from.<br>
+Sampling&nbsp;is&nbsp;per-participant,&nbsp;random,&nbsp;and&nbsp;without&nbsp;replacement&nbsp;during&nbsp;an<br>
+experiment.&nbsp;Once&nbsp;sampled,&nbsp;the&nbsp;choice&nbsp;will&nbsp;remain&nbsp;in&nbsp;place&nbsp;for&nbsp;all<br>
+iterations&nbsp;of&nbsp;the&nbsp;block.&nbsp;Sampling&nbsp;happens&nbsp;after&nbsp;pages&nbsp;are&nbsp;chosen&nbsp;from<br>
+groups.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['Experiment', 'Block', 'Page', 'Option', 'RunIf', 'SampleFrom']</td></tr></table>
+</body></html>

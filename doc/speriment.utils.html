@@ -1,0 +1,90 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module speriment.utils</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="speriment.html"><font color="#ffffff">speriment</font></a>.utils</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/presley/Speriment/speriment/utils.py">/Users/presley/Speriment/speriment/utils.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="csv.html">csv</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="speriment.utils.html#IDGenerator">IDGenerator</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IDGenerator">class <strong>IDGenerator</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Creates&nbsp;an&nbsp;object&nbsp;to&nbsp;generate&nbsp;unique&nbsp;IDs&nbsp;for&nbsp;experimental&nbsp;components.&nbsp;You<br>
+should&nbsp;create&nbsp;exactly&nbsp;one&nbsp;per&nbsp;experiment&nbsp;so&nbsp;that&nbsp;all&nbsp;IDs&nbsp;in&nbsp;that&nbsp;experiment<br>
+will&nbsp;be&nbsp;distinct.<br>
+&nbsp;<br>
+Usage:<br>
+with&nbsp;<a href="#-make_experiment">make_experiment</a>(<a href="#IDGenerator">IDGenerator</a>()):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;experiment&nbsp;code&gt;<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="IDGenerator-__init__"><strong>__init__</strong></a>(self, seed<font color="#909090">=0</font>)</dt><dd><tt>seed:&nbsp;optional,&nbsp;an&nbsp;integer&nbsp;to&nbsp;start&nbsp;making&nbsp;IDs&nbsp;at.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-get_dicts"><strong>get_dicts</strong></a>(csvfile, sep<font color="#909090">=','</font>)</dt><dd><tt>csvfile:&nbsp;string,&nbsp;a&nbsp;filename&nbsp;of&nbsp;a&nbsp;csv&nbsp;file.&nbsp;The&nbsp;file&nbsp;should&nbsp;have&nbsp;a&nbsp;header<br>
+row&nbsp;with&nbsp;column&nbsp;names.<br>
+&nbsp;<br>
+sep:&nbsp;string,&nbsp;the&nbsp;delimiter&nbsp;used&nbsp;to&nbsp;separate&nbsp;values&nbsp;in&nbsp;the&nbsp;csv&nbsp;file.&nbsp;Defaults<br>
+to&nbsp;comma.<br>
+&nbsp;<br>
+Returns:&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;file)&nbsp;of&nbsp;dictionaries&nbsp;mapping<br>
+strings&nbsp;(column&nbsp;names)&nbsp;to&nbsp;strings&nbsp;(cell&nbsp;values).</tt></dd></dl>
+ <dl><dt><a name="-get_rows"><strong>get_rows</strong></a>(csvfile, sep<font color="#909090">=','</font>)</dt><dd><tt>csvfile:&nbsp;string,&nbsp;a&nbsp;filename&nbsp;of&nbsp;a&nbsp;csv&nbsp;file.<br>
+&nbsp;<br>
+sep:&nbsp;string,&nbsp;the&nbsp;delimiter&nbsp;used&nbsp;to&nbsp;separate&nbsp;values&nbsp;in&nbsp;the&nbsp;csv&nbsp;file.&nbsp;Defaults<br>
+to&nbsp;comma.<br>
+&nbsp;<br>
+Returns:&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;file)&nbsp;of&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;cell&nbsp;in<br>
+the&nbsp;row)&nbsp;of&nbsp;strings.</tt></dd></dl>
+ <dl><dt><a name="-make_experiment"><strong>make_experiment</strong></a>(id_generator)</dt><dd><tt>id_generator:&nbsp;<a href="#IDGenerator">IDGenerator</a>,&nbsp;an&nbsp;object&nbsp;that&nbsp;will&nbsp;make&nbsp;unique&nbsp;IDs&nbsp;for<br>
+everything&nbsp;in&nbsp;an&nbsp;Experiment.<br>
+&nbsp;<br>
+side&nbsp;effect:&nbsp;puts&nbsp;id_generator&nbsp;in&nbsp;scope&nbsp;for&nbsp;the&nbsp;duration&nbsp;of&nbsp;the&nbsp;with&nbsp;block.<br>
+Options,&nbsp;Pages,&nbsp;and&nbsp;Blocks&nbsp;will&nbsp;automatically&nbsp;use&nbsp;it&nbsp;to&nbsp;create&nbsp;unique&nbsp;IDs.<br>
+&nbsp;<br>
+Usage:<br>
+with&nbsp;<a href="#-make_experiment">make_experiment</a>(<a href="#IDGenerator">IDGenerator</a>()):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;experiment&nbsp;code&gt;<br>
+&nbsp;<br>
+&lt;any&nbsp;code&nbsp;here&nbsp;will&nbsp;not&nbsp;use&nbsp;that&nbsp;<a href="#IDGenerator">IDGenerator</a>&nbsp;anymore&gt;</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ['get_rows', 'get_dicts', 'IDGenerator', 'make_experiment']</td></tr></table>
+</body></html>
