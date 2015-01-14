@@ -10,14 +10,15 @@
   <script src="../node_modules/jquery/dist/jquery.js"></script>
   <script src="../javascript/speriment.js"></script>
   <script src="../json/sampleJSON.json"></script>
+  <script src="../json/example_experiment.json"></script>
   <script src="../cumulativity/cumulativity.json"></script>
 
   <script type="text/javascript">
     $(document).ready(function(){
-        <!-- var s = new Experiment(training_experiment); -->
-        <!-- var s = new Experiment(latin_square_experiment); -->
-        var condition = 0; // you can change this to test your latin square
-        var s = new Experiment(cumulativity_experiment, condition);
+        var jsonExperiment = cumulativity_experiment;
+        var condition = 1; // you can change this to test your latin square
+        var counterbalance = 0;
+        var s = new Experiment(jsonExperiment, condition, counterbalance);
         s.start();
     });
   </script>
