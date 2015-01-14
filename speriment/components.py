@@ -1,137 +1,10 @@
-'''This is the API you can use to write a Python script for use with
-Speriment.'''
-import json, jsonschema
+'''These are the constructors for all objects that make up experiments.'''
+
 from collections import Counter
-import copy, csv
-import pkg_resources
+import copy, pkg_resources, json, jsonschema
+# more imports before Experiment
 
-### Reading CSV File
-
-def get_rows(csvfile, sep = ','):
-    '''csvfile: string, a filename of a csv file.
-
-    sep: string, the delimiter used to separate values in the csv file. Defaults
-    to comma.
-
-    Returns: lists (one for each row in the file) of lists (one for each cell in
-    the row) of strings.'''
-
-    with open(csvfile, 'r') as f:
-        rows = csv.reader(f, delimiter = sep)
-        return list(rows)
-
-def get_dicts(csvfile, sep = ','):
-    '''csvfile: string, a filename of a csv file. The file should have a header
-    row with column names.
-
-    sep: string, the delimiter used to separate values in the csv file. Defaults
-    to comma.
-
-    Returns: lists (one for each row in the file) of dictionaries mapping
-    strings (column names) to strings (cell values).'''
-
-    with open(csvfile, 'r') as f:
-        dicts = csv.DictReader(f, delimiter = sep)
-        return list(dicts)
-
-### Writing objects to JSON
-
-class ExperimentEncoder(json.JSONEncoder):
-    '''This class enables nested Python objects to be correctly serialized to JSON.
-    It also requires that non-schema validation pass before the JSON is
-    generated.'''
-    def rename_key(self, dictionary, key, new_key):
-        if key in dictionary:
-            dict_copy = copy.deepcopy(dictionary)
-            value = dictionary[key]
-            dict_copy[new_key] = value
-            del dict_copy[key]
-            return dict_copy
-        else:
-            return dictionary
-
-    def compile_treatments(self, obj):
-        '''Treatments are lists of lists of blocks to run conditionally. Remove
-        this variable and add RunIf objects to those blocks.'''
-        for i, treatment in enumerate(obj.treatments):
-            for block in treatment:
-                block.run_if = RunIf(permutation = i)
-        del obj.treatments
-        return obj
-
-    def default(self, obj):
-        if isinstance(obj, Component):
-            if hasattr(obj, 'treatments'):
-                obj = self.compile_treatments(obj)
-            obj.validate()
-            # make keys follow JS conventions
-            renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
-            renamed_ri = self.rename_key(renamed_ls, 'run_if', 'runIf')
-            renamed_id = self.rename_key(renamed_ri, 'id_str', 'id')
-            return renamed_id
-        if isinstance(obj, RunIf):
-            renamed_option = self.rename_key(obj.__dict__, 'option_id', 'optionID')
-            renamed_page = self.rename_key(renamed_option, 'page_id', 'pageID')
-            return renamed_page
-        if isinstance(obj, SampleFrom):
-            return {"sampleFrom": obj.bank}
-        # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, obj)
-
-### Generating IDs
-
-class IDGenerator:
-    '''Creates an object to generate unique IDs for experimental components. You
-    should create exactly one per experiment so that all IDs in that experiment
-    will be distinct.
-
-    Usage:
-    with make_experiment(IDGenerator()):
-        <experiment code>
-    '''
-
-    def __init__(self, seed = 0):
-        '''seed: optional, an integer to start making IDs at.'''
-        self.current_id = seed
-
-    def next_id(self):
-        '''Takes no arguments and returns a string, which is a new unique ID.'''
-        self.current_id += 1
-        return str(self.current_id)
-
-### Makes the with statement possible
-
-def make_experiment(id_generator):
-    '''id_generator: IDGenerator, an object that will make unique IDs for
-    everything in an Experiment.
-
-    side effect: puts id_generator in scope for the duration of the with block.
-    Options, Pages, and Blocks will automatically use it to create unique IDs.
-
-    Usage:
-    with make_experiment(IDGenerator()):
-        <experiment code>
-
-    <any code here will not use that IDGenerator anymore>
-    '''
-    return ExperimentMaker(id_generator)
-
-class ExperimentMaker():
-    '''This class makes the "with" statement for automatic ID generation
-    possible. It sets an IDGenerator as a class variable in Component, making it
-    available to Options, Pages, and Blocks. At the end of the with block,
-    it is removed and any errors encountered in the block are raised.'''
-    def __init__(self, id_generator):
-        self.id_generator = id_generator
-
-    def __enter__(self):
-        Component.id_generator = self.id_generator
-
-    def __exit__(self, etype, evalue, etrace):
-        Component.id_generator = None
-        return False # False means if you encountered errors, raise them
-
-### Special kind of experimental components (not in the hierarchy)
+__all__ = ['Experiment', 'Block', 'Page', 'Option', 'RunIf', 'SampleFrom']
 
 class RunIf:
     def __init__(self, page = None, option = None, regex = None, permutation =
@@ -172,8 +45,6 @@ class SampleFrom:
         groups.'''
         self.bank = bank
 
-#### Experiment Components
-
 class Component:
     '''This is the superclass of Option, Page, Block, and Experiment. You should
     not instantiate this class.'''
@@ -181,11 +52,11 @@ class Component:
     # class variable
     id_generator = None
 
-    def set_id(self, id_str = None):
+    def _set_id(self, id_str = None):
         if id_str:
             self.id_str = id_str
         else:
-            self.id_str = self.id_generator.next_id()
+            self.id_str = self.id_generator._next_id()
 
     def new(self):
         '''Use this method to return a new experimental component with the same
@@ -194,7 +65,7 @@ class Component:
         they can coexist in an experiment and won't be confused with each other,
         for instance if one is referred to in a RunIf.'''
         new_component = copy.deepcopy(self)
-        new_component.id_str = self.id_generator.next_id()
+        new_component.id_str = self.id_generator._next_id()
         for att in ['blocks', 'pages', 'options']:
             if hasattr(new_component, att):
                 setattr(new_component, att, [item.new()
@@ -204,11 +75,11 @@ class Component:
                         for group in new_component.groups]
         return new_component
 
-    def set_optional_args(self, **kwargs):
+    def _set_optional_args(self, **kwargs):
         for (key, value) in kwargs.iteritems():
             setattr(self, key, value)
 
-    def validate(self):
+    def _validate(self):
         '''To be defined for each subtype.'''
         pass
 
@@ -243,10 +114,10 @@ class Option(Component):
         Note that the type of an Option (radio button, check box, dropdown, or
         text box) is determined based on its data and the attributes of its
         containing Page. It is not set directly in the Option.'''
-        self.set_id(id_str)
+        self._set_id(id_str)
         if text != None:
             self.text = text
-        self.set_optional_args(**kwargs)
+        self._set_optional_args(**kwargs)
 
 
 class Page(Component):
@@ -299,16 +170,16 @@ class Page(Component):
         characters as options. They will be mapped onto the options from left to
         right, as the options are displayed on the screen in shuffled order.
         '''
-        self.set_id(id_str)
+        self._set_id(id_str)
         self.text = text
-        self.set_optional_args(**kwargs)
+        self._set_optional_args(**kwargs)
         if options:
             self.options = options
 
-    def validate_resources(self):
+    def _validate_resources(self):
         pass # check for supported filetypes
 
-    def validate_freetext(self):
+    def _validate_freetext(self):
         if hasattr(self, 'freetext') and self.freetext == True:
             if len(self.options) > 1:
                 raise ValueError, '''If freetext is true, the page has a text box
@@ -321,7 +192,7 @@ class Page(Component):
                 expression rather than a boolean as its "correct" attribute.'''
        #TODO reverse is true
 
-    def validate_keyboard(self):
+    def _validate_keyboard(self):
         if hasattr(self, 'keyboard'): 
             if type(self.keyboard) == list:
                 if len(self.keyboard) != len(self.options):
@@ -333,10 +204,10 @@ class Page(Component):
                     pages with two options.'''
 
 
-    def validate(self):
-        self.validate_resources()
-        self.validate_freetext()
-        self.validate_keyboard()
+    def _validate(self):
+        self._validate_resources()
+        self._validate_freetext()
+        self._validate_keyboard()
 
 class Block(Component):
     def __init__(self, pages = None, groups = None, blocks = None, id_str = None,
@@ -415,16 +286,16 @@ class Block(Component):
         filenames, or page condition.
         '''
 
-        self.set_id(id_str)
-        self.set_optional_args(**kwargs)
+        self._set_id(id_str)
+        self._set_optional_args(**kwargs)
         if pages != None:
             self.pages = pages
         if groups != None:
             self.groups = groups
         if blocks != None:
             self.blocks = blocks
-        self.validate_contents()
-        self.set_optional_args(**kwargs)
+        self._validate_contents()
+        self._set_optional_args(**kwargs)
 
         if exchangeable:
             self.exchangeable = [b.id_str for b in exchangeable]
@@ -434,7 +305,7 @@ class Block(Component):
 
         if latin_square:
             self.latin_square = latin_square
-            self.validate_latin_square()
+            self._validate_latin_square()
 
         if pseudorandom:
             self.pseudorandom = pseudorandom
@@ -446,13 +317,13 @@ class Block(Component):
             #     for block in treatment:
             #         block.run_if = RunIf(permutation = i)
 
-    def validate(self):
-        self.validate_contents()
-        self.validate_pseudorandom()
-        self.validate_latin_square()
-        self.validate_counterbalancing()
+    def _validate(self):
+        self._validate_contents()
+        self._validate_pseudorandom()
+        self._validate_latin_square()
+        self._validate_counterbalancing()
 
-    def validate_counterbalancing(self):
+    def _validate_counterbalancing(self):
         if hasattr(self, 'counterbalance') and hasattr(self, 'treatments'):
             print '''Warning: counterbalance and treatments depend on the same
             variable, so using both in one experiment will cause
@@ -462,14 +333,14 @@ class Block(Component):
             randomly for each participant.'''
 
 
-    def validate_contents(self):
+    def _validate_contents(self):
         content_types = [attribute for attribute in
                 ['pages', 'groups', 'blocks'] if hasattr(self, attribute)]
         if len(content_types) != 1:
             raise ValueError, '''Block must have exactly one of pages, groups,
             and blocks.'''
 
-    def validate_pseudorandom(self):
+    def _validate_pseudorandom(self):
         if hasattr(self, 'pseudorandom'):
             if hasattr(self, 'groups'):
                 if self.latin_square == False:
@@ -492,8 +363,11 @@ class Block(Component):
                     block.'''
         #TODO elif hasattr('pages')
 
-    def validate_latin_square(self):
+    def _validate_latin_square(self):
         pass
+
+from compiler import ExperimentEncoder
+from utils import make_exp, make_task
 
 class Experiment(Component):
     '''An Experiment holds all the information describing one experiment. If you
@@ -526,17 +400,17 @@ class Experiment(Component):
         if banks:
             self.banks = banks
 
-    def validate(self):
-        self.validate_page_tags()
-        self.validate_option_tags()
+    def _validate(self):
+        self._validate_page_tags()
+        self._validate_option_tags()
 
-    def validate_page_tags(self):
+    def _validate_page_tags(self):
         pass
 
-    def validate_option_tags(self):
+    def _validate_option_tags(self):
         pass
 
-    def validate_json(self, json_object):
+    def _validate_json(self, json_object):
         contents = pkg_resources.resource_string(__name__, 'sperimentschema.json')
         schema = json.loads(contents)
         jsonschema.validate(json_object, schema)
@@ -545,16 +419,16 @@ class Experiment(Component):
         return json.dumps(self, indent = 4, cls = ExperimentEncoder)
 
     def to_file(self, filename, varname):
-        '''Validates the structure of the experiment and writes it as a JSON
+        '''validates the structure of the experiment and writes it as a JSON
         object in a JavaScript file.'''
         json_experiment = self.to_JSON()
-        self.validate_json(json_experiment)
+        self._validate_json(json_experiment)
         to_write = 'var ' + varname + ' = ' + json_experiment
         with open(filename, 'w') as f:
             f.write(to_write)
 
     def install(self, experiment_name):
-        '''Validates the structure of the experiment, writes it as a JSON object
+        '''validates the structure of the experiment, writes it as a JSON object
         in a JavaScript file, and gives PsiTurk access to Speriment and the JSON
         object.'''
         filename = experiment_name + '.js'
@@ -564,36 +438,3 @@ class Experiment(Component):
         make_task(varname)
 
 
-def make_task(varname):
-    '''Replace PsiTurk's example task.js with the standard Speriment task.js,
-    with the JSON object variable name inserted.'''
-    with open('./static/js/task.js', 'w') as task:
-        task.write('''$(document).ready(function(){
-    var mySperiment = ''' + varname + ''';
-    var psiturk = PsiTurk(uniqueId, adServerLoc);
-    psiturk.finishInstructions();
-    var speriment = new Experiment(mySperiment, condition, counterbalance, psiturk);
-    speriment.start();
-});''')
-
-def make_exp(filename):
-    '''Add script tags to PsiTurk's exp.html file so it can use speriment.js and
-    the JSON object.'''
-    exp_file = './templates/exp.html'
-    #TODO will change to static/lib/node_modules/speriment/speriment.js and maybe min
-    speriment_tag = '''\n\t\t<script
-    src="/static/lib/node_modules/speriment/javascript/speriment.js" type="text/javascript">'''
-    json_tag = '''\n\t\t<script src="/static/js/{0}" type="text/javascript">'''.format(filename)
-    new_contents = None
-    with open(exp_file, 'r') as exp:
-        exp_contents = exp.read()
-        script_tags = exp_contents.split('</script>')
-        # These scripts must go after PsiTurk and its dependencies but before
-        # task.js and the rest of the page
-        if script_tags[-4] == speriment_tag:
-            script_tags[-3] = json_tag
-        else:
-            script_tags = script_tags[:-2] + [speriment_tag] + [json_tag] + script_tags[-2:]
-        new_contents = '</script>'.join(script_tags)
-    with open(exp_file, 'w') as expw:
-        expw.write(new_contents)
