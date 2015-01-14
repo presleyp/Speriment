@@ -201,6 +201,20 @@
                 "freetext": {
                     "description": "Does this question have a text box option, as opposed to discrete choices? Defaults to false.",
                     "type": "boolean"
+                },
+                "keyboard": {
+                    "description": "Whether and how to use keybindings to choose options.",
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "required": ["id", "text"]

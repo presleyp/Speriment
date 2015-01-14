@@ -291,6 +291,13 @@ class Page(Component):
 
         freetext: boolean, whether the Option is a text box rather than multiple
         choice.
+
+        keyboard: boolean or [character], representing how Options are to be
+        selected. If False, they are selected with the mouse. If True and there
+        are exactly two Options, the left is selected with the f key and the
+        right with the j key. If a list of characters, there must be as many
+        characters as options. They will be mapped onto the options from left to
+        right, as the options are displayed on the screen in shuffled order.
         '''
         self.set_id(id_str)
         self.text = text
@@ -306,18 +313,30 @@ class Page(Component):
             if len(self.options) > 1:
                 raise ValueError, '''If freetext is true, the page has a text box
                 as its option, so there shouldn't be more than one option.'''
-            if self.options[0].correct in [True, False]:
+            if hasattr(self.options[0], 'correct') and self.options[0].correct in [True, False]:
                 raise ValueError, '''A text box option should have a regular
                 expression rather than a boolean as its "correct" attribute.'''
-            if self.correct in [True, False]:
+            if hasattr(self, 'correct') and self.correct in [True, False]:
                 raise ValueError, '''A text box option should have a regular
                 expression rather than a boolean as its "correct" attribute.'''
        #TODO reverse is true
+
+    def validate_keyboard(self):
+        if hasattr(self, 'keyboard'): 
+            if type(self.keyboard) == list:
+                if len(self.keyboard) != len(self.options):
+                    raise ValueError, '''List of keybindings must have as many
+                    entries as there are options in the page.'''
+            elif self.keyboard:
+                if len(self.options) != 2:
+                    raise ValueError, '''Default keybindings only compatible with
+                    pages with two options.'''
 
 
     def validate(self):
         self.validate_resources()
         self.validate_freetext()
+        self.validate_keyboard()
 
 class Block(Component):
     def __init__(self, pages = None, groups = None, blocks = None, id_str = None,

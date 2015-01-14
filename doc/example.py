@@ -40,10 +40,14 @@ with make_experiment(IDGenerator()):
     # You can use a loop or list comprehension to make pages from your items.
 
     # after using get_rows, access cells with indices, starting from 0
+    # keyboard = True means disable the mouse and use the default keybindings, f
+    # for the left option and j for the right option
+    # spacebar is always available to move to the next question
     pages1 = [Page(
                    row[0],
                    options = [Option(row[1]), Option(row[2])],
-                   condition = row[3]
+                   condition = row[3],
+                   keyboard = True
                    ) for row in items1]
 
     # after using get_dicts, access cells with column names
