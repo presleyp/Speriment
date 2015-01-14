@@ -4,3 +4,8 @@
 *.egg
 .DS_Store
 node_modules/*
+bin/speriment-outputc
+build/*
+doc/sampleJSON.json
+javascript/
+test/example_experiment.json
