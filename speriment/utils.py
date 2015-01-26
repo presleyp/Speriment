@@ -39,7 +39,7 @@ class IDGenerator:
         <experiment code>
     '''
 
-    def __init__(self, seed = 0):
+    def __init__(self, seed = -1):
         '''seed: optional, an integer to start making IDs at.'''
         self.current_id = seed
 
@@ -74,10 +74,10 @@ class ExperimentMaker():
         self.id_generator = id_generator
 
     def __enter__(self):
-        Component.id_generator = self.id_generator
+        Component._id_generator = self.id_generator
 
     def __exit__(self, etype, evalue, etrace):
-        Component.id_generator = None
+        Component._id_generator = None
         return False # False means if you encountered errors, raise them
 
 def make_task(varname):

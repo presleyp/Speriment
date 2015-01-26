@@ -6,6 +6,29 @@ function cleanUp(){
     $('#experimentDiv').remove();
 }
 
+test("sampleFromBank", function(){
+    var parent = {banks: {bank1: [{'s': 'apple', 'p': 'apples'}, {'s': 'tree', 'p': 'trees'}]}};
+    var prop = {sampleFrom: 'bank1', variable: 0, field: 's'};
+    var sampled = sampleFromBank(parent, prop);
+    strictEqual(sampled, 'apple', 'sample from bank with variable and field');
+});
+
+test("getRow", function(){
+    var prop = {sampleFrom: 'bank1'};
+    var propV = {sampleFrom: 'bank1', variable: 1};
+    var propNV = {sampleFrom: 'bank1', notVariable: 1};
+    var bank1 = ['zero', 'one'];
+    var bank2 = [{'s': 'apple', 'p': 'apples'}, {'s': 'tree', 'p': 'trees'}];
+    var randomResult = getRow(prop, bank1);
+    ok(randomResult.length > 0, 'grabs a row');
+    strictEqual(getRow(propV, bank1), 'one', 'grabs correct row with variable');
+    strictEqual(getRow(propNV, bank1), 'zero', 'grabs correct row with notVariable');
+    var randomObj = getRow(prop, bank2);
+    ok(randomObj.s.length > 0, 'grabs a row with object bank');
+    strictEqual(getRow(propV, bank2).s, 'tree', 'grabs correct row with variable from object bank');
+    strictEqual(getRow(propNV, bank2).s, 'apple', 'grabs correct row with notVariable from object bank');
+});
+
 test("shuffle banks", function(){
     //operates in place but I assign to the result so I need to test the return value
     var b = {};
@@ -21,24 +44,40 @@ test("shuffle banks", function(){
 });
 
 test("sampling without replacement", function(){
-    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps'}}, {id: 'p2', text: {sampleFrom: 'ps'}},
-        {id: 'p3', text: {sampleFrom: 'ps'}}], banks: {'ps': ['one', 'two', 'three']}};
+    var jsonb = {id: 'b1', pages: [
+        {id: 'p1', text: {sampleFrom: 'ps', variable: 0}},
+        {id: 'p2', text: {sampleFrom: 'ps', variable: 1}},
+        {id: 'p3', text: {sampleFrom: 'ps', variable: 2}}],
+        banks: {'ps': ['one', 'two', 'three']}};
     var b = new InnerBlock(jsonb, fakeContainer);
     var texts = _.pluck(b.contents, 'text');
     strictEqual(_.unique(texts).length, 3, 'sampling is without replacement');
 });
 
 test("sampling from outer block", function(){
-    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps'}}, {id: 'p2', text: {sampleFrom: 'ps'}},
-        {id: 'p3', text: {sampleFrom: 'ps'}}]};
-    var jsonb2 = {id: 'b2', pages: [{id: 'p4', text: {sampleFrom: 'ps'}}, {id: 'p5', text: {sampleFrom: 'ps'}},
-        {id: 'p6', text: {sampleFrom: 'ps'}}]};
+    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps', variable: 0}}, {id: 'p2', text: {sampleFrom: 'ps', variable: 1}},
+        {id: 'p3', text: {sampleFrom: 'ps', variable: 2}}]};
+    var jsonb2 = {id: 'b2', pages: [{id: 'p4', text: {sampleFrom: 'ps', variable: 3}}, {id: 'p5', text: {sampleFrom: 'ps', variable: 4}},
+        {id: 'p6', text: {sampleFrom: 'ps', variable: 5}}]};
     var outerb = {id: 'b3', blocks: [jsonb, jsonb2], banks: {'ps': ['one', 'two', 'three', 'four', 'five', 'six']}};
     var b = new OuterBlock(outerb, fakeContainer);
     var texts1 = _.pluck(b.contents[0].contents, 'text');
     var texts2 = _.pluck(b.contents[1].contents, 'text');
     strictEqual(_.unique(_.union(texts1, texts2)).length, 6, 'sampling is without replacement');
 });
+
+test("sampling from outer block with fields", function(){
+    var jsonb = {id: 'b1', pages: [{id: 'p1', text: {sampleFrom: 'ps', variable: 0, field: 'a'}}, {id: 'p2', text: {sampleFrom: 'ps', variable: 1, field: 'a'}},
+        {id: 'p3', text: {sampleFrom: 'ps', variable: 2, field: 'a'}}]};
+    var jsonb2 = {id: 'b2', pages: [{id: 'p4', text: {sampleFrom: 'ps', variable: 0, field: 'b'}}, {id: 'p5', text: {sampleFrom: 'ps', variable: 1, field: 'b'}},
+        {id: 'p6', text: {sampleFrom: 'ps', variable: 2, field: 'b'}}]};
+    var outerb = {id: 'b3', blocks: [jsonb, jsonb2], banks: {'ps': [{'a': 'one', 'b': 'two'}, {'a': 'three', 'b': 'four'}, {'a': 'five', 'b': 'six'}]}};
+    var b = new OuterBlock(outerb, fakeContainer);
+    var texts1 = _.pluck(b.contents[0].contents, 'text');
+    var texts2 = _.pluck(b.contents[1].contents, 'text');
+    strictEqual(_.unique(_.union(texts1, texts2)).length, 6, 'sampling is without replacement');
+});
+
 
 test("create inner block", function(){
     setupForm();

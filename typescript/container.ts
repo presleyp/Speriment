@@ -56,7 +56,6 @@ function reorderBlocks(blocks: Block[], blockIDs: string[], orderingFunction): B
     return blocks;
 }
 
-
 function makePermuter(permutation: number) {
 
     function counterbalanceBlockIds(counterbalance: string[]): string[] {
@@ -89,31 +88,3 @@ function shuffleBanks(banks){
     _.each(banks, (bankList, bankName) => {banks[bankName] = _.shuffle(bankList)});
     return banks;
 }
-
-function setOrSample(property, block: Block){
-    if (_.isObject(property) && _.has(property, 'sampleFrom')){
-        return sampleFromBank(block, property.sampleFrom);
-    } else {
-        return property;
-    }
-}
-    //TODO validation that bank will exist is important
-function sampleFromBank(ancestor, bankName){
-    if (_.has(ancestor.banks, bankName)){
-        return ancestor.banks[bankName].pop();
-    } else {
-        return sampleFromBank(ancestor.container, bankName);
-    }
-}
-
-// function getContainers(block: Block): string[] {
-//     function getC(current, acc){
-//         if (current.container && current.container.id){
-//             return getC(current.container, acc.concat([current.container.id]));
-//         } else {
-//             return acc;
-//         }
-//     }
-
-//     return getC(block, [block.id]);
-// }

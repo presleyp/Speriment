@@ -1,10 +1,11 @@
 /// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
 /// <reference path="option.ts"/>
+/// <reference path="viewable.ts"/>
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class Page{
+class Page implements Viewable{
     public static dropdownThreshold: number = 7;
     public static SPACEKEY = 32;
     public text: string;
@@ -17,9 +18,9 @@ class Page{
     constructor(jsonPage, public block){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
         this.id = jsonPage.id;
-        this.text = setOrSample(jsonPage.text, this.block);
+        this.text = setText(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
-        this.resources = _.map(jsonPage.resources, (r: string):string => {return this.makeResource(r, this.block)});
+        this.resources = _.map(jsonPage.resources, (r: string):string => {return makeResource(r, this.block)});
         this.tags = jsonPage.tags;
         this.record = new TrialRecord(this.id, this.text, this.condition, this.block.containerIDs, this.tags);
     }
@@ -34,21 +35,6 @@ class Page{
         $(CONTINUE).prop({disabled: false});
     }
 
-    private makeResource(jsonResource: string, block: Block): string{ //TODO ogg can also be video, need to disambiguate
-        var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
-            'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4':
-            'video', 'webm': 'video'};
-        var resource = setOrSample(jsonResource, block);
-        var extension = resource.split('.').pop().toLowerCase();
-        var fileType = fileTypeMap[extension];
-        if (fileType === 'img') {
-            return '<img src="' + resource + '" alt="' + resource + '">';
-        } else {
-            var mediaType = extension === 'mp3' ? 'audio/mpeg' : fileType + '/' + extension;
-            return '<' + fileType + ' controls><source src="' + resource + '" type="' + mediaType + '"></' + fileType + '>';
-        }
-    }
-
     public display(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
         $(document).off('keypress').keypress((k:KeyboardEvent) => {
@@ -59,7 +45,8 @@ class Page{
         });
         this.disableNext();
         $(OPTIONS).empty();
-        $(PAGE).empty().append(this.text, this.resources);
+        $(PAGE).empty().append(this.text);
+        $(RESOURCES).empty().append(this.resources);
         $(CONTINUE).show();
     }
 

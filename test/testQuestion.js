@@ -27,13 +27,17 @@ test("question initialization", function(){
 });
 
 test("page with sampling", function(){
-    var jsonq = {'text': {'sampleFrom': 'questions'}, id: 'q1', condition: {'sampleFrom': 'conds'},
-        resources: ['resource1.jpg', {sampleFrom: 'resourcebank'}],
-        options: [{text: {sampleFrom: 'optiontext'}, id: 'o1'}, {text: 'option2', id: 'o2', feedback: {sampleFrom: 'optionfeedback'}}]};
+    var jsonq = {'text': {'sampleFrom': 'questions', variable: 1},
+        id: 'q1',
+        condition: {'sampleFrom': 'conds', variable: 2},
+        resources: ['resource1.jpg', {sampleFrom: 'resourcebank', variable: 1}],
+        options: [
+            {text: {sampleFrom: 'optiontext', notVariable: 0}, id: 'o1'},
+            {text: 'option2', id: 'o2', feedback: {sampleFrom: 'optionfeedback', notVariable: 0}}]};
     var block = {'id': 'b', 'banks': {'questions': ['one', 'two'], 'conds': ['a', 'b', 'c'], 'resourcebank': ['r1.mp3', 'r2.mp3'],
     'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no']}};
     var q = new Question(jsonq, block);
-    // bank shuffling is done at the block level; pages always pop from banks
+    // bank shuffling is done at the block level; pages always use variables as indices
     strictEqual(q.text, 'two', 'text is last element of text bank');
     strictEqual(q.condition, 'c', 'condition is last element of condition bank');
     strictEqual(q.resources[0], '<img src="resource1.jpg" alt="resource1.jpg">', 'unsampled resource made correctly');

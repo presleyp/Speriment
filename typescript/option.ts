@@ -1,22 +1,25 @@
 /// <reference path="experiment.ts"/>
 /// <reference path="block.ts"/>
 /// <reference path="page.ts"/>
+/// <reference path="viewable.ts"/>
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class ResponseOption{
+class ResponseOption implements Viewable{
 
     public text: string;
     public id: string;
     public feedback: string;
     public correct: boolean;
     public tags: string[];
+    public resources: string[];
 
     constructor(jsonOption, public question: Question){
-        jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null});
+        jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null, resources: null});
         this.id = jsonOption.id;
-        this.text = setOrSample(jsonOption.text, this.question.block);
+        this.text = setText(jsonOption.text, this.question.block);
         this.feedback = jsonOption.feedback;
+        this.resources = _.map(jsonOption.resources, (r: string):string => {return makeResource(r, this.question.block)});
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         this.tags = jsonOption.tags;
     }
@@ -78,6 +81,7 @@ class RadioOption extends ResponseOption{
 
         $(OPTIONS).append(label);
         $(OPTIONS).append(input);
+        $(OPTIONS).append(this.resources);
     }
 
 }

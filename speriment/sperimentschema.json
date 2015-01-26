@@ -17,7 +17,18 @@
                 {
                     "type": "string"
                 },
-                {"$ref": "#/definitions/sampler"}
+                {"$ref": "#/definitions/sampler"},
+                {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {"$ref": "#/definitions/sampler"}
+                        ]
+                    }
+                }
             ]
         },
 
@@ -70,8 +81,19 @@
             "description": "A list of pieces of information to be used as page or option properties.",
             "type": "array",
             "items": {
-                "description": "A piece of information to be used as a page or option property.",
-                "type": "string"
+                "oneOf": [
+                    {
+                        "description": "A piece of information to be used as a page or option property.",
+                        "type": "string"
+                    },
+                    {
+                        "description": "An object containing related pieces of information, each to be used as a page or option property.",
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                ]
             }
         },
 

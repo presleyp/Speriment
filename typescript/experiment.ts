@@ -9,6 +9,7 @@
 // global constants for referring to HTML
 var PAGE = "p.question",
     OPTIONS = "p.answer",
+    RESOURCES = "p.resources",
     NAVIGATION = "div.navigation",
     CONTINUE = "#continue"; // Next or Submit button
 
@@ -29,10 +30,11 @@ class Experiment implements Container{
         this.permutation = parseInt(permutation);
         this.exchangeable = jsonExperiment.exchangeable;
         this.counterbalance = jsonExperiment.counterbalance;
+        this.banks = shuffleBanks(jsonExperiment.banks);
+        this.experimentRecord = new ExperimentRecord(psiturk, this.permutation);
+
         this.contents = makeBlocks(jsonExperiment.blocks, this);
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
-        this.experimentRecord = new ExperimentRecord(psiturk, this.permutation);
-        this.banks = shuffleBanks(jsonExperiment.banks);
     }
 
     public start(){
@@ -55,6 +57,9 @@ class Experiment implements Container{
         var answerPar = document.createElement('p');
         $(answerPar).addClass('answer');
 
+        var resourcePar = document.createElement('p');
+        $(resourcePar).addClass('resources');
+
         var navigationDiv = document.createElement('div');
         $(navigationDiv).addClass('navigation');
 
@@ -62,7 +67,7 @@ class Experiment implements Container{
         $(nextButton).attr({type: "button", id: "continue", value: "Next"});
 
         $('body').append(experimentDiv);
-        $(experimentDiv).append(questionPar, answerPar, navigationDiv);
+        $(experimentDiv).append(questionPar, resourcePar, answerPar, navigationDiv);
         $(navigationDiv).append(nextButton);
     }
 

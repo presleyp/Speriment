@@ -37,26 +37,88 @@ class RunIf:
             self.permutation = permutation
 
 class SampleFrom:
-    def __init__(self, bank):
-        '''bank: string, the name of an information bank to sample from.
-        Sampling is per-participant, random, and without replacement during an
-        experiment. Once sampled, the choice will remain in place for all
-        iterations of the block. Sampling happens after pages are chosen from
-        groups.'''
+    '''Stands in place of a value of a Page or Option and tells the program to
+    randomly choose a value to go there on a per-participant basis. Once
+    sampled, the choice will remain in place for all iterations of the block.
+    Sampling happens after pages are chosen from groups.'''
+
+    _id_generators = {} # {bankname: IDGenerator}
+    _variable_maps = {} # {bankname: {variablename: index}}
+
+    def __init__(self, bank, variable = None, not_variable = None, field = None,
+            without_replacement = True):
+        '''bank: string, the name of an information bank to sample from. A
+        corresponding bank must be put in one of the Blocks containing this
+        SampleFrom, or the Experiment.
+
+        variable: string or integer, optional. Like a variable x, it doesn't
+        matter what you call it, it just matters whether another variable has
+        the same name or a different one. If you give two SampleFroms the same
+        bank and variable, they will sample the same value for a given
+        participant (but likely different values for different participants). If
+        you give them the same bank and different variables, they will sample
+        different values.
+
+        not_variable: string or integer, optional. If you give two SampleFroms
+        the same bank and give one variable x and the other not_variable x, they
+        will not sample the same value. not_variable is ignored if you give
+        a variable.
+
+        field: string, optional. Use with a bank made up of dictionaries where
+        each dictionary has the same keys. field is the key you want to access.
+        If you SampleFrom a bank of dictionaries that all contain x and y keys,
+        and field is x, you will get one of the x values.
+
+        with_replacement: boolean, optional. Defaults to False. Invalid when
+        variable or not_variable is given. False is a shorthand
+        for giving this SampleFrom a variable that is not used elsewhere in the
+        experiment. Thus, False means this SampleFrom will not sample the same
+        value as another SampleFrom on the same bank that has a variable,
+        not_variable, or with_replacement set to False. True is a shorthand for
+        "pick anything at all." Thus, a True setting on one SampleFrom overrides
+        False settings on other SampleFroms on the same bank: they may sample
+        the same value.
+        '''
         self.bank = bank
+        if bank not in self._id_generators:
+            self._id_generators[bank] = IDGenerator()
+            self._variable_maps[bank] = {}
+        if variable != None:
+            self.variable = variable
+            if not variable in self._variable_maps[bank]:
+                self._variable_maps[bank][variable] = self._id_generators[bank]._next_id()
+        elif not_variable != None:
+            self.not_variable = not_variable
+            if not not_variable in self._variable_maps[bank]:
+                self._variable_maps[bank][not_variable] = self._id_generators[bank]._next_id()
+        else:
+            if with_replacement:
+                self.with_replacement = with_replacement
+        if field != None:
+            self.field = field
+
+    def _set_variable(self):
+        self.variable = int(self._id_generators[bank]._next_id())
+
+    def _validate(self):
+        # TODO (not)var or without_r consistently for a given bank
+        # TODO enough in bank for all samples
+        # TODO fields consistent in bank
+        pass
+
 
 class Component:
     '''This is the superclass of Option, Page, Block, and Experiment. You should
     not instantiate this class.'''
 
     # class variable
-    id_generator = None
+    _id_generator = None
 
     def _set_id(self, id_str = None):
         if id_str:
             self.id_str = id_str
         else:
-            self.id_str = self.id_generator._next_id()
+            self.id_str = self._id_generator._next_id()
 
     def new(self):
         '''Use this method to return a new experimental component with the same
@@ -65,7 +127,7 @@ class Component:
         they can coexist in an experiment and won't be confused with each other,
         for instance if one is referred to in a RunIf.'''
         new_component = copy.deepcopy(self)
-        new_component.id_str = self.id_generator._next_id()
+        new_component.id_str = self._id_generator._next_id()
         for att in ['blocks', 'pages', 'options']:
             if hasattr(new_component, att):
                 setattr(new_component, att, [item.new()
@@ -140,6 +202,11 @@ class Page(Component):
         correct Option. If freetext is True, a string representing a regular
         expression that a correct answer will match.
 
+        resources: [string], filenames of any images, audio, or video that
+        should display on the page. Any resource can be SampleFrom. Put all
+        resource files in static/images. They can be further divided into
+        subdirectories there.
+
         tags: [string], any metadata you want to associate with this Page. It
         will not be used in the experiment, but will be passed through to the
         data file. All pages in the entire experiment must have the same number
@@ -149,9 +216,6 @@ class Page(Component):
         experimental manipulation. Used if this Page is in a block where
         pseudorandom is True, to keep Pages with the same condition from
         appearing in a row. Can also be SampleFrom.
-
-        resources: [string], filenames of any images, audio, or video that
-        should display on the page. Any resource can be SampleFrom.
 
         ordered: boolean, whether the Options for this Page need to be kept in
         the order in which they were given. If True, the Options may be reversed
@@ -239,6 +303,16 @@ class Block(Component):
         There should be no overlap between the blocks in exchangeable and the
         blocks in counterbalance.
 
+        treatments: [[Block]], only valid if contents is [Block]. Uses
+        num_counters in PsiTurk's config.txt. The blocks listed in treatments
+        are specified as running conditionally, based on a variable that changes
+        per participant and can take on as many values as you specify in
+        num_counters in PsiTurk's config.txt. Each sublist of blocks shows which
+        blocks will run when the counter is set to one of its possible
+        variables. The number of sublists should equal num_counters. Blocks
+        contained by this block that are not listed in treatments will run by
+        default.
+
         latin_square: boolean, only valid if contents is [[Page]], that is,
         groups of Pages. If True, Pages are chosen from groups according to a
         Latin Square. This process requires that all groups in the Block have
@@ -248,7 +322,7 @@ class Block(Component):
         condition. The condition attribute of Pages is not used to check the
         order.
 
-        pseudorandom: boolean, only valid if contents is [[Pages]] or [Pages], 
+        pseudorandom: boolean, only valid if contents is [[Pages]] or [Pages],
         all Pages have a condition attribute specified, and there will be an equal
         number of each Pages of each condition displayed (therefore it is not
         valid if contents is [[Pages]] and latin_square is False, because there's
@@ -279,11 +353,14 @@ class Block(Component):
         to display its contents, no matter the type of contents. See the RunIf
         documentation for more information.
 
-        banks: {string: [string]}, a dictionary mapping bank names to banks,
-        where a bank is a list of pieces of information. Within a bank, all
-        items should be for the same purpose. Bank information can be used for
-        page text, option text, page feedback, option feedback, resource
-        filenames, or page condition.
+        banks: {string: [string]} or {string: [{string: string}]}. A dictionary
+        mapping bank names to banks, where a bank is a list of pieces of
+        information (which may be simple - strings - or complex - dictionaries
+        of strings). Within a bank, all items should be for the same purpose. If
+        the pieces of information are complex, all dictionaries in the same bank
+        should have the same keys. Bank information can be used for page text,
+        option text, page feedback, option feedback, resource filenames, or page
+        condition.
         '''
 
         self._set_id(id_str)
@@ -367,7 +444,7 @@ class Block(Component):
         pass
 
 from compiler import ExperimentEncoder
-from utils import make_exp, make_task
+from utils import make_exp, make_task, IDGenerator
 
 class Experiment(Component):
     '''An Experiment holds all the information describing one experiment. If you
@@ -375,7 +452,7 @@ class Experiment(Component):
     and among blocks within one experiment), then use one IDGenerator per
     experiment.'''
     def __init__(self, blocks, exchangeable = [], counterbalance = [], banks =
-            {}):
+            {}, treatments = []):
         '''
         blocks: [Block], the contents of the experiment.
 
@@ -385,11 +462,23 @@ class Experiment(Component):
         counterbalance: [Block], a subset of the Blocks. See Block documentation
         for more information.
 
-        banks: {string: [string]}, a dictionary mapping bank names to banks,
-        where a bank is a list of pieces of information. Within a bank, all
-        items should be for the same purpose. Bank information can be used for
-        page text, option text, page feedback, option feedback, resource
-        filenames, or page condition.
+        treatments: [[Block]], a subset of the Blocks. Uses
+        num_counters in PsiTurk's config.txt. The blocks listed in treatments
+        are specified as running conditionally, based on a variable that changes
+        per participant and can take on as many values as you specify in
+        num_counters in PsiTurk's config.txt. Each sublist of blocks shows which
+        blocks will run when the counter is set to one of its possible
+        variables. The number of sublists should equal num_counters. Blocks
+        that are not listed in treatments will run by default.
+
+        banks: {string: [string]} or {string: [{string: string}]}. A dictionary
+        mapping bank names to banks, where a bank is a list of pieces of
+        information (which may be simple - strings - or complex - dictionaries
+        of strings). Within a bank, all items should be for the same purpose. If
+        the pieces of information are complex, all dictionaries in the same bank
+        should have the same keys. Bank information can be used for page text,
+        option text, page feedback, option feedback, resource filenames, or page
+        condition.
         '''
 
         self.blocks = [b for b in blocks]
@@ -399,6 +488,8 @@ class Experiment(Component):
             self.counterbalance = [b.id_str for b in counterbalance]
         if banks:
             self.banks = banks
+        if treatments:
+            self.treatments = treatments
 
     def _validate(self):
         self._validate_page_tags()
