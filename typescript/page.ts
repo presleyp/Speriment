@@ -64,7 +64,7 @@ class Question extends Page{
 
     constructor(jsonQuestion, block){
         super(jsonQuestion, block);
-        var jQuestion = _.defaults(jsonQuestion, {ordered: false, exclusive: true, freetext: false, keyboard: null});
+        var jQuestion = _.defaults(jsonQuestion, {ordered: false, exclusive: true, freetext: false, keyboard: null, feedback: null});
         this.ordered = jQuestion.ordered;
         this.exclusive = jQuestion.exclusive;
         this.freetext = jQuestion.freetext;
@@ -76,9 +76,7 @@ class Question extends Page{
             }
         }
         this.keyboard = jQuestion.keyboard;
-        if (!_.isUndefined(jQuestion.feedback)){ //TODO will probably want to use resources in feedback
-            this.feedback = new Statement({text: setOrSample(jQuestion.feedback, block), id: this.id + "_feedback"}, block);
-        }
+        this.feedback = getFeedback(jQuestion.feedback, this.id, block);
         this.options = _.map(jQuestion.options, (o):ResponseOption => {
             if (jQuestion.options.length > Page.dropdownThreshold){
                 return new DropDownOption(o, this, this.exclusive);
@@ -106,7 +104,7 @@ class Question extends Page{
         this.record.endTime = new Date().getTime();
         var selected: ResponseOption[] = _.filter<ResponseOption>(this.options, (o) => {return o.selected()});
         // feedback that should be displayed to the respondent
-        var optionFeedback: Statement[] = _.compact(_.map(selected, (o) => {return o.getFeedback();}));
+        var optionFeedback: Statement[] = _.compact(_.map(selected, (o) => {return getFeedback(o.feedback, o.id, this.block);}));
         this.recordResponses(selected);
         this.recordCorrect(selected);
         experimentRecord.addRecord(this.record);

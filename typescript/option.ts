@@ -24,7 +24,7 @@ class ResponseOption implements Viewable{
         this.tags = jsonOption.tags;
     }
 
-    public display(){}
+    public display(){} //TODO make div with pars for resources and options
 
     public getResponse(){
         return [this.id, this.text];
@@ -40,15 +40,6 @@ class ResponseOption implements Viewable{
 
     public selected(): boolean {
         return $('#'+this.id).is(':checked');
-    }
-
-    public getFeedback(){
-        if (this.feedback){
-            return new Statement({text: setOrSample(this.feedback, this.question.block), id: this.id + "_feedback"},
-                    this.question.block);
-        } else {
-            return null;
-        }
     }
 
     public isCorrect(){

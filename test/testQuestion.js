@@ -32,10 +32,10 @@ test("page with sampling", function(){
         condition: {'sampleFrom': 'conds', variable: 2},
         resources: ['resource1.jpg', {sampleFrom: 'resourcebank', variable: 1}],
         options: [
-            {text: {sampleFrom: 'optiontext', notVariable: 0}, id: 'o1'},
+            {text: {sampleFrom: 'optiontext', notVariable: 0}, id: 'o1', resources: [{sampleFrom: 'optionresource'}]},
             {text: 'option2', id: 'o2', feedback: {sampleFrom: 'optionfeedback', notVariable: 0}}]};
     var block = {'id': 'b', 'banks': {'questions': ['one', 'two'], 'conds': ['a', 'b', 'c'], 'resourcebank': ['r1.mp3', 'r2.mp3'],
-    'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no']}};
+    'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no'], optionresource: ['r3.mp3']}};
     var q = new Question(jsonq, block);
     // bank shuffling is done at the block level; pages always use variables as indices
     strictEqual(q.text, 'two', 'text is last element of text bank');
@@ -45,6 +45,7 @@ test("page with sampling", function(){
     strictEqual(q.options[0].text, 'that', 'option text sampled correctly');
     strictEqual(q.options[1].text, 'option2', 'unsampled option text intact');
     strictEqual(q.options[1].getFeedback().text, 'no', 'option feedback sampled correctly');
+    strictEqual(q.options[0].resources[0], '<audio controls><source src="r3.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
 });
 
 test("checkbox options", function(){

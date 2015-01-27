@@ -9,12 +9,24 @@ interface Viewable {
     resources;
 }
 
-function setText(text, block): string{
+function setText(text, block: Block): string{
     if (_.isArray(text)){
         var textParts = _.map(text, (t) => setOrSample(t, block));
-        return textParts.join();
+        return textParts.join('');
     } else {
         return setOrSample(text, block);
+    }
+}
+
+function getFeedback(feedback, ident: string, block: Block): Statement{
+    if (feedback){
+        if (_.isObject(feedback)){
+            return new Statement(feedback, block);
+        } else {
+            return new Statement({text: setOrSample(feedback, block), id: ident + "_feedback"}, block);
+        }
+    } else {
+        return null;
     }
 }
 
