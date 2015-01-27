@@ -46,7 +46,7 @@ class SampleFrom:
     _variable_maps = {} # {bankname: {variablename: index}}
 
     def __init__(self, bank, variable = None, not_variable = None, field = None,
-            without_replacement = True):
+            with_replacement = True):
         '''bank: string, the name of an information bank to sample from. A
         corresponding bank must be put in one of the Blocks containing this
         SampleFrom, or the Experiment.
@@ -203,9 +203,8 @@ class Page(Component):
         expression that a correct answer will match.
 
         resources: [string], filenames of any images, audio, or video that
-        should display on the page. Any resource can be SampleFrom. Put all
-        resource files in static/images. They can be further divided into
-        subdirectories there.
+        should display on the page. Any resource can be SampleFrom. Make sure
+        resources are inside your project directory.
 
         tags: [string], any metadata you want to associate with this Page. It
         will not be used in the experiment, but will be passed through to the
