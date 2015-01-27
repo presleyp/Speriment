@@ -14,9 +14,10 @@ class Block{
     runIf;
     banks;
     oldContents;
+    criterion: number;
 
     constructor(jsonBlock, public container: Container){
-        jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}});
+        jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}, criterion: null});
         this.runIf = jsonBlock.runIf;
         if (jsonBlock.runIf){
             if (_.has(jsonBlock.runIf, 'optionID')){
@@ -40,6 +41,28 @@ class Block{
     tellLast(): void{}
 
     run(nextUp, experimentRecord: ExperimentRecord){}
+
+    // have to meet or exceed criterion to move on; otherwise you repeat this block
+    shouldLoop(experimentRecord: ExperimentRecord): boolean {
+        if (!this.criterion){
+            return false;
+        } else {
+            var grades: boolean[] = experimentRecord.getBlockGrades(this.id);
+            var metric: number;
+
+            // this.criterion is necessary percent correct
+            if (this.criterion < 1){
+                metric = _.compact(grades).length / grades.length;
+
+            // this.criterion is necessary number correct in a row from the end
+            } else {
+                var lastIncorrect = _.lastIndexOf(grades, false);
+                var metric = grades.length - (lastIncorrect + 1);
+            }
+
+            return metric < this.criterion;
+        }
+    }
 
     advance(experimentRecord: ExperimentRecord): void {
         if (!_.isEmpty(this.contents) && this.runIf.shouldRun(experimentRecord)){
@@ -90,12 +113,11 @@ class InnerBlock extends Block{
     contents: Page[];
     private latinSquare: boolean;
     private pseudorandom: boolean;
-    private criterion: number;
     private isLast: boolean = false;
 
     constructor(jsonBlock, public container: Container){
         super(jsonBlock, container);
-        jsonBlock = _.defaults(jsonBlock, {latinSquare: false, pseudorandom: false, criterion: null});
+        jsonBlock = _.defaults(jsonBlock, {latinSquare: false, pseudorandom: false});
         this.latinSquare = jsonBlock.latinSquare;
         this.pseudorandom = jsonBlock.pseudorandom;
         this.criterion = jsonBlock.criterion;
@@ -198,29 +220,6 @@ class InnerBlock extends Block{
             }
         });
         this.contents = pages;
-    }
-
-    //TODO move to Block
-    // have to meet or exceed criterion to move on; otherwise you repeat this block
-    shouldLoop(experimentRecord: ExperimentRecord): boolean {
-        if (!this.criterion){
-            return false;
-        } else {
-            var grades: boolean[] = experimentRecord.getBlockGrades(this.id);
-            var metric: number;
-
-            // this.criterion is necessary percent correct
-            if (this.criterion < 1){
-                metric = _.compact(grades).length / grades.length;
-
-            // this.criterion is necessary number correct in a row from the end
-            } else {
-                var lastIncorrect = _.lastIndexOf(grades, false);
-                var metric = grades.length - (lastIncorrect + 1);
-            }
-
-            return metric < this.criterion;
-        }
     }
 
     advance(experimentRecord: ExperimentRecord){
