@@ -7,6 +7,8 @@ interface Viewable {
     text;
     id: string;
     resources;
+
+    wrapResource(resource: string): HTMLElement;
 }
 
 function setText(text, block: Block): string{

@@ -80,7 +80,7 @@ test("sampling from outer block with fields", function(){
 
 
 test("create inner block", function(){
-    setupForm();
+    Experiment.addElements();
     var jsonb = {id: "b1", pages:[{text:"one", id:"p1"}, {text:"two", id:"p2", freetext: true, options: [{id: "o1"}]}]};
     var b = new InnerBlock(jsonb, fakeContainer);
     strictEqual(b.contents.length, 2, "are pages initialized properly?");
@@ -109,6 +109,7 @@ test("create inner block", function(){
             ok(p instanceof Question, "should be a Question");
         }
     });
+    cleanUp();
 });
 
 test("choosing pages", function(){
@@ -238,14 +239,14 @@ CustomError.prototype.toString = function() {
 
 
 test("statement calling advance", function(){
-    setupForm();
+    Experiment.addElements()
     var pgs = [{text:"page1", id:"p1"}, {text:"page2", id:"p2"}];
     var b = new InnerBlock({id:"b1", pages: pgs} , fakeContainer);
     var er = new ExperimentRecord();
     b.advance(er);
 
     // first statement displays
-    var text1 = $("p.question").text();
+    var text1 = $("#pagetext").text();
     notEqual(text1, "", "statement should display");
     strictEqual($(":button").length, 1, "there should be a next button");
 
@@ -269,7 +270,7 @@ test("statement calling advance", function(){
     */
 
     // second statement displays
-    notEqual(text1, $("p.question").text(), "next statement should display after click");
+    notEqual(text1, $("#pagetext").text(), "next statement should display after click");
 
     //entries = JSON.parse($("#surveyman").val()).responses;
 
@@ -289,17 +290,18 @@ test("statement calling advance", function(){
     strictEqual(entries[1].selected, undefined, 'statement should not record selected options');
     strictEqual(entries[1].correct, undefined, 'statement should not record correct options');
     */
+   cleanUp();
 });
 
 test("question calling advance", function(){
-    setupForm();
+    Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1", correct:"some text"}] },
         {text:"page2", id:"p2", freetext: true, options:[{id:"o2", correct: "some text"}] }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
     var er = new ExperimentRecord();
     b.advance(er);
 
-    var text1 = $("p.question").text();
+    var text1 = $("#pagetext").text();
     notEqual(text1, "", "question text should display");
     // strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
     // strictEqual($("#continue").prop("disabled"), true, "next button should be disabled");
@@ -308,7 +310,7 @@ test("question calling advance", function(){
     var oid = b.oldContents[0].options[0].id;
 
     strictEqual($("#"+oid).val(), '', "text box should be empty");
-    strictEqual($("p.answer input").val(), '', "text box should be empty");
+    strictEqual($(".response input").val(), '', "text box should be empty");
     strictEqual(b.oldContents[0].options[0].selected(), false, "option should know it's unselected");
 
     // strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
@@ -331,12 +333,12 @@ test("question calling advance", function(){
    */
 
     // check displaying
-    notEqual(text1, $("p.question").text(), "next question text should display after click");
-    notEqual("", $("p.question").text(), "next question text should display after click");
-    strictEqual($("p.answer input").val().length, 0, "text box should be empty");
+    notEqual(text1, $("#pagetext").text(), "next question text should display after click");
+    notEqual("", $("#pagetext").text(), "next question text should display after click");
+    strictEqual($(".response input").val().length, 0, "text box should be empty");
     strictEqual(b.oldContents[1].options[0].selected(), false, "option should know it's unselected");
 
-    $("p.answer input").val('more text');
+    $(".response input").val('more text');
 
     strictEqual(b.oldContents[1].options[0].selected(), true, "option should know it's selected");
 
@@ -353,18 +355,19 @@ test("question calling advance", function(){
     strictEqual(entries[1].selected[0], "more text", 'question should record the content of the text box');
     strictEqual(entries[1].correct[0], false, 'question should record whether the response was correct');
     */
+    cleanUp();
 });
 
 test("question with answer calling advance", function(){
-    setupForm();
+    Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1"}] , feedback:"good job" } ,
         {text:"page2", id:"p2", freetext: true, options:[{id:"o2"}] , feedback: "great job" }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
     var er = new ExperimentRecord();
     b.advance(er);
 
-    var text1 = $("p.question").text();
-    strictEqual($("p.question:contains('page')").length, 1, "question text should display");
+    var text1 = $("#pagetext").text();
+    strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
 
     $(":input[type='text']").val("hi");
     clickNext();
@@ -381,7 +384,7 @@ test("question with answer calling advance", function(){
     strictEqual(entries[0].correct[0], null, 'question should record null when no correct answer was supplied');
     */
 
-    strictEqual($("p.question:contains('job')").length, 1, "answer should display after click");
+    strictEqual($("#pagetext:contains('job')").length, 1, "answer should display after click");
 
     clickNext();
 
@@ -395,14 +398,14 @@ test("question with answer calling advance", function(){
     ok(entries[1].startTime <= entries[1].endTime, 'start time should be before end time');
     */
 
-    notEqual(text1, $("p.question").text(), "next question text should display after click");
-    strictEqual($("p.question:contains('page')").length, 1, "next question text should display after click");
+    notEqual(text1, $("#pagetext").text(), "next question text should display after click");
+    strictEqual($("#pagetext:contains('page')").length, 1, "next question text should display after click");
 
     $(":input[type='text']").val("hello");
     $(":input[type='text']").trigger("keyup");
     clickNext();
 
-    strictEqual($("p.question:contains('job')").length, 1, "answer should display after click");
+    strictEqual($("#pagetext:contains('job')").length, 1, "answer should display after click");
 
     //check recording TODO
     /*
@@ -417,11 +420,12 @@ test("question with answer calling advance", function(){
     */
 
     throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
+    cleanUp();
 
 });
 
 test("question with options with answers calling advance", function(){
-    setupForm();
+    Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "a", feedback: "good job"}, {id:'o2', text:'b', feedback:'not quite'} ] , } ,
         {text:"page2", id:"p2", options:[{id: "o1", text: "a", feedback: "good job"}, {id:'o2', text:'b', feedback:'not quite'}] }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
@@ -429,21 +433,22 @@ test("question with options with answers calling advance", function(){
     var er = new ExperimentRecord();
     b.advance(er);
 
-    var text1 = $("p.question").text();
-    strictEqual($("p.question:contains('page')").length, 1, "question text should display");
-    strictEqual($("p.answer input").length, 2, 'option buttons should display');
-    strictEqual($("p.answer label").length, 2, 'option labels should display');
+    var text1 = $("#pagetext").text();
+    strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
+    strictEqual($(".response input").length, 2, 'option buttons should display');
+    strictEqual($(".response label").length, 2, 'option labels should display');
 
     $(":input[id='o1']").prop("checked", true);
     clickNext();
-    strictEqual($("p.question").text(), "good job", "answer should display after click");
+    strictEqual($("#pagetext").text(), "good job", "answer should display after click");
 
     clickNext();
 
-    notEqual(text1, $("p.question").text(), "next question text should display after click");
-    strictEqual($("p.question:contains('page')").length, 1, "next question text should display after click");
+    notEqual(text1, $("#pagetext").text(), "next question text should display after click");
+    strictEqual($("#pagetext:contains('page')").length, 1, "next question text should display after click");
 
     throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
+    cleanUp();
 });
 
 var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "A", feedback:"good job"}, {id:'o2', text:"B", feedback: 'no'}] },
@@ -464,7 +469,7 @@ var jsons = {blocks:[
 ] };
 
 test('create outerblock', function(){
-    setupForm();
+    Experiment.addElements();
     var jsonb = {id:'b1', blocks:[
             { id:'b3', pages: pgs2 },
             { id:'b4', pages: pgs3 }
@@ -503,7 +508,6 @@ test('create outerblock', function(){
 
 
 test("create survey", function(){
-    // setupForm();
     var s = new Experiment(jsons, 0, 0);
 
     strictEqual(s.contents.length, 2, "survey should have two blocks");
@@ -612,15 +616,14 @@ test("counterbalancing and exchanging", function(){
 });
 
 test('run blocks conditionally: when condition is satisfied', function(){
-    // setupForm();
-    cleanUp();
+    // cleanUp();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
     var runBoth = new Experiment({blocks: [b1, b2]}, 0, 0, fakePsiTurk);
 
     runBoth.start();
     // clickNext(); // breakoff notice
-    strictEqual($('p.answer input').length, 2, "there should be two options");
+    strictEqual($('.response input').length, 2, "there should be two options");
     if ($("#o1").length === 1){
         $("#o1").prop('checked', true);
     } else {
@@ -629,7 +632,7 @@ test('run blocks conditionally: when condition is satisfied', function(){
     clickNext(); // page 1
     clickNext(); // page 1 answer
 
-    // $("p.answer input").prop('checked', true);
+    // $(".response input").prop('checked', true);
     if ($("#o1").length === 1){
         $("#o1").prop('checked', true);
     } else {
@@ -638,13 +641,13 @@ test('run blocks conditionally: when condition is satisfied', function(){
     clickNext(); // page 2
     clickNext(); // page 2 answer
 
-    ok($('p.question:contains("page")'), 'second block should run because o1 was chosen');
+    ok($('#pagetext:contains("page")'), 'second block should run because o1 was chosen');
 
-    $("p.answer input").prop('checked', true);
+    $(".response input").prop('checked', true);
     clickNext(); // page 3
     clickNext(); // page 3 answer
 
-    $("p.answer input").prop('checked', true);
+    $(".response input").prop('checked', true);
     clickNext(); // page 4
 
     // page 4 answer
@@ -654,7 +657,6 @@ test('run blocks conditionally: when condition is satisfied', function(){
 });
 
 test('run blocks conditionally: when text has been entered', function(){
-    // setupForm();
     var textpage = {id: 'p1', freetext: true, options: [{id: 'o1'}]};
     var statement = {id: 'p2', text: 'page2'};
     var b1 = {id: 'b1', pages: [textpage]};
@@ -662,26 +664,25 @@ test('run blocks conditionally: when text has been entered', function(){
     var runBoth = new Experiment({blocks: [b1, b2], breakoff: false}, 0);
 
     runBoth.start();
-    strictEqual($('p.answer input').length, 1, 'text box shows');
+    strictEqual($('.response input').length, 1, 'text box shows');
     // give the desired answer
     $('#o1').val('hello');
     clickNext();
     // b2 should run
     ok(runBoth.experimentRecord.textMatch('p1', 'hello'), 'record should note that a matching response was given');
-    strictEqual($('p.question').text(), 'page2', 'block 2 runs because hello was given as text answer');
+    strictEqual($('#pagetext').text(), 'page2', 'block 2 runs because hello was given as text answer');
 
     cleanUp();
 });
 
 test('run blocks conditionally: when condition is unsatisfied', function(){
-    // setupForm();
     var b1 = {id: 'b1', pages: pgs};
     var b2 = {id: 'b2', pages: pgs2, runIf: {pageID: 'p1', optionID: 'o1'}};
     var runOne = new Experiment({blocks: [b2, b1]}, 0);
     runOne.start();
 
     clickNext();
-    ok(_.contains(['page1', 'page2'], $('p.question').text()), 'b1 should run, skipping b2 because o1 has not been chosen');
+    ok(_.contains(['page1', 'page2'], $('#pagetext').text()), 'b1 should run, skipping b2 because o1 has not been chosen');
 
     cleanUp();
 });
@@ -692,12 +693,12 @@ test('run blocks conditionally: based on permutation', function(){
 
     var runOne = new Experiment({blocks: [b1, b2]}, 0, 1);
     runOne.start();
-    ok(_.contains(['page3', 'page4'], $('p.question').text()), "b2 should run because b1's runIf is not satisfied");
+    ok(_.contains(['page3', 'page4'], $('#pagetext').text()), "b2 should run because b1's runIf is not satisfied");
     cleanUp();
 
     var runBoth = new Experiment({blocks: [b1, b2]}, 0, 0);
     runBoth.start();
-    ok(_.contains(['page1', 'page2'], $('p.question').text()), 'b1 should run because its runIf is satisfied');
+    ok(_.contains(['page1', 'page2'], $('#pagetext').text()), 'b1 should run because its runIf is satisfied');
     cleanUp();
 });
 
@@ -705,7 +706,7 @@ var ps = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}
         {id: 'p2', text:'page2', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]}];
 
 test('recording multiple iterations of the same question', function(){
-    setupForm();
+    Experiment.addElements();
     var b1 = new InnerBlock({id: 'b1', pages: [ps[0], ps[0], ps[0]]}, {version: 0, containerIDs: []});
     var er = new ExperimentRecord();
     b1.advance(er);
@@ -717,10 +718,11 @@ test('recording multiple iterations of the same question', function(){
     strictEqual(er.trialRecords.p1[0].iteration, 1, 'The first should be iteration 1');
     strictEqual(er.trialRecords.p1[1].iteration, 2, 'The second should be iteration 2');
     notEqual(er.trialRecords.p1[0].startTime, er.trialRecords.p1[1].startTime, 'The records should be distinct');
+    cleanUp();
 });
 
 test('training block: whole number criterion not met', function(){
-    setupForm();
+    Experiment.addElements();
     var b1 = new InnerBlock({id: 'b1', pages: ps, criterion: 2}, fakeContainer);
     var er = new ExperimentRecord();
     b1.advance(er);
@@ -730,11 +732,12 @@ test('training block: whole number criterion not met', function(){
     //choose right answer
     $('#o1').prop('checked', true);
     clickNext();
-    ok($('p.question').text(), 'block should loop, displaying a page again, because only one answer was right');
+    ok($('#pagetext').text(), 'block should loop, displaying a page again, because only one answer was right');
+    cleanUp();
 });
 
 test('training block: whole number criterion met', function(){
-    setupForm();
+    Experiment.addElements();
     var er2 = new ExperimentRecord();
     var b2 = new InnerBlock({id: 'b2', pages: ps, criterion: 2}, fakeContainer);
     b2.advance(er2);
@@ -744,10 +747,11 @@ test('training block: whole number criterion met', function(){
     // choose right answer
     $('#o1').prop('checked', true);
     throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    cleanUp();
 });
 
 test('training block: whole number criterion met, feedback page', function(){
-    setupForm();
+    Experiment.addElements();
     var er = new ExperimentRecord();
     var qa = [{id: 'p5', text: 'page1', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o2', text:'B', correct:false}]},
         {id: 'p6', text:'page2', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o4', text:'B', correct:false}]}];
@@ -763,10 +767,11 @@ test('training block: whole number criterion met, feedback page', function(){
     clickNext();
     // feedback displays
     throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    cleanUp();
 });
 
 test('training block: decimal criterion not met', function(){
-    setupForm();
+    Experiment.addElements();
     var er = new ExperimentRecord();
     var b3 = new InnerBlock({id: 'b3', pages: ps, criterion: 0.8}, fakeContainer);
     b3.advance(er);
@@ -776,11 +781,12 @@ test('training block: decimal criterion not met', function(){
     //choose right answer
     $('#o1').prop('checked', true);
     clickNext();
-    ok($('p.question').text(), 'block should loop, displaying a page again, because only one answer was right');
+    ok($('#pagetext').text(), 'block should loop, displaying a page again, because only one answer was right');
+    cleanUp();
 });
 
 test('training block: decimal criterion met', function(){
-    setupForm();
+    Experiment.addElements();
     var er = new ExperimentRecord();
     var b4 = new InnerBlock({id: 'b4', pages: ps, criterion: 0.5}, fakeContainer);
     b4.advance(er);
@@ -790,10 +796,11 @@ test('training block: decimal criterion met', function(){
     // choose wrong answer, but still good enough to meet criterion
     $('#o2').prop('checked', true);
     throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    cleanUp();
 });
 
 test('training block: decimal criterion met on second try', function(){
-    setupForm();
+    Experiment.addElements();
     var er = new ExperimentRecord();
     var b6 = new InnerBlock({id: 'b6', pages: ps, criterion: 0.5}, fakeContainer);
     b6.advance(er);
@@ -810,10 +817,11 @@ test('training block: decimal criterion met on second try', function(){
     //choose right answer
     $('#o1').prop('checked', true);
     throws(clickNext, CustomError, 'block finishes because criterion was met on the second round');
+    cleanUp();
 });
 
 test('training block: decimal criterion met, no correctness info', function(){
-    setupForm();
+    Experiment.addElements();
     var er = new ExperimentRecord();
     ps.push({id:'p3', text:'page3', options: [{id: 'o1', text:'A'}, {id:'o2', text:'B'}]});
     var b5 = new InnerBlock({pages: ps, id:'b5', criterion: 0.5}, fakeContainer);
@@ -829,10 +837,11 @@ test('training block: decimal criterion met, no correctness info', function(){
     clickNext();
     $(answers[2]).prop('checked', true);
     throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    cleanUp();
 });
 
 test('training shuffles pages and options', function(){
-    setupForm();
+    Experiment.addElements();
     var sameFirstPages = [];
     var sameFirstOptions = [];
     var ps = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]},
@@ -857,4 +866,5 @@ test('training shuffles pages and options', function(){
 
     ok(_.contains(sameFirstPages, false), 'first page varies across loops over the block');
     ok(_.contains(sameFirstOptions, false), 'first option varies across loops over the block');
+    cleanUp();
 });

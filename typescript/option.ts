@@ -9,7 +9,7 @@ class ResponseOption implements Viewable{
 
     public text: string;
     public id: string;
-    public feedback: string;
+    public feedback: Statement;
     public correct: boolean;
     public tags: string[];
     public resources: string[];
@@ -18,8 +18,10 @@ class ResponseOption implements Viewable{
         jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null, resources: null});
         this.id = jsonOption.id;
         this.text = setText(jsonOption.text, this.question.block);
-        this.feedback = jsonOption.feedback;
-        this.resources = _.map(jsonOption.resources, (r: string):string => {return makeResource(r, this.question.block)});
+        this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.block);
+        this.resources = _.map(jsonOption.resources, (r: string):string => {
+            return makeResource(r, this.question.block);
+        });
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         this.tags = jsonOption.tags;
     }
@@ -58,6 +60,18 @@ class ResponseOption implements Viewable{
         });
     }
 
+    public wrapResource(resource: string): HTMLElement{
+        var par = document.createElement('p');
+        $(par).append(resource);
+        return par;
+    }
+
+    public wrapOption(parts){
+        var optionDiv = document.createElement('div');
+        $(optionDiv).addClass('response');
+        $(optionDiv).append(parts);
+        return optionDiv;
+    }
 }
 
 class RadioOption extends ResponseOption{
@@ -70,9 +84,8 @@ class RadioOption extends ResponseOption{
         $(input).attr({type: "radio", id: this.id, name: this.question.id});
         $(input).change((m:MouseEvent) => {this.onChange();});
 
-        $(OPTIONS).append(label);
-        $(OPTIONS).append(input);
-        $(OPTIONS).append(this.resources);
+        var optionParts = _.map(this.resources, this.wrapResource).concat([label, input]);
+        $(OPTIONS).append(this.wrapOption(optionParts));
     }
 
 }
@@ -87,8 +100,8 @@ class CheckOption extends ResponseOption{
         $(input).attr({type: "checkbox", id: this.id, name: this.question.id});
         $(input).change((m:MouseEvent) => {this.onChange();});
 
-        $(OPTIONS).append(label);
-        $(OPTIONS).append(input);
+        var optionParts = _.map(this.resources, this.wrapResource).concat([label, input]);
+        $(OPTIONS).append(this.wrapOption(optionParts));
     }
 }
 
@@ -106,7 +119,8 @@ class TextOption extends ResponseOption{
     display(){
         var input = document.createElement("input");
         $(input).attr({type: "text", id: this.id, name: this.question.id});
-        $(OPTIONS).append(input);
+        var optionParts = _.map(this.resources, this.wrapResource).concat([input]);
+        $(OPTIONS).append(this.wrapOption(optionParts));
         $(input).keypress((k:KeyboardEvent) => {
             // space shouldn't trigger clicking next
             k.stopPropagation();
@@ -146,20 +160,21 @@ class DropDownOption extends ResponseOption{
         this.exclusive = exclusive;
     }
 
-    display(){
+    display(){//TODO changed OPTION+" select" to select, check if it broke
         //if select element exists, append to it, otherwise create it first
-        if ($(OPTIONS+" select").length === 0){
+        if ($("select").length === 0){
             var select = document.createElement("select");
             if (!this.exclusive){
                 $(select).attr({multiple: "multiple", name: this.question.id});
             }
             $(select).change((m:MouseEvent) => {this.onChange();});
-            $(OPTIONS).append(select);
+            var optionParts = _.map(this.resources, this.wrapResource).concat([select]);
+            $(OPTIONS).append(this.wrapOption(optionParts));
         }
         var option = document.createElement("option");
         $(option).attr("id", this.id);
         $(option).append(this.text);
-        $(OPTIONS+" select").append(option);
+        $("select").append(option);
     }
 
     useKey(key: number){

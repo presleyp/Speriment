@@ -33,7 +33,7 @@ test("page with sampling", function(){
         resources: ['resource1.jpg', {sampleFrom: 'resourcebank', variable: 1}],
         options: [
             {text: {sampleFrom: 'optiontext', notVariable: 0}, id: 'o1', resources: [{sampleFrom: 'optionresource'}]},
-            {text: 'option2', id: 'o2', feedback: {sampleFrom: 'optionfeedback', notVariable: 0}}]};
+            {text: 'option2', id: 'o2', feedback: {text: {sampleFrom: 'optionfeedback', notVariable: 0}}}]};
     var block = {'id': 'b', 'banks': {'questions': ['one', 'two'], 'conds': ['a', 'b', 'c'], 'resourcebank': ['r1.mp3', 'r2.mp3'],
     'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no'], optionresource: ['r3.mp3']}};
     var q = new Question(jsonq, block);
@@ -44,7 +44,7 @@ test("page with sampling", function(){
     strictEqual(q.resources[1], '<audio controls><source src="r2.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
     strictEqual(q.options[0].text, 'that', 'option text sampled correctly');
     strictEqual(q.options[1].text, 'option2', 'unsampled option text intact');
-    strictEqual(q.options[1].getFeedback().text, 'no', 'option feedback sampled correctly');
+    strictEqual(q.options[1].feedback.text, 'no', 'option feedback sampled correctly');
     strictEqual(q.options[0].resources[0], '<audio controls><source src="r3.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
 });
 
@@ -120,7 +120,8 @@ test("option ordering", function(){
 
 function setup(){
     var $fixture = $( "#qunit-fixture" );
-    $fixture.append("<div id='question'><p class='question'></p><p class='answer'></p></div> <div class='navigation'></div><div class='breakoff'> </div><form class='responses'><input type='hidden' id='surveyman'></form>");
+    var html = '<div id="experimentdiv"> <p id="pagetext"></p>   <div id="resourceDiv"></div> <div id="responseDiv"></div> <div class="navigation"><input id="continue" type="button" value="Next"></div> </div>';
+    $fixture.append(html);
     var nextButton = document.createElement("input");
     $(nextButton).attr({type: "button", id: "continue", value: "Next"});
     $("div.navigation").append(nextButton);
@@ -133,35 +134,36 @@ function setupForm(){
 }
 
 test("statement display", function(){
-    setupForm();
+    Experiment.addElements();
     strictEqual($("div.navigation").length, 1, "setup didn't work");
     var jsons = {"text": "Do I pass?", id: "s1"};
     var s = new Statement(jsons, {});
     s.display();
-    strictEqual($("p.question").text(), "Do I pass?", "statement text not appended properly");
-    strictEqual($("p.answer").text(), '', "statement shouldn't put anything in answer paragraph");
+    strictEqual($("#pagetext").text(), "Do I pass?", "statement text not appended properly");
+    strictEqual($(".response").text(), '', "statement shouldn't put anything in answer paragraph");
     strictEqual($(":button").length, 1, "There should be one Next button");
     // strictEqual($(":button").prop('disabled'), true, 'Next button should be disabled at first');
 
     s.isLast = true;
     s.display();
 
-    strictEqual($("p.question").text(), "Do I pass?", "statement text should be appended");
-    strictEqual($("p.answer").html().length, 0, "statement shouldn't put anything in answer paragraph");
+    strictEqual($("#pagetext").text(), "Do I pass?", "statement text should be appended");
+    strictEqual($("#responseDiv").html().length, 0, "statement shouldn't put anything in answer paragraph");
     // strictEqual($(":button[value='Next']").length, 0, "Next button shouldn't display");
     // strictEqual($(":submit").length, 1, "Submit button should show");
     // strictEqual($(":submit").prop('disabled'), true, 'Submit button should be disabled at first');
+    cleanUp();
 });
 
 
 test("question display with radios", function(){
-    setupForm();
+    Experiment.addElements();
     var opts = [{text: "A", id: "o1", correct: true}, {text: "B", id: "o2", correct: false}];
     var q = new Question({text: "Do I pass?", id: "q1", options: opts}, {});
     q.display();
-    strictEqual($("p.question").text(), "Do I pass?", "is question text accurate?");
-    strictEqual($("p.answer :input").length, 2, "did option inputs get appended?");
-    strictEqual($("p.answer *").length, 4, "did option inputs and labels get appended?");
+    strictEqual($("#pagetext").text(), "Do I pass?", "is question text accurate?");
+    strictEqual($(".response :input").length, 2, "did option inputs get appended?");
+    strictEqual($(".response *").length, 4, "did option inputs and labels get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
 
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
@@ -175,9 +177,9 @@ test("question display with radios", function(){
     q.display();
     id1 = q.options[0].id;
     id2 = q.options[1].id;
-    strictEqual($("p.question").text(), "Do I pass?", "is question text accurate?");
-    strictEqual($("p.answer :input").length, 2, "did option inputs get appended?");
-    strictEqual($("p.answer *").length, 4, "did option inputs and labels get appended?");
+    strictEqual($("#pagetext").text(), "Do I pass?", "is question text accurate?");
+    strictEqual($(".response :input").length, 2, "did option inputs get appended?");
+    strictEqual($(".response *").length, 4, "did option inputs and labels get appended?");
     // strictEqual($(":button").length, 0, "should not be a next button");
     // strictEqual($(":submit").length, 1, "should be a submit button");
     // strictEqual($(":submit").prop("disabled"), true, "submit button should be disabled");
@@ -188,14 +190,15 @@ test("question display with radios", function(){
     strictEqual(q.options[1].selected(), false, "does option know it's not selected?");
     notEqual(q.options[0].isCorrect(), null, "does option know if it's correct?");
     notEqual(q.options[1].isCorrect(), null, "does option know if it's correct?");
+    cleanUp();
 });
 
 test("question display with checkboxes", function(){
-    setupForm();
+    Experiment.addElements();
     var opts = [{text: "A", id: "o1", correct: true}, {text: "B", id: "o2", correct: false}];
     var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: opts}, {});
     q.display();
-    strictEqual($("p.answer *").length, 4, "did option inputs and labels get appended?");
+    strictEqual($(".response *").length, 4, "did option inputs and labels get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
     var id1 = q.options[0].id;
@@ -214,14 +217,15 @@ test("question display with checkboxes", function(){
 
     notEqual(q.options[0].isCorrect(), null, "does option know if it's correct?");
     notEqual(q.options[1].isCorrect(), null, "does option know if it's correct?");
+    cleanUp();
 });
 
 test("question display with dropdown", function(){
-    setupForm();
+    Experiment.addElements();
     var os = _.map(_.range(8), function(i){return {text: i.toString(), id: i.toString()};});
     var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: os}, {});
     q.display();
-    strictEqual($("p.answer *").length, 9, "did select and its options get appended?");
+    strictEqual($(".response *").length, 9, "did select and its options get appended?");
     strictEqual($("option").length, 8, "did options get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
@@ -240,22 +244,23 @@ test("question display with dropdown", function(){
     $("option[id='"+id1+"']").trigger("change");
     strictEqual(q.options[0].selected(), false, "option should know it's no longer selected");
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled when selections are removed");
+    cleanUp();
 });
 
 test("question display with text", function(){
-    setupForm();
+    Experiment.addElements();
     var opt = [{id: "o1", text: "starter", correct: /hello/}];
     var q = new Question({text: "Do I pass?", id: "q1", freetext: true, options: opt}, {});
     q.display();
 
-    strictEqual($("p.answer input").length, 1, "did textbox get appended?");
+    strictEqual($(".response input").length, 1, "did textbox get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
     // strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
-    strictEqual($("p.answer input").val(), "", "text should start out blank (not supporting placeholders currently)");//TODO
+    strictEqual($(".response input").val(), "", "text should start out blank (not supporting placeholders currently)");
 
     $("#o1").val("hi");
 
-    strictEqual($("p.answer input").val(), "hi", "did changing text work?");
+    strictEqual($(".response input").val(), "hi", "did changing text work?");
     strictEqual($("#o1").val(), "hi", "did changing text work?");
     strictEqual(q.options[0].isCorrect(), false, "text should know it's incorrect");
 
@@ -270,11 +275,12 @@ test("question display with text", function(){
     $("#o1").val("");
 
     strictEqual(q.options[0].selected(), false, "does option know it doesn't have text?");
+    cleanUp();
 });
 
 // asyncTest('statement enables next button after delay', function(){
 //     expect(1);
-//     setupForm();
+//     Experiment.addElements();
 //     var jsons = {"text": "Do I pass?", id: "s1"};
 //     var s = new Statement(jsons, {});
 //     s.display();
@@ -287,7 +293,7 @@ test("question display with text", function(){
 
 // asyncTest('statement enables submit button after delay', function(){
 //     expect(1);
-//     setupForm();
+//     Experiment.addElements();
 //     var jsons = {"text": "Do I pass?", id: "s1"};
 //     var s = new Statement(jsons, {});
 //     s.isLast = true;

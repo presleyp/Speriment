@@ -20,7 +20,9 @@ class Page implements Viewable{
         this.id = jsonPage.id;
         this.text = setText(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
-        this.resources = _.map(jsonPage.resources, (r: string):string => {return makeResource(r, this.block)});
+        this.resources = _.map(jsonPage.resources, (r: string):string => {
+            return makeResource(r, this.block);
+        });
         this.tags = jsonPage.tags;
         this.record = new TrialRecord(this.id, this.text, this.condition, this.block.containerIDs, this.tags);
     }
@@ -35,6 +37,13 @@ class Page implements Viewable{
         $(CONTINUE).prop({disabled: false});
     }
 
+    public wrapResource(resource: string): HTMLElement {
+        var wrapper = document.createElement('div');
+        $(wrapper).addClass('resource');
+        $(wrapper).append(resource);
+        return wrapper;
+    }
+
     public display(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
         $(document).off('keypress').keypress((k:KeyboardEvent) => {
@@ -46,7 +55,7 @@ class Page implements Viewable{
         this.disableNext();
         $(OPTIONS).empty();
         $(PAGE).empty().append(this.text);
-        $(RESOURCES).empty().append(this.resources);
+        $(RESOURCES).empty().append(_.map(this.resources, this.wrapResource));
         $(CONTINUE).show();
     }
 
@@ -104,7 +113,7 @@ class Question extends Page{
         this.record.endTime = new Date().getTime();
         var selected: ResponseOption[] = _.filter<ResponseOption>(this.options, (o) => {return o.selected()});
         // feedback that should be displayed to the respondent
-        var optionFeedback: Statement[] = _.compact(_.map(selected, (o) => {return getFeedback(o.feedback, o.id, this.block);}));
+        var optionFeedback: Statement[] = _.compact(_.pluck(selected, 'feedback'));
         this.recordResponses(selected);
         this.recordCorrect(selected);
         experimentRecord.addRecord(this.record);

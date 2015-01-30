@@ -1,0 +1,19 @@
+#experimentDiv{
+    margin: 10%;
+    text-align: center;
+}
+.resource{
+    display: inline-block;
+    margin: 10px;
+}
+.response{
+    margin: 50px;
+    display: inline-block;
+
+}
+input{
+    margin: 10px;
+}
+select{
+    margin: 10px;
+}

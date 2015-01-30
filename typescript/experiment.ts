@@ -7,9 +7,9 @@
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 // global constants for referring to HTML
-var PAGE = "p.question",
-    OPTIONS = "p.answer",
-    RESOURCES = "p.resources",
+var PAGE = "#pagetext",
+    RESOURCES = "#resourceDiv",
+    OPTIONS = "#responseDiv",
     NAVIGATION = "div.navigation",
     CONTINUE = "#continue"; // Next or Submit button
 
@@ -39,7 +39,7 @@ class Experiment implements Container{
 
     public start(){
         this.tellLast();
-        this.addElements();
+        Experiment.addElements();
         this.advance(this.experimentRecord);
     }
 
@@ -47,18 +47,18 @@ class Experiment implements Container{
         _.last<Block>(this.contents).tellLast();
     }
 
-    private addElements(){
+    static addElements(){
         var experimentDiv = document.createElement('div');
         $(experimentDiv).attr("id", "experimentDiv");
 
         var questionPar = document.createElement('p');
-        $(questionPar).addClass('question');
+        $(questionPar).attr('id', 'pagetext');
 
-        var answerPar = document.createElement('p');
-        $(answerPar).addClass('answer');
+        var resourceDiv = document.createElement('div');
+        $(resourceDiv).attr('id', 'resourceDiv');
 
-        var resourcePar = document.createElement('p');
-        $(resourcePar).addClass('resources');
+        var responseDiv = document.createElement('div');
+        $(responseDiv).attr('id', 'responseDiv');
 
         var navigationDiv = document.createElement('div');
         $(navigationDiv).addClass('navigation');
@@ -67,7 +67,7 @@ class Experiment implements Container{
         $(nextButton).attr({type: "button", id: "continue", value: "Next"});
 
         $('body').append(experimentDiv);
-        $(experimentDiv).append(questionPar, resourcePar, answerPar, navigationDiv);
+        $(experimentDiv).append(questionPar, resourceDiv, responseDiv, navigationDiv);
         $(navigationDiv).append(nextButton);
     }
 
