@@ -26,7 +26,7 @@ class ResponseOption implements Viewable{
         this.tags = jsonOption.tags;
     }
 
-    public display(){} //TODO make div with pars for resources and options
+    public run(){} //TODO make div with pars for resources and options
 
     public getResponse(){
         return [this.id, this.text];
@@ -75,7 +75,7 @@ class ResponseOption implements Viewable{
 }
 
 class RadioOption extends ResponseOption{
-    display(){
+    run(){
         var label = document.createElement("label");
         $(label).attr("for", this.id);
         $(label).append(this.text);
@@ -91,7 +91,7 @@ class RadioOption extends ResponseOption{
 }
 
 class CheckOption extends ResponseOption{
-    display(){
+    run(){
         var label = document.createElement("label");
         $(label).attr("for", this.id);
         $(label).append(this.text);
@@ -116,7 +116,7 @@ class TextOption extends ResponseOption{
         }
     }
 
-    display(){
+    run(){
         var input = document.createElement("input");
         $(input).attr({type: "text", id: this.id, name: this.question.id});
         var optionParts = _.map(this.resources, this.wrapResource).concat([input]);
@@ -160,7 +160,7 @@ class DropDownOption extends ResponseOption{
         this.exclusive = exclusive;
     }
 
-    display(){//TODO changed OPTION+" select" to select, check if it broke
+    run(){//TODO changed OPTION+" select" to select, check if it broke
         //if select element exists, append to it, otherwise create it first
         if ($("select").length === 0){
             var select = document.createElement("select");

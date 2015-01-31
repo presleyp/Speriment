@@ -38,13 +38,8 @@ class Experiment implements Container{
     }
 
     public start(){
-        this.tellLast();
         Experiment.addElements();
-        this.advance(this.experimentRecord);
-    }
-
-    private tellLast(){
-        _.last<Block>(this.contents).tellLast();
+        this.run(this.experimentRecord);
     }
 
     static addElements(){
@@ -71,10 +66,12 @@ class Experiment implements Container{
         $(navigationDiv).append(nextButton);
     }
 
-    public advance(experimentRecord: ExperimentRecord){
+    public run(experimentRecord: ExperimentRecord){
         if (!_.isEmpty(this.contents)){
             var block = this.contents.shift();
-            block.advance(experimentRecord);
+            block.run(experimentRecord);
+        } else {
+            experimentRecord.submitRecords();
         }
     }
 

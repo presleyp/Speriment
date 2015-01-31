@@ -44,7 +44,7 @@ class Page implements Viewable{
         return wrapper;
     }
 
-    public display(experimentRecord){
+    public run(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
         $(document).off('keypress').keypress((k:KeyboardEvent) => {
             if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
@@ -99,10 +99,10 @@ class Question extends Page{
         });
     }
 
-    public display(experimentRecord): void{
-        super.display(experimentRecord);
+    public run(experimentRecord): void{
+        super.run(experimentRecord);
         this.orderOptions();
-        _.each(this.options, (o:ResponseOption):void => {o.display()});
+        _.each(this.options, (o:ResponseOption):void => {o.run()});
         if (this.keyboard){
             _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
         }
@@ -112,18 +112,18 @@ class Question extends Page{
     public advance(experimentRecord): void{
         this.record.endTime = new Date().getTime();
         var selected: ResponseOption[] = _.filter<ResponseOption>(this.options, (o) => {return o.selected()});
-        // feedback that should be displayed to the respondent
+        // feedback that should be shown to the respondent
         var optionFeedback: Statement[] = _.compact(_.pluck(selected, 'feedback'));
         this.recordResponses(selected);
         this.recordCorrect(selected);
         experimentRecord.addRecord(this.record);
 
         if (!_.isEmpty(optionFeedback) && this.exclusive){ // ignoring option-by-option feedback if nonexclusive TODO
-            optionFeedback[0].display(experimentRecord);
+            optionFeedback[0].run(experimentRecord);
         } else if (this.feedback){
-            this.feedback.display(experimentRecord);
+            this.feedback.run(experimentRecord);
         } else {
-            this.block.advance(experimentRecord);
+            this.block.run(experimentRecord);
         }
     }
 
@@ -160,17 +160,16 @@ class Question extends Page{
 
 class Statement extends Page{
 
-    public display(experimentRecord){
-        super.display(experimentRecord);
+    public run(experimentRecord){
+        super.run(experimentRecord);
         this.record.startTime = new Date().getTime();
-        // setTimeout(() => {this.enableNext()}, 1000);
         this.enableNext();
     }
 
     public advance(experimentRecord){
         this.record.endTime = new Date().getTime();
         experimentRecord.addRecord(this.record);
-        this.block.advance(experimentRecord);
+        this.block.run(experimentRecord);
     }
 
 }

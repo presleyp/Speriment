@@ -33,14 +33,34 @@ class Block{
             this.runIf = new RunIf();
         }
         this.id = jsonBlock.id;
+        this.criterion = jsonBlock.criterion;
         this.banks = shuffleBanks(jsonBlock.banks);
         this.oldContents = [];
         this.containerIDs = this.container.containerIDs.concat(this.id);
     }
 
-    tellLast(): void{}
+    run(experimentRecord: ExperimentRecord){
+        if (_.isEmpty(this.contents)){
+            if (this.shouldLoop(experimentRecord)){
+                this.reset();
+                this.runChild(experimentRecord);
+            } else {
+                this.container.run(experimentRecord);
+            }
+        } else {
+            if (this.runIf.shouldRun(experimentRecord)){
+                this.runChild(experimentRecord);
+            } else {
+                this.container.run(experimentRecord);
+            }
+        }
+    }
 
-    run(nextUp, experimentRecord: ExperimentRecord){}
+    runChild(experimentRecord: ExperimentRecord){
+        var nextChild = this.contents.shift();
+        this.oldContents.push(nextChild);
+        nextChild.run(experimentRecord);
+    }
 
     // have to meet or exceed criterion to move on; otherwise you repeat this block
     shouldLoop(experimentRecord: ExperimentRecord): boolean {
@@ -64,19 +84,11 @@ class Block{
         }
     }
 
-    advance(experimentRecord: ExperimentRecord): void {
-        if (!_.isEmpty(this.contents) && this.runIf.shouldRun(experimentRecord)){
-            var nextUp = this.contents.shift();
-            this.oldContents.push(nextUp);
-            this.run(nextUp, experimentRecord);
-        } else {
-            this.nextMove(experimentRecord);
-        }
+    reset(){
+        this.contents = this.oldContents;
+        this.oldContents = [];
     }
 
-    nextMove(experimentRecord: ExperimentRecord): void {
-        this.container.advance(experimentRecord);
-    }
 }
 
 // an OuterBlock can only contain Blocks (InnerBlocks or OuterBlocks)
@@ -98,14 +110,10 @@ class OuterBlock extends Block implements Container{
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
     }
 
-    tellLast(){
-        _.last<Block>(this.contents).tellLast();
+    reset(){
+        super.reset();
+        _.each(this.contents, (b: Block) => {b.reset()});
     }
-
-    run(block: Block, experimentRecord: ExperimentRecord){
-        block.advance(experimentRecord);
-    }
-
 }
 
 // an InnerBlock can only contain Pages or groups of Pages
@@ -113,14 +121,12 @@ class InnerBlock extends Block{
     contents: Page[];
     private latinSquare: boolean;
     private pseudorandom: boolean;
-    private isLast: boolean = false;
 
     constructor(jsonBlock, public container: Container){
         super(jsonBlock, container);
         jsonBlock = _.defaults(jsonBlock, {latinSquare: false, pseudorandom: false});
         this.latinSquare = jsonBlock.latinSquare;
         this.pseudorandom = jsonBlock.pseudorandom;
-        this.criterion = jsonBlock.criterion;
         if (jsonBlock.groups){
             this.contents = this.choosePages(jsonBlock.groups, container.version);
         } else {
@@ -129,12 +135,9 @@ class InnerBlock extends Block{
         this.orderPages();
     }
 
-    run(page: Page, experimentRecord: ExperimentRecord){
-        page.display(experimentRecord);
-    }
-
-    tellLast(){
-        this.isLast = true;
+    reset(){
+        super.reset();
+        this.orderPages();
     }
 
     private makePages(jsonPages): Page[] {
@@ -220,22 +223,5 @@ class InnerBlock extends Block{
             }
         });
         this.contents = pages;
-    }
-
-    advance(experimentRecord: ExperimentRecord){
-        if (_.isEmpty(this.contents) && this.shouldLoop(experimentRecord)){
-            this.contents = this.oldContents;
-            this.oldContents = [];
-            this.orderPages();
-        }
-        super.advance(experimentRecord);
-    }
-
-    nextMove(experimentRecord: ExperimentRecord){
-        if (this.isLast){
-            experimentRecord.submitRecords();
-        } else {
-            super.nextMove(experimentRecord);
-        }
     }
 }

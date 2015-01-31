@@ -138,14 +138,14 @@ test("statement display", function(){
     strictEqual($("div.navigation").length, 1, "setup didn't work");
     var jsons = {"text": "Do I pass?", id: "s1"};
     var s = new Statement(jsons, {});
-    s.display();
+    s.run();
     strictEqual($("#pagetext").text(), "Do I pass?", "statement text not appended properly");
     strictEqual($(".response").text(), '', "statement shouldn't put anything in answer paragraph");
     strictEqual($(":button").length, 1, "There should be one Next button");
     // strictEqual($(":button").prop('disabled'), true, 'Next button should be disabled at first');
 
     s.isLast = true;
-    s.display();
+    s.run();
 
     strictEqual($("#pagetext").text(), "Do I pass?", "statement text should be appended");
     strictEqual($("#responseDiv").html().length, 0, "statement shouldn't put anything in answer paragraph");
@@ -160,7 +160,7 @@ test("question display with radios", function(){
     Experiment.addElements();
     var opts = [{text: "A", id: "o1", correct: true}, {text: "B", id: "o2", correct: false}];
     var q = new Question({text: "Do I pass?", id: "q1", options: opts}, {});
-    q.display();
+    q.run();
     strictEqual($("#pagetext").text(), "Do I pass?", "is question text accurate?");
     strictEqual($(".response :input").length, 2, "did option inputs get appended?");
     strictEqual($(".response *").length, 4, "did option inputs and labels get appended?");
@@ -174,7 +174,7 @@ test("question display with radios", function(){
     strictEqual($(":button").prop("disabled"), false, "next button should be enabled");
 
     q.isLast = true;
-    q.display();
+    q.run();
     id1 = q.options[0].id;
     id2 = q.options[1].id;
     strictEqual($("#pagetext").text(), "Do I pass?", "is question text accurate?");
@@ -197,7 +197,7 @@ test("question display with checkboxes", function(){
     Experiment.addElements();
     var opts = [{text: "A", id: "o1", correct: true}, {text: "B", id: "o2", correct: false}];
     var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: opts}, {});
-    q.display();
+    q.run();
     strictEqual($(".response *").length, 4, "did option inputs and labels get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
@@ -224,7 +224,7 @@ test("question display with dropdown", function(){
     Experiment.addElements();
     var os = _.map(_.range(8), function(i){return {text: i.toString(), id: i.toString()};});
     var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: os}, {});
-    q.display();
+    q.run();
     strictEqual($(".response *").length, 9, "did select and its options get appended?");
     strictEqual($("option").length, 8, "did options get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
@@ -251,7 +251,7 @@ test("question display with text", function(){
     Experiment.addElements();
     var opt = [{id: "o1", text: "starter", correct: /hello/}];
     var q = new Question({text: "Do I pass?", id: "q1", freetext: true, options: opt}, {});
-    q.display();
+    q.run();
 
     strictEqual($(".response input").length, 1, "did textbox get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
@@ -283,7 +283,7 @@ test("question display with text", function(){
 //     Experiment.addElements();
 //     var jsons = {"text": "Do I pass?", id: "s1"};
 //     var s = new Statement(jsons, {});
-//     s.display();
+//     s.run();
 
 //     setTimeout(function(){
 //         strictEqual($(":button").prop('disabled'), false, 'Next button should be enabled after 2 seconds');
@@ -297,7 +297,7 @@ test("question display with text", function(){
 //     var jsons = {"text": "Do I pass?", id: "s1"};
 //     var s = new Statement(jsons, {});
 //     s.isLast = true;
-//     s.display();
+//     s.run();
 
 //     setTimeout(function(){
 //         strictEqual($(":submit").prop('disabled'), false, 'Submit button should be enabled after 2 seconds');

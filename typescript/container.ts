@@ -16,7 +16,7 @@ interface Container{
     containerIDs: string[];
     banks;
 
-    advance(experimentRecord: ExperimentRecord): void;
+    run(experimentRecord: ExperimentRecord): void;
 }
 
 // functions Containers use

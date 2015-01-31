@@ -1,7 +1,7 @@
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class TrialRecord {
+class TrialRecord { //TODO record anything that can be sampled - resources, feedback is taken care of; switch to dictionary
     public pageID: string;
     public pageText: string;
     public blockIDs: string[];
@@ -107,9 +107,7 @@ class ExperimentRecord {
 
     public getBlockGrades(blockID: string): boolean[] {
         // get the last iteration of each page
-        var recentRecords: TrialRecord[] = _.map(this.trialRecords, (trlist: TrialRecord[]) => {
-            return _.last(trlist);
-        });
+        var recentRecords: TrialRecord[] = _.map(this.trialRecords, _.last);
         // get only records contained by the given block
         var relevantRecords: TrialRecord[] = _.filter(recentRecords, (tr: TrialRecord) => {
             return _.contains(tr.blockIDs, blockID);

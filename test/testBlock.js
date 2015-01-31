@@ -1,5 +1,5 @@
 
-var fakeContainer = {version: 0, permutation: 0, advance: function(){throw new CustomError("I advanced");}, containerIDs: []};
+var fakeContainer = {version: 0, permutation: 0, run: function(){throw new CustomError("I advanced");}, containerIDs: []};
 var fakePsiTurk = {recordTrialData: function(){throw new CustomError("Would save data here");}};
 
 function cleanUp(){
@@ -238,12 +238,12 @@ CustomError.prototype.toString = function() {
 
 
 
-test("statement calling advance", function(){
-    Experiment.addElements()
+test("statement calling container's run", function(){
+    Experiment.addElements();
     var pgs = [{text:"page1", id:"p1"}, {text:"page2", id:"p2"}];
     var b = new InnerBlock({id:"b1", pages: pgs} , fakeContainer);
     var er = new ExperimentRecord();
-    b.advance(er);
+    b.run(er);
 
     // first statement displays
     var text1 = $("#pagetext").text();
@@ -274,9 +274,9 @@ test("statement calling advance", function(){
 
     //entries = JSON.parse($("#surveyman").val()).responses;
 
-    // out of pages so Next should call Page's advance which will call Block's advance which will call its
-    // container's advance, which is here set to throw an error
-    throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
+    // out of pages so Next should call Page's run which will call Block's run which will call its
+    // container's run, which is here set to throw an error
+    throws(clickNext, CustomError, "at end of block, block's container's run should be called");
 
     ok(_.has(er.trialRecords, "p1"), "p1 should be logged in experiment record");
     ok(_.has(er.trialRecords, "p2"), "p2 should be logged in experiment record");
@@ -293,13 +293,13 @@ test("statement calling advance", function(){
    cleanUp();
 });
 
-test("question calling advance", function(){
+test("question calling run", function(){
     Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1", correct:"some text"}] },
         {text:"page2", id:"p2", freetext: true, options:[{id:"o2", correct: "some text"}] }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
     var er = new ExperimentRecord();
-    b.advance(er);
+    b.run(er);
 
     var text1 = $("#pagetext").text();
     notEqual(text1, "", "question text should display");
@@ -342,7 +342,7 @@ test("question calling advance", function(){
 
     strictEqual(b.oldContents[1].options[0].selected(), true, "option should know it's selected");
 
-    throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
+    throws(clickNext, CustomError, "at end of block, block's container's run should be called");
 
     //check recording TODO
     /*
@@ -358,13 +358,13 @@ test("question calling advance", function(){
     cleanUp();
 });
 
-test("question with answer calling advance", function(){
+test("question with answer calling run", function(){
     Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1"}] , feedback:"good job" } ,
         {text:"page2", id:"p2", freetext: true, options:[{id:"o2"}] , feedback: "great job" }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
     var er = new ExperimentRecord();
-    b.advance(er);
+    b.run(er);
 
     var text1 = $("#pagetext").text();
     strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
@@ -419,19 +419,19 @@ test("question with answer calling advance", function(){
     strictEqual(entries[2].correct[0], null, 'question should record null when no correct answer was supplied');
     */
 
-    throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
+    throws(clickNext, CustomError, "at end of block, block's container's run should be called");
     cleanUp();
 
 });
 
-test("question with options with answers calling advance", function(){
+test("question with options with answers calling run", function(){
     Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", options:[{id: "o1", text: "a", feedback: "good job"}, {id:'o2', text:'b', feedback:'not quite'} ] , } ,
         {text:"page2", id:"p2", options:[{id: "o1", text: "a", feedback: "good job"}, {id:'o2', text:'b', feedback:'not quite'}] }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
 
     var er = new ExperimentRecord();
-    b.advance(er);
+    b.run(er);
 
     var text1 = $("#pagetext").text();
     strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
@@ -447,7 +447,7 @@ test("question with options with answers calling advance", function(){
     notEqual(text1, $("#pagetext").text(), "next question text should display after click");
     strictEqual($("#pagetext:contains('page')").length, 1, "next question text should display after click");
 
-    throws(clickNext, CustomError, "at end of block, block's container's advance should be called");
+    throws(clickNext, CustomError, "at end of block, block's container's run should be called");
     cleanUp();
 });
 
@@ -490,7 +490,7 @@ test('create outerblock', function(){
     var b3 = new OuterBlock(jsonb2, fakeContainer);
     strictEqual(b3.runIf.optionID, 'o1', 'runIf should be set when passed in');
 
-    b.advance(new ExperimentRecord());
+    b.run(new ExperimentRecord());
     //p3
     clickNext();
     clickNext();
@@ -502,7 +502,7 @@ test('create outerblock', function(){
     clickNext();
     //p6
     clickNext();
-    throws(clickNext, CustomError, "should call container's advance");
+    throws(clickNext, CustomError, "should call container's run");
     cleanUp();
 });
 
@@ -704,12 +704,15 @@ test('run blocks conditionally: based on permutation', function(){
 
 var ps = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]},
         {id: 'p2', text:'page2', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]}];
+var ps2 = [{id: 'p3', text: 'page3', options: [{id: 'o1', text:'A'}, {id:'o2', text:'B'}]},
+        {id: 'p4', text:'page4', options: [{id: 'o1', text:'A'}, {id:'o2', text:'B'}]}];
+
 
 test('recording multiple iterations of the same question', function(){
     Experiment.addElements();
     var b1 = new InnerBlock({id: 'b1', pages: [ps[0], ps[0], ps[0]]}, {version: 0, containerIDs: []});
     var er = new ExperimentRecord();
-    b1.advance(er);
+    b1.run(er);
     $('#o1').prop('checked', true);
     clickNext();
     $('#o1').prop('checked', true);
@@ -725,7 +728,23 @@ test('training block: whole number criterion not met', function(){
     Experiment.addElements();
     var b1 = new InnerBlock({id: 'b1', pages: ps, criterion: 2}, fakeContainer);
     var er = new ExperimentRecord();
-    b1.advance(er);
+    b1.run(er);
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    //choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    ok($('#pagetext').text(), 'block should loop, displaying a page again, because only one answer was right');
+    cleanUp();
+});
+
+test('outer training block: whole number criterion not met', function(){
+    Experiment.addElements();
+    var b1 = {id: 'b1', pages: ps, criterion: 2};
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1]}, fakeContainer);
+    var er = new ExperimentRecord();
+    b2.run(er);
     // choose wrong answer
     $('#o2').prop('checked', true);
     clickNext();
@@ -740,15 +759,122 @@ test('training block: whole number criterion met', function(){
     Experiment.addElements();
     var er2 = new ExperimentRecord();
     var b2 = new InnerBlock({id: 'b2', pages: ps, criterion: 2}, fakeContainer);
-    b2.advance(er2);
+    b2.run(er2);
     // choose right answer
     $('#o1').prop('checked', true);
     clickNext();
     // choose right answer
     $('#o1').prop('checked', true);
-    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
     cleanUp();
 });
+
+test('outer training block: whole number criterion met', function(){
+    Experiment.addElements();
+    var er2 = new ExperimentRecord();
+    var b1 = {id: 'b1', pages: ps};
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 2}, fakeContainer);
+    b2.run(er2);
+    // choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose right answer
+    $('#o1').prop('checked', true);
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
+    cleanUp();
+});
+
+test('outer training block with inner ungraded block: whole number criterion met', function(){
+    Experiment.addElements();
+    var er2 = new ExperimentRecord();
+    var b1 = {id: 'b1', pages: ps};
+    var b3 = {id: 'b3', pages: ps2}; // no correctness info
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1, b3], criterion: 2}, fakeContainer);
+    b2.run(er2);
+    // choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose something
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose something
+    $('#o1').prop('checked', true);
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
+    cleanUp();
+});
+
+test('outer training block with inner ungraded block: whole number criterion not met', function(){
+    Experiment.addElements();
+    var er2 = new ExperimentRecord();
+    var b1 = {id: 'b1', pages: ps};
+    var b3 = {id: 'b3', pages: ps2}; // no correctness info
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1, b3], criterion: 2}, fakeContainer);
+    b2.run(er2);
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    // choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose something
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose something
+    $('#o1').prop('checked', true);
+    clickNext();
+    ok($('#pagetext').text(), 'block should loop, displaying a page again, because only one answer was right');
+    cleanUp();
+});
+
+test('outer training block with inner training block: decimal criterion met', function(){
+    Experiment.addElements();
+    var er2 = new ExperimentRecord();
+    var b1 = {id: 'b1', pages: ps, criterion: 2};
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 0.9}, fakeContainer);
+    b2.run(er2);
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    // try again
+    // choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    // choose right answer
+    $('#o1').prop('checked', true);
+    // outer block is satisfied because it only cares about latest iteration
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
+    cleanUp();
+});
+
+test('outer training block with inner training block: decimal criterion not met', function(){
+    Experiment.addElements();
+    var er2 = new ExperimentRecord();
+    var b1 = {id: 'b1', pages: ps, criterion: 1};
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 0.9}, fakeContainer);
+    b2.run(er2);
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    // try again
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    // choose right answer
+    $('#o1').prop('checked', true);
+    clickNext();
+    ok($('#pagetext').text(), 'inner block is satisfied but outer block is not so it loops');
+    cleanUp();
+});
+
 
 test('training block: whole number criterion met, feedback page', function(){
     Experiment.addElements();
@@ -756,7 +882,7 @@ test('training block: whole number criterion met, feedback page', function(){
     var qa = [{id: 'p5', text: 'page1', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o2', text:'B', correct:false}]},
         {id: 'p6', text:'page2', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o4', text:'B', correct:false}]}];
     var bqa = new InnerBlock({id: 'b2', pages: qa, criterion: 2}, fakeContainer);
-    bqa.advance(er);
+    bqa.run(er);
     // choose right answer
     $('#o1').prop('checked', true);
     clickNext();
@@ -766,7 +892,7 @@ test('training block: whole number criterion met, feedback page', function(){
     $('#o1').prop('checked', true);
     clickNext();
     // feedback displays
-    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
     cleanUp();
 });
 
@@ -774,7 +900,7 @@ test('training block: decimal criterion not met', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
     var b3 = new InnerBlock({id: 'b3', pages: ps, criterion: 0.8}, fakeContainer);
-    b3.advance(er);
+    b3.run(er);
     // choose wrong answer
     $('#o2').prop('checked', true);
     clickNext();
@@ -789,13 +915,13 @@ test('training block: decimal criterion met', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
     var b4 = new InnerBlock({id: 'b4', pages: ps, criterion: 0.5}, fakeContainer);
-    b4.advance(er);
+    b4.run(er);
     // choose right answer
     $('#o1').prop('checked', true);
     clickNext();
     // choose wrong answer, but still good enough to meet criterion
     $('#o2').prop('checked', true);
-    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
     cleanUp();
 });
 
@@ -803,7 +929,7 @@ test('training block: decimal criterion met on second try', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
     var b6 = new InnerBlock({id: 'b6', pages: ps, criterion: 0.5}, fakeContainer);
-    b6.advance(er);
+    b6.run(er);
     //choose wrong answer
     $('#o2').prop('checked', true);
     clickNext();
@@ -830,13 +956,13 @@ test('training block: decimal criterion met, no correctness info', function(){
     // ungraded page doesn't affect metric
     var answers = _.map(pageOrder, function(p){return p === 'p2' ? '#o1' : '#o2';});
 
-    b5.advance(er);
+    b5.run(er);
     $(answers[0]).prop('checked', true);
     clickNext();
     $(answers[1]).prop('checked', true);
     clickNext();
     $(answers[2]).prop('checked', true);
-    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's advance");
+    throws(clickNext, CustomError, "block finishes because criterion was met, so advancing calls container's run");
     cleanUp();
 });
 
@@ -850,7 +976,7 @@ test('training shuffles pages and options', function(){
 
     _.map(_.range(20), function(){
         var b = new InnerBlock({id: 'b', pages: ps, criterion: 2}, fakeContainer);
-        b.advance(er);
+        b.run(er);
         var firstPage1 = b.oldContents[0].id;
         var firstOption1 = b.oldContents[0].options[0].id;
         $('#o1').prop('checked', true);
