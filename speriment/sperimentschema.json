@@ -38,7 +38,8 @@
                 {
                     "type": "string"
                 },
-                {"$ref": "#/definitions/sampler"}
+                {"$ref": "#/definitions/sampler"},
+                {"$ref": "#/definitions/page"}
             ]
         },
 
@@ -74,7 +75,8 @@
                     "description": "Name of the bank to sample the property from.",
                     "type": "string"
                 }
-            }
+            },
+            "additionalProperties": false
         },
 
         "bank": {
@@ -149,6 +151,7 @@
                             "type": "string"
                         }
                     },
+                    "additionalProperties": false,
                     "required": ["pageID"]
                 },
                 {
@@ -159,6 +162,7 @@
                             "type": "string"
                         }
                     },
+                    "additionalProperties": false,
                     "required": ["pageID"]
                 },
                 {
@@ -167,6 +171,7 @@
                             "type": "number"
                         }
                     },
+                    "additionalProperties": false,
                     "required": ["permutation"]
                 }
             ]
@@ -185,12 +190,14 @@
                 "text": {"$ref": "#/definitions/text"},
                 "feedback": {"$ref": "#/definitions/feedback"},
                 "correct": {"$ref": "#/definitions/correct"},
+                "resources": {"$ref": "#/definitions/resources"},
                 "tags": {
                     "description": "Array of descriptors. This array should be the same length for all options in the entire experiment, or absent for all options.",
                     "type": "array",
                     "items": {"$ref": "#/definitions/tag"}
                 }
             },
+            "additionalProperties": false,
             "required": ["id", "text"]
         },
 
@@ -239,6 +246,7 @@
                     ]
                 }
             },
+            "additionalProperties": false,
             "required": ["id", "text"]
         },
 
@@ -260,6 +268,7 @@
                         "criterion": {"$ref": "#/definitions/criterion"},
                         "banks": {"$ref": "#/definitions/banks"}
                     },
+                    "additionalProperties": false,
                     "required": ["id", "pages"]
                 },
 
@@ -284,6 +293,7 @@
                         "criterion": {"$ref": "#/definitions/criterion"},
                         "banks": {"$ref": "#/definitions/banks"}
                     },
+                    "additionalProperties": false,
                     "required": ["id", "groups"]
                 },
 
@@ -301,6 +311,7 @@
                         "criterion": {"$ref": "#/definitions/criterion"},
                         "banks": {"$ref": "#/definitions/banks"}
                     },
+                    "additionalProperties": false,
                     "required": ["id", "blocks"]
                 }
             ]
@@ -323,5 +334,6 @@
             "items": {"$ref": "#/definitions/block"}
         }
     },
+    "additionalProperties": false,
     "required": ["blocks"]
 }
