@@ -92,6 +92,9 @@ def make_task(varname):
     speriment.start();
 });''')
 
+# This is an ugly way to add Speriment's javascript and css files to the HTML,
+# but I use it because replacing PsiTurk's HTML file is vulnerable to breaking
+# as PsiTurk updates.
 def make_exp(filename):
     '''Add script tags to PsiTurk's exp.html file so it can use speriment.js and
     the JSON object, and add css link so it can use speriment.css.'''
@@ -99,19 +102,23 @@ def make_exp(filename):
     #TODO will change to static/lib/node_modules/speriment/speriment.js and maybe min
     speriment_tag = '''\n\t\t<script src="/static/lib/node_modules/speriment/javascript/speriment.js" type="text/javascript">'''
     json_tag = '''\n\t\t<script src="/static/js/{0}" type="text/javascript">'''.format(filename)
-    css_tag = '''\n\t<link rel=stylesheet href="/static/lib/node_modules/speriment/css/speriment.css" type="text/css">'''
+    script_divider = '</script>'
+    css_tag = '''\n\t<link rel=stylesheet href="/static/lib/node_modules/speriment/css/speriment.css"'''
+    css_divider = 'type="text/css">'
     new_contents = None
     with open(exp_file, 'r') as exp:
         exp_contents = exp.read()
-        script_tags = exp_contents.split('</script>')
+        script_tags = exp_contents.split(script_divider)
         # These scripts must go after PsiTurk and its dependencies but before
         # task.js and the rest of the page
         if script_tags[-4] == speriment_tag:
             script_tags[-3] = json_tag
         else:
             script_tags = script_tags[:-2] + [speriment_tag] + [json_tag] + script_tags[-2:]
-        with_scripts = '</script>'.join(script_tags)
-        contents = with_scripts.split('text/css')
-        new_contents = 'text/css'.join(contents[:-1] + [css_tag] + [contents[-1]])
+        with_scripts = script_divider.join(script_tags)
+        contents = with_scripts.split(css_divider)
+        if contents[-2] != css_tag:
+            contents = contents[:-1] + [css_tag] + [contents[-1]]
+        new_contents = css_divider.join(contents)
     with open(exp_file, 'w') as expw:
         expw.write(new_contents)
