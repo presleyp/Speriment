@@ -50,13 +50,14 @@ Here are a few things Speriment can handle:
   Then set the block containing the groups to `latin_square = True`. This feature
   uses the `num_conds` variable set by PsiTurk, so remember to set that to your
   number of conditions.
-- pseudorandomization. Specify the condition of each Page in a block, and then
+- pseudorandomization. Specify the `condition` of each Page in a block, and then
   set `pseudorandom = True`. The block will not run two items of the same
   condition in a row.
 - training loops. Give the relevant pages in a block (or their options)
   `correct` attributes. Then set a criterion for the block, as explained in the
   Python API. The block will rerun itself until the participant performs as
-  well as you specified in the criterion.
+  well as you specified in the criterion. You may want to specify `feedback` on
+  each Page or Option to tell participants how they're doing.
 - presentation of items conditioned on previous responses. Create a RunIf
   object and put it in the block that you want to run only under a certain
   condition.

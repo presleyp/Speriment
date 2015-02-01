@@ -149,9 +149,10 @@ class Component:
 class Option(Component):
     def __init__(self, text = None, id_str = None, **kwargs):
         '''
-        text: If the Option is not a text box, this is the label for the Option
+        text: string or [string]. If the Option is not a text box, this is the label for the Option
         that will be displayed on the page. If the Option is a text box, this is
-        not currently used. Can also be SampleFrom.
+        not currently used. The string or any string(s) in the list can be
+        SampleFrom.
 
         id_str: String, optional, an identifier unique among all options in this
         experiment. (Currently uniqueness in its page is sufficient but this may
@@ -159,8 +160,12 @@ class Option(Component):
 
         **kwargs: optional keyword arguments, which can include:
 
-        feedback: string, the feedback to be displayed if this Option is chosen.
-        Can also be SampleFrom.
+        feedback: string or Page (without options), the feedback to be displayed
+        if this Option is chosen.  Can use SampleFrom to choose string.
+
+        resources: [string], filenames of any images, audio, or video that
+        should display with the option. Any resource can be SampleFrom. Make sure
+        resources are inside your project directory.
 
         correct: If the Option is not a text box, a boolean representing whether
         this Option is correct. If the Option is a text box, a string
@@ -185,7 +190,8 @@ class Option(Component):
 class Page(Component):
     def __init__(self, text, options = None, id_str = None, **kwargs):
         '''
-        text: The text to be displayed on the page. Can also be SampleFrom.
+        text: string or [string], the text to be displayed on the page. The
+        string or any string(s) in the list can be SampleFrom.
 
         options: [Option], optional, the answer choices to be displayed on the
         page.
@@ -195,8 +201,8 @@ class Page(Component):
 
         **kwargs: optional keyword arguments, which can include:
 
-        feedback: string, the feedback to be displayed after an answer is
-        chosen. Can also be SampleFrom.
+        feedback: string or Page (without options), the feedback to be displayed
+        after an answer is chosen. Can use SampleFrom to choose string.
 
         correct: If freetext is False, a string representing the id_str of the
         correct Option. If freetext is True, a string representing a regular
@@ -330,23 +336,19 @@ class Block(Component):
 
         **kwargs: optional keyword arguments, which can include:
 
-        criterion: integer or float between 0 and 1. If integer, it must be
-        less than or equal to the number of Pages contained by this Block
-        (currently it can only be used on Blocks where contents is [Page] or
-        [[Page]], but eventually it will be usable with [Block], and this
-        restriction will apply to the Pages that are ultimately contained by the
-        Block) that have a specification for the correct attribute, or have
-        Options that do. The integer then represents the number of Pages that
-        can be correct and were correct in a row at the end of the Block. The
-        idea is that participants may make mistakes at the beginning, but by the
-        end of the Block should give correct answers for this long of a streak
-        in order to show master. If it's a float, it represents a percentage of
-        Pages that can be correct that were correct out of the entire block, not
-        in a streak. Whether it's an integer or a float, this attribute signals
-        that a participant should see the (reshuffled) contents of this Block as
-        many times as it takes to reach criterion before moving on to later
-        Blocks, and can be used to train participants before later testing them
-        on novel information.
+        criterion: integer or float between 0 and 1. If integer, it represents
+        the number of Pages that can be correct (the Page or its Options have a
+        'correct' argument) and were correct in a row at the end of the Block.
+        The idea is that participants may make mistakes at the beginning, but by
+        the end of the Block should give correct answers for this long of a
+        streak in order to show mastery. If it's a float, it represents a
+        percentage of Pages that can be correct that were correct out of the
+        entire block, not in a streak. Whether it's an integer or a float, this
+        attribute signals that a participant should see the (reshuffled)
+        contents of this Block as many times as it takes to reach criterion
+        before moving on to later Blocks, and can be used to train participants
+        before later testing them on novel information. Pages are reshuffled but
+        Blocks are not re-exchanged.
 
         run_if: RunIf, gives a condition that must be met in order for this Block
         to display its contents, no matter the type of contents. See the RunIf
