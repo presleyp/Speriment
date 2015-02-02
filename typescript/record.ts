@@ -1,7 +1,7 @@
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class TrialRecord { //TODO record anything that can be sampled - resources, feedback is taken care of; switch to dictionary
+class TrialRecord {
     public pageID: string;
     public pageText: string;
     public blockIDs: string[];
@@ -10,7 +10,7 @@ class TrialRecord { //TODO record anything that can be sampled - resources, feed
     public selectedID: string = null;
     public selectedText: string = null;
     public correct = null;
-    public iteration: number = 1;
+    public iteration: number;
     public condition: string = null;
     public pageTags: string[] = [];
     public optionTags: string[] = [];
@@ -46,13 +46,14 @@ class ExperimentRecord {
         this.permutation = permutation;
     }
 
-    public addRecord(trialRecord: TrialRecord){
-        if (!_.has(this.trialRecords, trialRecord.pageID)){
-            this.trialRecords[trialRecord.pageID] = [trialRecord];
+    public addRecord(pageRecord: TrialRecord){
+        var newRecord = jQuery.extend(true, {}, pageRecord); // deep copy to avoid corruption in training loops
+        if (!_.has(this.trialRecords, newRecord.pageID)){
+            newRecord.iteration = 1;
+            this.trialRecords[newRecord.pageID] = [newRecord];
         } else {
-            var iter = this.trialRecords[trialRecord.pageID].length + 1;
-            trialRecord.iteration = iter;
-            this.trialRecords[trialRecord.pageID].push(trialRecord);
+            newRecord.iteration = this.trialRecords[newRecord.pageID].length + 1;
+            this.trialRecords[newRecord.pageID].push(newRecord);
         }
     }
 
@@ -86,24 +87,6 @@ class ExperimentRecord {
             return false;
         }
     }
-
-    // public responseGiven(runIf){
-    //     if (_.has(this.trialRecords, runIf.pageID)) {
-    //         var pageResponses: TrialRecord[] = this.trialRecords[runIf.pageID];
-    //         var response: TrialRecord = _.last(pageResponses);
-    //         if (runIf.optionID){
-    //             return _.contains(response.selectedID, runIf.optionID);
-    //         } else if (runIf.regex && response.selectedID.length === 1){
-    //             return response.selectedText[0].search(runIf.regex) >= 0;
-    //         } else if (runIf.counterbalance){
-    //             return runIf.counterbalance === this.permutation;
-    //         } else {
-    //             throw "runIf does not contain optionID or regex.";
-    //         }
-    //     } else {
-    //         return false;
-    //     }
-    // }
 
     public getBlockGrades(blockID: string): boolean[] {
         // get the last iteration of each page
