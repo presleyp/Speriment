@@ -875,6 +875,86 @@ test('outer training block with inner training block: decimal criterion not met'
     cleanUp();
 });
 
+test('recording multiple iterations', function(){
+    Experiment.addElements();
+    var pgs = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]},
+        {id: 'p2', text:'page2', options: [{id: 'o3', text:'C', correct:true}, {id:'o4', text:'D', correct:false}]}];
+
+    var b1 = new InnerBlock({id: 'b1', pages: pgs, criterion: 0.9}, fakeContainer);
+    var er = new ExperimentRecord();
+    b1.run(er);
+
+    // iter 1 - p1: o1
+    if ($('#o1').length > 0){
+        $('#o1').prop('checked', true);
+    } else if ($('#o4').length > 0){
+        $('#o4').prop('checked', true);
+    } else {
+        console.log('options are wrong');
+    }
+    clickNext();
+
+    if ($('#o1').length > 0){
+        $('#o1').prop('checked', true);
+    } else if ($('#o4').length > 0){
+        $('#o4').prop('checked', true);
+    } else {
+        console.log('options are wrong');
+    }
+    clickNext();
+
+    // iter 2 - p1: o2
+    if ($('#o2').length > 0){
+        $('#o2').prop('checked', true);
+    } else if ($('#o3').length > 0){
+        $('#o3').prop('checked', true);
+    } else {
+        console.log('options are wrong');
+    }
+    clickNext();
+    if ($('#o2').length > 0){
+        $('#o2').prop('checked', true);
+    } else if ($('#o3').length > 0){
+        $('#o3').prop('checked', true);
+    } else {
+        console.log('options are wrong');
+    }
+    clickNext();
+
+    var iterations = _.pluck(er.trialRecords.p1, 'iteration');
+    var selected = _.pluck(er.trialRecords.p1, 'selectedID');
+    var selected2 =  _.pluck(er.trialRecords.p2, 'selectedID');
+    strictEqual(iterations[0], 1, 'both iterations of p1 are captured');
+    strictEqual(iterations[1], 2, 'both iterations of p1 are captured');
+    strictEqual(selected[0][0], 'o1', 'options ids recorded both times');
+    strictEqual(selected[1][0], 'o2', 'options ids recorded both times');
+    strictEqual(selected2[0][0], 'o4', 'options ids recorded both times');
+    strictEqual(selected2[1][0], 'o3', 'options ids recorded both times');
+    cleanUp();
+});
+
+test('recording multiple iterations', function(){
+    Experiment.addElements();
+    var b1 = new InnerBlock({id: 'b1', pages: [ps[0]], criterion: 0.9}, fakeContainer);
+    var er = new ExperimentRecord();
+    b1.run(er);
+
+    $('#o2').prop('checked', true);
+    clickNext();
+
+    $('#o2').prop('checked', true);
+    clickNext();
+
+    var iterations = _.pluck(er.trialRecords.p1, 'iteration');
+    var selected = _.pluck(er.trialRecords.p1, 'selectedID');
+    strictEqual(iterations[0], 1, 'both iterations of p1 are captured');
+    strictEqual(iterations[1], 2, 'both iterations of p1 are captured');
+    strictEqual(selected[0][0], 'o2', 'options ids recorded both times');
+    strictEqual(selected[1][0], 'o2', 'options ids recorded both times');
+    strictEqual(selected.length, 2, 'options ids recorded both times');
+    cleanUp();
+});
+
 
 test('training block: whole number criterion met, feedback page', function(){
     Experiment.addElements();
