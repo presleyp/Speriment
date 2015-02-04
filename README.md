@@ -131,21 +131,17 @@ you called the directory).
 12. Finally, use Speriment to retrieve and format your data, writing it to a
     csv in your project directory that you can load into Python or R. Speriment
     comes with a command-line tool `speriment-output` to make this easy. It
-    takes one required argument and two optional lists of arguments. The required argument is
-    the name of a file to write the results to. The options are --tags or -t and --exclude or -e.
+    takes one required argument and one optional list of arguments. The required argument is
+    the name of a file to write the results to. The optional one is --exclude
+    or -e.  It should be used if you know already that you want to exclude data
+    from certain workers. You can exclude them after looking at the data, so
+    this is just a convenience. Follow the flag with the worker IDs of the
+    workers you want to exclude.
 
-    The --tags option should be used if you passed tags into your Python script for pages and/or options.
-    Supply a name for each tag, starting with page tags and then option tags, in the order in which you supplied
-    the data in your script. You must use the same number of tags as you supplied.
-
-    The --exclude option should be used if you know already that you want to exclude data from certain workers. You
-    can exclude them after looking at the data, so this is just a convenience. Follow the flag with the worker IDs of
-    the workers you want to exclude.
-
-    Here, I'm imagining I have tags representing ItemType and Frequency, and I want to exclude the data that I generated
+    Here, I'm imagining I want to exclude the data that I generated
     when I was debugging the experiment and was given worker ID debugALHLUO.
-    
-    `speriment-output myproject_results.csv --tags ItemType Frequency -e debugALHLUO`
+
+    `speriment-output myproject_results.csv -e debugALHLUO`
 
 
 ###What data does Speriment record?
@@ -153,26 +149,32 @@ you called the directory).
 In terms of PsiTurk, Speriment only records trial data, not unstructured data.
 PsiTurk records event data automatically, but only for a few kinds of events.
 
-Speriment records the following trial data and `speriment-output` gives it these names:
+Speriment records the following trial data and `speriment-output` gives it these column names:
 
-- PageID: ID given or automatically generated for the page
-- PageText: Text given to display on the page
+- PageID: ID given or automatically generated for the page.
+- PageText: Text displayed on the page.
+- PageResources: Resources displayed on the page.
 - BlockIDs: IDs of all blocks that enclose this page
 - StartTime: The time when the page displayed. This is in milliseconds since
-  1/1/1970, which makes it easy to subtract EndTime from it for reaction time.
+  1/1/1970, which makes it easy to do math on.
 - EndTime: The time when the participant clicked Next.
+- ReactionTime: The difference between StartTime and EndTime.
 - Iteration: The number of times, counting from 1, that this page was
   displayed. Will always be 1 unless the page is in a block with a criterion.
-- Condition: The experimental condition you supplied for the page.
-- SelectedID: The IDs of any options that the participant selected.
-- SelectedText: The text of any options that the participant selected.
-- Correct: The information you supplied about whether the option is correct or
-  what a correct text answer will match.
+- Condition: The experimental condition supplied or sampled for the page.
 - OptionOrder: The option IDs in the order in which they were displayed.
   Options are shuffled and you may want to look at how they appeared on the
   page.
+- OptionTexts: The text of each option displayed on this page in the order in which it displayed.
+- OptionResources: Resources displayed with the options on this page, grouped
+  by option in the order in which the options displayed.
+- SelectedID: The IDs of any options that the participant selected.
 - SelectedPosition: The position, left-to-right starting from 0 at the left, of
   any selected options.
+- SelectedText: The text of any options that the participant selected.
+- Correct: The information you supplied about whether the option is correct or
+  what a correct text answer will match.
+
 
 `speriment-output` also returns the following columns from PsiTurk data:
 - UniqueID: The HIT ID and Worker ID
@@ -181,17 +183,16 @@ Speriment records the following trial data and `speriment-output` gives it these
 - Version: If you set the `num_conds` variable in config.txt, this is the
   version of the experiment that the participant saw. Used in Latin Square
   designs.
+- Permutation: If you set the `num_counters` variable in config.txt, this
+  determines the ordering of the blocks you counterbalanced.
 - HIT: HIT ID
 - WorkerID: Worker ID of the participant
 
 Finally, it returns the tags you included in your Python script:
 - User-defined columns: There will then be a column for each page tag you
-  supplied followed by a column for each option tag you supplied. If you
-  supplied none of a kind of tag, those columns will not be present. Note that,
-  because you're allowed to make nonexclusive questions where participants can
-  select multiple options, each option tag column will contain a list of one or
-  more values, one for each option selected. If the page is exclusive, it will
-  be a list containing one value rather than a bare value.
+  supplied and a column for each option tag you supplied. Option tag values
+  will be grouped by option and giving in the order in which the options were
+  displayed.
 
 PsiTurk provides information about the version of the experiment (which they
 call condition) that was used for the purpose of Latin squares, the worker ID,

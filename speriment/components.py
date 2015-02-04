@@ -173,10 +173,10 @@ class Option(Component):
         For example, correct = 'hi.*' would mean that 'hi' and 'high' are both
         correct inputs.
 
-        tags: [string], any metadata you want to associate with this Option. It
-        will not be used in the experiment, but will be passed through to the
-        data file. All options in the entire experiment must have the same
-        number of tags so that they will stay aligned in the output file.
+        tags: {string: string}, a dictionary for any metadata you want to
+        associate with this Option. The keys of the dictionary will become
+        columns in your output file. It will not be used in the experiment,
+        but will be passed through to the data file.
 
         Note that the type of an Option (radio button, check box, dropdown, or
         text box) is determined based on its data and the attributes of its
@@ -212,10 +212,10 @@ class Page(Component):
         should display on the page. Any resource can be SampleFrom. Make sure
         resources are inside your project directory.
 
-        tags: [string], any metadata you want to associate with this Page. It
-        will not be used in the experiment, but will be passed through to the
-        data file. All pages in the entire experiment must have the same number
-        of tags so that they will stay aligned in the output file.
+        tags: {string: string}, a dictionary for any metadata you want to
+        associate with this Page. The keys of the dictionary will become
+        columns in your output file. It will not be used in the experiment,
+        but will be passed through to the data file.
 
         condition: string, the condition this Page belongs to in the
         experimental manipulation. Used if this Page is in a block where
@@ -493,13 +493,6 @@ class Experiment(Component):
             self.treatments = treatments
 
     def _validate(self):
-        self._validate_page_tags()
-        self._validate_option_tags()
-
-    def _validate_page_tags(self):
-        pass
-
-    def _validate_option_tags(self):
         pass
 
     def _validate_json(self, json_object):
