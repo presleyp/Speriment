@@ -247,6 +247,7 @@ test("statement calling container's run", function(){
 
     // first statement displays
     var text1 = $("#pagetext").text();
+    var id1 = b.oldContents[0].id;
     notEqual(text1, "", "statement should display");
     strictEqual($(":button").length, 1, "there should be a next button");
 
@@ -258,16 +259,15 @@ test("statement calling container's run", function(){
     */
     clickNext();
 
-    /* TODO test experimentRecord
-    var entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 1, 'form should have one entry');
-    strictEqual(entries[0].page, b.oldContents[0].id, 'statement should record its id');
-    ok(entries[0].startTime, 'statement should record its start time');
-    ok(entries[0].endTime, 'statement should record its end time');
-    ok(entries[0].startTime < entries[0].endTime, 'start time should be before end time');
-    strictEqual(entries[0].selected, undefined, 'statement should not record selected options');
-    strictEqual(entries[0].correct, undefined, 'statement should not record correct options');
-    */
+    var rec = er.trialRecords[id1][0];
+    strictEqual(_.keys(er.trialRecords).length, 1, 'only one page recorded so far');
+    strictEqual(er.trialRecords[id1].length, 1, 'only one iteration recorded so far');
+    strictEqual(rec.blockIDs[0], b.id, 'block id recorded');
+    ok(_.contains([pgs[0].id, pgs[1].id], rec.pageID), 'id recorded');
+    ok(_.contains([pgs[0].text, pgs[1].text], rec.pageText), 'text recorded');
+    ok(rec.startTime, 'start time recorded');
+    ok(rec.endTime, 'end time recorded');
+    ok(rec.startTime < rec.endTime, 'start time is before end time');
 
     // second statement displays
     notEqual(text1, $("#pagetext").text(), "next statement should display after click");
@@ -280,28 +280,19 @@ test("statement calling container's run", function(){
 
     ok(_.has(er.trialRecords, "p1"), "p1 should be logged in experiment record");
     ok(_.has(er.trialRecords, "p2"), "p2 should be logged in experiment record");
-    /*
-    entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 2, 'form should have two entries');
-    strictEqual(entries[1].page, b.oldContents[1].id, 'statement should record its id');
-    ok(entries[1].startTime, 'statement should record its start time');
-    ok(entries[1].endTime, 'statement should record its end time');
-    ok(entries[1].startTime <= entries[1].endTime, 'start time should be before end time');
-    strictEqual(entries[1].selected, undefined, 'statement should not record selected options');
-    strictEqual(entries[1].correct, undefined, 'statement should not record correct options');
-    */
-   cleanUp();
+    cleanUp();
 });
 
 test("question calling run", function(){
     Experiment.addElements();
     var pgs = [{text:"page1", id:"p1", freetext: true, options:[{id: "o1", correct:"some text"}] },
-        {text:"page2", id:"p2", freetext: true, options:[{id:"o2", correct: "some text"}] }];
+        {text:"page2", id:"p2", freetext: true, options:[{id:"o1", correct: "some text"}] }];
     var b = new InnerBlock({id:"b1", pages: pgs}, fakeContainer);
     var er = new ExperimentRecord();
     b.run(er);
 
     var text1 = $("#pagetext").text();
+    var id1 = b.oldContents[0].id;
     notEqual(text1, "", "question text should display");
     // strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
     // strictEqual($("#continue").prop("disabled"), true, "next button should be disabled");
@@ -320,17 +311,21 @@ test("question calling run", function(){
     // click can override it
     clickNext();
 
-    //check recording TODO
-    /*
-    var entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 1, 'form should have one entry');
-    strictEqual(entries[0].page, b.oldContents[0].id, 'question should record its id');
-    ok(entries[0].startTime, 'question should record its start time');
-    ok(entries[0].endTime, 'question should record its end time');
-    ok(entries[0].startTime <= entries[0].endTime, 'start time should be before end time');
-    strictEqual(entries[0].selected[0], "some text", 'question should record the content of the text box');
-    strictEqual(entries[0].correct[0], true, 'question should record whether the response was correct');
-   */
+    var rec = er.trialRecords[id1][0];
+    strictEqual(_.keys(er.trialRecords).length, 1, 'only one page recorded so far');
+    strictEqual(er.trialRecords[id1].length, 1, 'only one iteration recorded so far');
+    strictEqual(rec.blockIDs[0], b.id, 'block id recorded');
+    strictEqual(id1, rec.pageID, 'id recorded');
+    strictEqual(text1, rec.pageText, 'text recorded');
+    ok(rec.startTime, 'start time recorded');
+    ok(rec.endTime, 'end time recorded');
+    ok(rec.startTime < rec.endTime, 'start time is before end time');
+    strictEqual(rec.selectedID[0], "o1", 'question should record the id of the text box');
+    strictEqual(rec.selectedPosition[0], 0, 'question should record the position of the text box');
+    strictEqual(rec.optionOrder[0], "o1", 'question should record the option order');
+    strictEqual(rec.optionTexts[0], "", 'question should record the option texts');
+    strictEqual(rec.selectedText[0], "some text", 'question should record the content of the text box');
+    strictEqual(rec.correct[0], true, 'question should record whether the response was correct');
 
     // check displaying
     notEqual(text1, $("#pagetext").text(), "next question text should display after click");
@@ -344,17 +339,6 @@ test("question calling run", function(){
 
     throws(clickNext, CustomError, "at end of block, block's container's run should be called");
 
-    //check recording TODO
-    /*
-    entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 2, 'form should have two entries');
-    strictEqual(entries[1].page, b.oldContents[1].id, 'question should record its id');
-    ok(entries[1].startTime, 'question should record its start time');
-    ok(entries[1].endTime, 'question should record its end time');
-    ok(entries[1].startTime <= entries[1].endTime, 'start time should be before end time');
-    strictEqual(entries[1].selected[0], "more text", 'question should record the content of the text box');
-    strictEqual(entries[1].correct[0], false, 'question should record whether the response was correct');
-    */
     cleanUp();
 });
 
@@ -367,11 +351,13 @@ test("question with answer calling run", function(){
     b.run(er);
 
     var text1 = $("#pagetext").text();
+    var id1 = b.oldContents[0].id;
     strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
 
     $(":input[type='text']").val("hi");
     clickNext();
 
+    var text2 = $("#pagetext").text();
     //check recording TODO
     /*
     var entries = JSON.parse($("#surveyman").val()).responses;
@@ -388,15 +374,16 @@ test("question with answer calling run", function(){
 
     clickNext();
 
-    //check recording TODO
-    /*
-    entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 2, 'form should have two entries');
-    ok(entries[1].page, 'answer should record its id');
-    ok(entries[1].startTime, 'answer should record its start time');
-    ok(entries[1].endTime, 'answer should record its end time');
-    ok(entries[1].startTime <= entries[1].endTime, 'start time should be before end time');
-    */
+    var rec = er.trialRecords[id1 + '_feedback'][0];
+    strictEqual(_.keys(er.trialRecords).length, 2, 'two pages recorded so far');
+    strictEqual(er.trialRecords[id1].length, 1, 'only one iteration recorded so far');
+    strictEqual(rec.blockIDs[0], b.id, 'block id recorded');
+    strictEqual(id1 + '_feedback', rec.pageID, 'id recorded');
+    strictEqual(text2, rec.pageText, 'text recorded');
+    ok(_.contains(rec.pageText, 'j'), 'feedback text recorded');
+    ok(rec.startTime, 'start time recorded');
+    ok(rec.endTime, 'end time recorded');
+    ok(rec.startTime < rec.endTime, 'start time is before end time');
 
     notEqual(text1, $("#pagetext").text(), "next question text should display after click");
     strictEqual($("#pagetext:contains('page')").length, 1, "next question text should display after click");
@@ -933,7 +920,7 @@ test('recording multiple iterations', function(){
     cleanUp();
 });
 
-test('recording multiple iterations', function(){
+test('recording multiple iterations, simpler version', function(){
     Experiment.addElements();
     var b1 = new InnerBlock({id: 'b1', pages: [ps[0]], criterion: 0.9}, fakeContainer);
     var er = new ExperimentRecord();

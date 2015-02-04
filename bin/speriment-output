@@ -17,9 +17,6 @@ def parse():
             data gathered in an experiment and write it to a csv file.''')
     parser.add_argument('filename', type=str, help = '''File
             to write experimental results to in csv format.''')
-    parser.add_argument('-t', '--tags', nargs='*',
-            default=[], help = '''Names of all page tags and option tags, in that
-            order, that were passed into the experiment.''')
     parser.add_argument('-e', '--exclude', nargs='*',
             default=[], help = '''Worker IDs of any participants whose data you don't
             want to write to the output file.''')
@@ -57,65 +54,38 @@ def retrieve(db_url, table_name, exclude = []):
             and participant['uniqueid'].split(':')[0] not in exclude]
     return data
 
-def format_data(data, user_defined_columns):
-    # parse each participant's datastring as json object
+def format_data(data):
+    # parse each participant's datastring
     participants = [json.loads(participant) for participant in data]
-    user_defined_columns
 
-    trialdata_column_names = [
-        'PageID',
-        'PageText',
-        'BlockIDs',
-        'StartTime',
-        'EndTime',
-        'Iteration',
-        'Condition',
-        'SelectedID',
-        'SelectedText',
-        'Correct',
-        'OptionOrder',
-        'SelectedPosition'
-    ]
-    num_trialdata_names = len(trialdata_column_names)
-    trial_column_names = [
-        'UniqueID',
-        'TrialNumber',
-        'Version',
-        'Permutation',
-        'HIT',
-        'WorkerID',
-    ]
-    column_names = trialdata_column_names + trial_column_names + user_defined_columns
-
-    # push important information into 'trialdata' subobjects
+    # push study and participant data into trial data
     for participant in participants:
         for trial in participant['data']:
-            trial['trialdata'] = trial['trialdata'][:num_trialdata_names] + [
-                    trial['uniqueid'],
-                    trial['current_trial'],
-                    participant['condition'],
-                    participant['counterbalance'],
-                    participant['hitId'],
-                    participant['workerId']
-                ] + trial['trialdata'][num_trialdata_names:]
+            trial['trialdata'].update({
+                'UniqueID': trial['uniqueid'],
+                'TrialNumber': trial['current_trial'],
+                'Version': participant['condition'],
+                'Permutation': participant['counterbalance'],
+                'HIT': participant['hitId'],
+                'WorkerID': participant['workerId']
+                })
 
-    # extract just trialdata objects
+    # extract just trial data
     trials = [trial['trialdata']
             for participant in participants
             for trial in participant['data']]
 
-
-    data_frame = pd.DataFrame(trials, columns = column_names)
+    data_frame = pd.DataFrame(trials)
     data_frame['ReactionTime'] = data_frame['EndTime'] - data_frame['StartTime']
     return data_frame
 
+
 if __name__ == '__main__':
-    # usage: speriment-output filename user_defined_columns exclude
+    # usage: speriment-output filename exclude
     args = parse()
     filename = args.filename
-    user_defined_columns = args.tags
     exclude = args.exclude
     (db_url, table_name) = get_credentials()
     data = retrieve(db_url, table_name, exclude)
-    formatted = format_data(data, user_defined_columns)
+    formatted = format_data(data)
     formatted.to_csv(filename)

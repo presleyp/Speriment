@@ -192,9 +192,12 @@
                 "correct": {"$ref": "#/definitions/correct"},
                 "resources": {"$ref": "#/definitions/resources"},
                 "tags": {
-                    "description": "Array of descriptors. This array should be the same length for all options in the entire experiment, or absent for all options.",
-                    "type": "array",
-                    "items": {"$ref": "#/definitions/tag"}
+                    "description": "Mapping of tag names to tags. Has no effect on the running of the experiment. Options needn't have the same tag names, but each tag name will form a column in the output.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "description": "Pieces of information the experimenter wants to associate with pages in the analysis.",
+                        "type": "string"
+                    }
                 }
             },
             "additionalProperties": false,
@@ -215,9 +218,12 @@
                     "type": "string"
                 },
                 "tags": {
-                    "description": "Array of descriptors. This array should be the same length for all pages in the entire experiment, or absent for all pages.",
-                    "type": "array",
-                    "items": {"$ref": "#/definitions/tag"}
+                    "description": "Mapping of tag names to tags. Has no effect on the running of the experiment. Pages needn't have the same tag names, but each tag name will form a column in the output.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "description": "Pieces of information the experimenter wants to associate with pages in the analysis.",
+                        "type": "string"
+                    }
                 },
                 "ordered": {
                     "description": "Are the options for this question ordered? Used to decide how to randomize the order of the options. Defaults to false.",

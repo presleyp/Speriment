@@ -11,7 +11,7 @@ class ResponseOption implements Viewable{
     public id: string;
     public feedback: Statement;
     public correct: boolean;
-    public tags: string[];
+    public tags;
     public resources: string[];
 
     constructor(jsonOption, public question: Question){
@@ -140,7 +140,7 @@ class TextOption extends ResponseOption{
         return this.getResponse()[1].length > 0;
     }
 
-    public isCorrect(){
+    public isCorrect(): boolean{
         if (this.regex){
             return Boolean(this.getResponse()[1].match(this.regex));
         } else {

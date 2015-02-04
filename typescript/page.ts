@@ -12,8 +12,8 @@ class Page implements Viewable{
     public id: string;
     public condition: string;
     public resources: string[];
-    public tags: string[];
-    public record;
+    public tags;
+    public record: TrialRecord;
 
     constructor(jsonPage, public block){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
@@ -24,7 +24,13 @@ class Page implements Viewable{
             return makeResource(r, this.block);
         });
         this.tags = jsonPage.tags;
-        this.record = new TrialRecord(this.id, this.text, this.condition, this.block.containerIDs, this.tags);
+        this.record = new TrialRecord(
+                this.id,
+                this.text,
+                this.condition,
+                this.block.containerIDs,
+                this.tags,
+                this.resources);
     }
 
     public advance(experimentRecord):void {}
@@ -111,11 +117,11 @@ class Question extends Page{
 
     public advance(experimentRecord): void{
         this.record.endTime = new Date().getTime();
+
         var selected: ResponseOption[] = _.filter<ResponseOption>(this.options, (o) => {return o.selected()});
-        // feedback that should be shown to the respondent
         var optionFeedback: Statement[] = _.compact(_.pluck(selected, 'feedback'));
+
         this.recordResponses(selected);
-        this.recordCorrect(selected);
         experimentRecord.addRecord(this.record);
 
         if (!_.isEmpty(optionFeedback) && this.exclusive){ // ignoring option-by-option feedback if nonexclusive TODO
@@ -134,10 +140,6 @@ class Question extends Page{
         this.record.selectedID = response_parts[0];
         this.record.selectedText = response_parts[1];
         this.record.selectedPosition = _.map(selected, (s) => {return _.indexOf(this.options, s);});
-        this.record.optionTags = _.zip.apply(_, _.pluck(selected, 'tags'));
-    }
-
-    private recordCorrect(selected: ResponseOption[]){
         this.record.correct = _.map(selected, (s) => {return s.isCorrect()});
     }
 
@@ -149,11 +151,14 @@ class Question extends Page{
         } else {
             this.options = _.shuffle<ResponseOption>(this.options);
         }
-        this.recordOptionOrder();
+        this.recordOrderedOptions();
     }
 
-    private recordOptionOrder(){
+    private recordOrderedOptions(){
         this.record.optionOrder = _.pluck(this.options, 'id');
+        this.record.optionTexts = _.pluck(this.options, 'text');
+        this.record.optionResources = _.pluck(this.options, 'resources');
+        this.record.optionTags = _.pluck(this.options, 'tags');
     }
 
 }

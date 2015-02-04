@@ -3,27 +3,34 @@
 
 class TrialRecord {
     public pageID: string;
-    public pageText: string;
+    public pageText: string; // can be sampled
+    public pageResources: string[]; // can be sampled
     public blockIDs: string[];
-    public startTime;
-    public endTime;
-    public selectedID: string = null;
-    public selectedText: string = null;
-    public correct = null;
+    public startTime: number;
+    public endTime: number;
     public iteration: number;
-    public condition: string = null;
-    public pageTags: string[] = [];
-    public optionTags: string[] = [];
-    public optionOrder: string[] = null;
-    public selectedPosition: number = null;
+    public condition: string; // can be sampled
+    public pageTags: Object;
+    // info on all options, in presentation order
+    public optionOrder: string[]; // randomized each iteration
+    public optionTexts: string[]; // can be sampled
+    public optionResources: string[][]; // can be sampled
+    public optionTags: Object[];
+    // info on selected option(s)
+    public selectedPosition: number[];
+    public selectedID: string[]; // redundant but used by RunIf
+    public selectedText: string[]; // needed for text options
+    public correct;
 
-    constructor(pageID, pageText, condition, containers, tags){
+    constructor(pageID: string, pageText: string, condition: string, containers: string[], tags: Object, resources: string[]){
         this.pageID = pageID;
         this.pageText = pageText;
         this.condition = condition;
         this.blockIDs = containers;
         this.pageTags = tags;
+        this.pageResources = resources;
     }
+
 }
 
 /* Each record is actually an array of TrialRecords, in case the
@@ -38,7 +45,7 @@ class TrialRecord {
 class ExperimentRecord {
     private trialRecords; // {pageID: TrialRecord[]}
     private psiturk;
-    private permutation;
+    private permutation: number;
 
     constructor(psiturk, permutation){
         this.psiturk = psiturk;
@@ -46,8 +53,9 @@ class ExperimentRecord {
         this.permutation = permutation;
     }
 
-    public addRecord(pageRecord: TrialRecord){
+    public addRecord(pageRecord: TrialRecord): void {
         var newRecord = jQuery.extend(true, {}, pageRecord); // deep copy to avoid corruption in training loops
+        newRecord.optionTags = this.zipOptionTags(newRecord.optionTags); // receive grouped by option, record grouped by tag
         if (!_.has(this.trialRecords, newRecord.pageID)){
             newRecord.iteration = 1;
             this.trialRecords[newRecord.pageID] = [newRecord];
@@ -57,7 +65,21 @@ class ExperimentRecord {
         }
     }
 
-    getPermutation(){
+    zipOptionTags(optionTags: any[]): Array<Object>{
+        // optionTags: [{tag1: option1value, tag2: option1value}, {tag1: option2value}, ...]
+        // want: {tag1: [option1value, option2value, ...], {tag2: [option1value, 'NA', ...], ...}
+        var optionTagNames: string[] = _.union.apply(_, _.map(optionTags, (t) => {return _.keys(t)}));
+        return _.map(optionTagNames, (tag: string): Object => {
+            var values = _.map(optionTags, (optionObject) => {
+                return _.has(optionObject, tag) ? optionObject[tag] : 'NA';
+            });
+            var tagObject = {};
+            tagObject[tag] = values;
+            return tagObject;
+        });
+    }
+
+    getPermutation(): number {
         return this.permutation;
     }
 
@@ -108,24 +130,30 @@ class ExperimentRecord {
         var records = _.toArray(this.trialRecords);
         var flatRecords = _.flatten(records);
         var orderedRecords = this.sortByStart(flatRecords);
-        var dataArrays = _.map(orderedRecords, (fr) => {
-            return [
-                fr.pageID,
-                fr.pageText,
-                fr.blockIDs,
-                fr.startTime,
-                fr.endTime,
-                fr.iteration,
-                fr.condition,
-                fr.selectedID,
-                fr.selectedText,
-                fr.correct,
-                fr.optionOrder,
-                fr.selectedPosition]
-            .concat(fr.pageTags)
-            .concat(fr.optionTags);
+        var dataObjects = _.map(orderedRecords, (r) => {
+            var row = {
+                PageID: r.pageID,
+                PageText: r.pageText,
+                BlockIDs: r.blockIDs,
+                StartTime: r.startTime,
+                EndTime: r.endTime,
+                Iteration: r.iteration,
+                Condition: r.condition,
+                SelectedID: r.selectedID,
+                SelectedText: r.selectedText,
+                Correct: r.correct,
+                OptionOrder: r.optionOrder,
+                SelectedPosition: r.selectedPosition,
+                PageResources: r.pageResources,
+                OptionTexts: r.optionTexts,
+                OptionResources: r.optionResources
+                }
+            _.extend(row, r.pageTags);
+            _.each(r.optionTags, (t) => {_.extend(row, t)});
+            return row;
         });
-        _.each(dataArrays, this.psiturk.recordTrialData);
+        _.each(dataObjects, this.psiturk.recordTrialData);
+
         this.psiturk.saveData();
         this.psiturk.completeHIT();
     }
@@ -135,4 +163,3 @@ class ExperimentRecord {
     }
 
 }
-
