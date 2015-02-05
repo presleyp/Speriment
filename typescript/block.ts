@@ -6,11 +6,15 @@
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class Block{
+interface Resettable{
+    reset(): void;
+    run(experimentRecord: ExperimentRecord): void;
+}
 
+class Block implements Resettable{
     id: string;
     containerIDs: string[];
-    contents;
+    contents: Resettable[];
     runIf;
     banks;
     oldContents;
@@ -87,6 +91,7 @@ class Block{
     reset(){
         this.contents = this.oldContents;
         this.oldContents = [];
+        _.each(this.contents, (c) => {c.reset()});
     }
 
 }
@@ -110,10 +115,6 @@ class OuterBlock extends Block implements Container{
         this.contents = orderBlocks(this.contents, this.exchangeable, this.permutation, this.counterbalance);
     }
 
-    reset(){
-        super.reset();
-        _.each(this.contents, (b: Block) => {b.reset()});
-    }
 }
 
 // an InnerBlock can only contain Pages or groups of Pages

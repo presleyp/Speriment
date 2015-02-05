@@ -5,7 +5,7 @@
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class Page implements Viewable{
+class Page implements Viewable, Resettable{
     public static dropdownThreshold: number = 7;
     public static SPACEKEY = 32;
     public text: string;
@@ -65,6 +65,10 @@ class Page implements Viewable{
         $(CONTINUE).show();
     }
 
+    reset(){
+        this.record = this.record.reset();
+    }
+
 }
 
 class Question extends Page{
@@ -103,27 +107,26 @@ class Question extends Page{
                 return new CheckOption(o, this);
             }
         });
+        this.orderOptions();
     }
 
     public run(experimentRecord): void{
         super.run(experimentRecord);
-        this.orderOptions();
         _.each(this.options, (o:ResponseOption):void => {o.run()});
         if (this.keyboard){
             _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
         }
-        this.record.startTime = new Date().getTime();
+        this.record.setStartTime(new Date().getTime());
     }
 
     public advance(experimentRecord): void{
-        this.record.endTime = new Date().getTime();
-
+        // recording
+        this.record.setEndTime(new Date().getTime());
         var selected: ResponseOption[] = _.filter<ResponseOption>(this.options, (o) => {return o.selected()});
-        var optionFeedback: Statement[] = _.compact(_.pluck(selected, 'feedback'));
-
         this.recordResponses(selected);
         experimentRecord.addRecord(this.record);
-
+        // feedback
+        var optionFeedback: Statement[] = _.compact(_.pluck(selected, 'feedback'));
         if (!_.isEmpty(optionFeedback) && this.exclusive){ // ignoring option-by-option feedback if nonexclusive TODO
             optionFeedback[0].run(experimentRecord);
         } else if (this.feedback){
@@ -137,13 +140,19 @@ class Question extends Page{
         // ids of selections and value of text
         var responses: string[][] = _.map(selected, (s) => {return s.getResponse()});
         var response_parts = _.zip.apply(_, responses);
-        this.record.selectedID = response_parts[0];
-        this.record.selectedText = response_parts[1];
-        this.record.selectedPosition = _.map(selected, (s) => {return _.indexOf(this.options, s);});
-        this.record.correct = _.map(selected, (s) => {return s.isCorrect()});
+        var selectedID = response_parts[0];
+        var selectedText = response_parts[1];
+        var selectedPosition = _.map(selected, (s) => {return _.indexOf(this.options, s);});
+        var correct = _.map(selected, (s) => {return s.isCorrect()});
+        this.record.addResponseData(selectedPosition, selectedID, selectedText, correct);
     }
 
-    private orderOptions(): void{
+    reset(){
+        this.record = this.record.reset();
+        this.orderOptions();
+    }
+
+    private orderOptions(){
         if (this.ordered){
             if (Math.random() > 0.5){
                 this.options = this.options.reverse();
@@ -151,14 +160,11 @@ class Question extends Page{
         } else {
             this.options = _.shuffle<ResponseOption>(this.options);
         }
-        this.recordOrderedOptions();
-    }
-
-    private recordOrderedOptions(){
-        this.record.optionOrder = _.pluck(this.options, 'id');
-        this.record.optionTexts = _.pluck(this.options, 'text');
-        this.record.optionResources = _.pluck(this.options, 'resources');
-        this.record.optionTags = _.pluck(this.options, 'tags');
+        var optionOrder = _.pluck(this.options, 'id');
+        var optionTexts = _.pluck(this.options, 'text');
+        var optionResources = _.pluck(this.options, 'resources');
+        var optionTags = _.pluck(this.options, 'tags');
+        this.record.addOptionData(optionOrder, optionTexts, optionResources, optionTags);
     }
 
 }
@@ -167,12 +173,12 @@ class Statement extends Page{
 
     public run(experimentRecord){
         super.run(experimentRecord);
-        this.record.startTime = new Date().getTime();
+        this.record.setStartTime(new Date().getTime());
         this.enableNext();
     }
 
     public advance(experimentRecord){
-        this.record.endTime = new Date().getTime();
+        this.record.setEndTime(new Date().getTime());
         experimentRecord.addRecord(this.record);
         this.block.run(experimentRecord);
     }

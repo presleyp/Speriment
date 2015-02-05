@@ -42,10 +42,12 @@ test("page with sampling", function(){
     strictEqual(q.condition, 'c', 'condition is last element of condition bank');
     strictEqual(q.resources[0], '<img src="resource1.jpg" alt="resource1.jpg">', 'unsampled resource made correctly');
     strictEqual(q.resources[1], '<audio controls><source src="r2.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
-    strictEqual(q.options[0].text, 'that', 'option text sampled correctly');
-    strictEqual(q.options[1].text, 'option2', 'unsampled option text intact');
-    strictEqual(q.options[1].feedback.text, 'no', 'option feedback sampled correctly');
-    strictEqual(q.options[0].resources[0], '<audio controls><source src="r3.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
+    var o1 = q.options[0].id === 'o1' ? q.options[0] : q.options[1];
+    var o2 = q.options[0].id == 'o1' ? q.options[1] : q.options[0];
+    strictEqual(o1.text, 'that', 'option text sampled correctly');
+    strictEqual(o2.text, 'option2', 'unsampled option text intact');
+    strictEqual(o2.feedback.text, 'no', 'option feedback sampled correctly');
+    strictEqual(o1.resources[0], '<audio controls><source src="r3.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
 });
 
 test("checkbox options", function(){

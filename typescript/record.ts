@@ -2,25 +2,27 @@
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
 class TrialRecord {
-    public pageID: string;
-    public pageText: string; // can be sampled
-    public pageResources: string[]; // can be sampled
-    public blockIDs: string[];
-    public startTime: number;
-    public endTime: number;
-    public iteration: number;
-    public condition: string; // can be sampled
-    public pageTags: Object;
-    // info on all options, in presentation order
-    public optionOrder: string[]; // randomized each iteration
-    public optionTexts: string[]; // can be sampled
-    public optionResources: string[][]; // can be sampled
-    public optionTags: Object[];
-    // info on selected option(s)
-    public selectedPosition: number[];
-    public selectedID: string[]; // redundant but used by RunIf
-    public selectedText: string[]; // needed for text options
-    public correct;
+    // page data
+    private pageID: string;
+    private pageText: string; // can be sampled
+    private pageResources: string[]; // can be sampled
+    private blockIDs: string[];
+    private condition: string; // can be sampled
+    private pageTags: Object;
+    // trial data
+    private startTime: number;
+    private endTime: number;
+    private iteration: number;
+    // option data
+    private optionOrder: string[]; // randomized each iteration
+    private optionTexts: string[]; // can be sampled
+    private optionResources: string[][]; // can be sampled
+    private optionTags: Object[];
+    // response data
+    private selectedPosition: number[];
+    private selectedID: string[]; // redundant but used by RunIf
+    private selectedText: string[]; // needed for text options
+    private correct;
 
     constructor(pageID: string, pageText: string, condition: string, containers: string[], tags: Object, resources: string[]){
         this.pageID = pageID;
@@ -29,6 +31,97 @@ class TrialRecord {
         this.blockIDs = containers;
         this.pageTags = tags;
         this.pageResources = resources;
+    }
+
+    getPageID(){
+        return this.pageID;
+    }
+
+    addOptionData(optionOrder, optionText, optionResources, optionTags){
+        this.optionOrder = optionOrder;
+        this.optionTexts = optionText;
+        this.optionResources = optionResources;
+        this.optionTags = this.zipOptionTags(optionTags);
+    }
+
+    addResponseData(selectedPosition, selectedID, selectedText, correct){
+        this.selectedPosition = selectedPosition;
+        this.selectedID = selectedID;
+        this.selectedText = selectedText;
+        this.correct = correct;
+    }
+
+    getStartTime(){
+        return this.startTime;
+    }
+
+    setStartTime(startTime){
+        this.startTime = startTime;
+    }
+
+    setEndTime(endTime){
+        this.endTime = endTime;
+    }
+
+    setIteration(iteration){
+        this.iteration = iteration;
+    }
+
+    inBlock(blockID){
+        return _.contains(this.blockIDs, blockID);
+    }
+
+    reset(): TrialRecord {
+        return new TrialRecord(this.pageID, this.pageText, this.condition, this.blockIDs, this.pageTags, this.pageResources);
+    }
+
+    zipOptionTags(optionTags: any[]): Array<Object>{
+        // optionTags: [{tag1: option1value, tag2: option1value}, {tag1: option2value}, ...]
+        // want: {tag1: [option1value, option2value, ...], {tag2: [option1value, 'NA', ...], ...}
+        var optionTagNames: string[] = _.union.apply(_, _.map(optionTags, (t) => {return _.keys(t)}));
+        return _.map(optionTagNames, (tag: string): Object => {
+            var values = _.map(optionTags, (optionObject) => {
+                return _.has(optionObject, tag) ? optionObject[tag] : 'NA';
+            });
+            var tagObject = {};
+            tagObject[tag] = values;
+            return tagObject;
+        });
+    }
+
+    responseGiven(optionID){
+        return _.contains(this.selectedID, optionID);
+    }
+
+    textMatch(regex){
+        if (this.selectedID.length === 1){
+            return this.selectedText[0].search(regex) >= 0;
+        } else {
+            return false;
+        }
+    }
+
+   writeData(){
+        var row = {
+            PageID: this.pageID,
+            PageText: this.pageText,
+            BlockIDs: this.blockIDs,
+            StartTime: this.startTime,
+            EndTime: this.endTime,
+            Iteration: this.iteration,
+            Condition: this.condition,
+            SelectedID: this.selectedID,
+            SelectedText: this.selectedText,
+            Correct: this.correct,
+            OptionOrder: this.optionOrder,
+            SelectedPosition: this.selectedPosition,
+            PageResources: this.pageResources,
+            OptionTexts: this.optionTexts,
+            OptionResources: this.optionResources
+            }
+        _.extend(row, this.pageTags);
+        _.each(this.optionTags, (t) => {_.extend(row, t)});
+        return row;
     }
 
 }
@@ -54,36 +147,22 @@ class ExperimentRecord {
     }
 
     public addRecord(pageRecord: TrialRecord): void {
-        var newRecord = jQuery.extend(true, {}, pageRecord); // deep copy to avoid corruption in training loops
-        newRecord.optionTags = this.zipOptionTags(newRecord.optionTags); // receive grouped by option, record grouped by tag
-        if (!_.has(this.trialRecords, newRecord.pageID)){
-            newRecord.iteration = 1;
-            this.trialRecords[newRecord.pageID] = [newRecord];
+        // var newRecord = jQuery.extend(true, {}, pageRecord); // deep copy to avoid corruption in training loops
+        var pageID = pageRecord.getPageID();
+        if (!_.has(this.trialRecords, pageID)){
+            pageRecord.setIteration(1);
+            this.trialRecords[pageID] = [pageRecord];
         } else {
-            newRecord.iteration = this.trialRecords[newRecord.pageID].length + 1;
-            this.trialRecords[newRecord.pageID].push(newRecord);
+            pageRecord.setIteration(this.trialRecords[pageID].length + 1);
+            this.trialRecords[pageID].push(pageRecord);
         }
-    }
-
-    zipOptionTags(optionTags: any[]): Array<Object>{
-        // optionTags: [{tag1: option1value, tag2: option1value}, {tag1: option2value}, ...]
-        // want: {tag1: [option1value, option2value, ...], {tag2: [option1value, 'NA', ...], ...}
-        var optionTagNames: string[] = _.union.apply(_, _.map(optionTags, (t) => {return _.keys(t)}));
-        return _.map(optionTagNames, (tag: string): Object => {
-            var values = _.map(optionTags, (optionObject) => {
-                return _.has(optionObject, tag) ? optionObject[tag] : 'NA';
-            });
-            var tagObject = {};
-            tagObject[tag] = values;
-            return tagObject;
-        });
     }
 
     getPermutation(): number {
         return this.permutation;
     }
 
-    private getLatestPageInfo(pageID: string): TrialRecord {
+    private getLatestTrialRecord(pageID: string): TrialRecord {
         if (_.has(this.trialRecords, pageID)) {
             var pageResponses: TrialRecord[] = this.trialRecords[pageID];
             return _.last(pageResponses);
@@ -93,18 +172,18 @@ class ExperimentRecord {
     }
 
     responseGiven(pageID: string, optionID: string): boolean {
-        var pageInfo = this.getLatestPageInfo(pageID);
-        if (pageInfo) {
-            return _.contains(pageInfo.selectedID, optionID);
+        var latestRecord = this.getLatestTrialRecord(pageID);
+        if (latestRecord) {
+            return latestRecord.responseGiven(optionID);
         } else {
             return false;
         }
     }
 
     textMatch(pageID: string, regex: string): boolean {
-        var pageInfo = this.getLatestPageInfo(pageID);
-        if (pageInfo && pageInfo.selectedID.length === 1) {
-            return pageInfo.selectedText[0].search(regex) >= 0;
+        var latestRecord = this.getLatestTrialRecord(pageID);
+        if (latestRecord){
+            return latestRecord.textMatch(regex);
         } else {
             return false;
         }
@@ -115,7 +194,7 @@ class ExperimentRecord {
         var recentRecords: TrialRecord[] = _.map(this.trialRecords, _.last);
         // get only records contained by the given block
         var relevantRecords: TrialRecord[] = _.filter(recentRecords, (tr: TrialRecord) => {
-            return _.contains(tr.blockIDs, blockID);
+            return tr.inBlock(blockID);
         });
         // order by time so you can check the number correct in a row
         var orderedRecords = this.sortByStart(relevantRecords);
@@ -130,36 +209,14 @@ class ExperimentRecord {
         var records = _.toArray(this.trialRecords);
         var flatRecords = _.flatten(records);
         var orderedRecords = this.sortByStart(flatRecords);
-        var dataObjects = _.map(orderedRecords, (r) => {
-            var row = {
-                PageID: r.pageID,
-                PageText: r.pageText,
-                BlockIDs: r.blockIDs,
-                StartTime: r.startTime,
-                EndTime: r.endTime,
-                Iteration: r.iteration,
-                Condition: r.condition,
-                SelectedID: r.selectedID,
-                SelectedText: r.selectedText,
-                Correct: r.correct,
-                OptionOrder: r.optionOrder,
-                SelectedPosition: r.selectedPosition,
-                PageResources: r.pageResources,
-                OptionTexts: r.optionTexts,
-                OptionResources: r.optionResources
-                }
-            _.extend(row, r.pageTags);
-            _.each(r.optionTags, (t) => {_.extend(row, t)});
-            return row;
-        });
+        var dataObjects = _.map(orderedRecords, (r) => {return r.writeData()});
         _.each(dataObjects, this.psiturk.recordTrialData);
-
         this.psiturk.saveData();
         this.psiturk.completeHIT();
     }
 
     private sortByStart(records: TrialRecord[]): TrialRecord[] {
-        return records.sort((r1, r2) => {return r1.startTime - r2.startTime});
+        return records.sort((r1, r2) => {return r1.getStartTime() - r2.getStartTime()});
     }
 
 }
