@@ -190,7 +190,7 @@ class ExperimentRecord {
 
     public getBlockGrades(blockID: string): boolean[] {
         // get the last iteration of each page
-        var recentRecords: TrialRecord[] = _.map(this.trialRecords, _.last);
+        var recentRecords: TrialRecord[] = _.map(this.trialRecords, (tr: TrialRecord[]) => {return _.last(tr)});
         // get only records contained by the given block
         var relevantRecords: TrialRecord[] = _.filter(recentRecords, (tr: TrialRecord) => {
             return tr.inBlock(blockID);
