@@ -331,6 +331,19 @@ test("reset page", function(){
     });
     ok(_.contains(firstOptionIDs, 'o1'), 'reset shuffles options');
     ok(_.contains(firstOptionIDs, 'o2'), 'reset shuffles options');
+
+    var rec1 = p1.record.optionOrder[0];
+    while (p1.options[0].id === rec1){
+        p1.reset();
+    }
+    var rec2 = p1.record.optionOrder[0];
+    notEqual(rec1, rec2, "reset doesn't mutate old records but produces new ones.");
+});
+
+test("zip option tags", function(){
+    var t = new TrialRecord();
+    var zipped = t.zipOptionTags([{tag1: 'a', tag2: 'b'}, {tag1: 'c'}, {tag3: 'd', tag2: 'e'}]);
+    ok(_.isEqual(zipped, {tag1: ['a', 'c', 'NA'], tag2: ['b', 'NA', 'e'], tag3: ['NA', 'NA', 'd']}), "zipOptionTags works");
 });
 
 // asyncTest('statement enables next button after delay', function(){
