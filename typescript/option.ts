@@ -20,10 +20,8 @@ class ResponseOption implements Viewable{
         this.id = jsonOption.id;
         this.text = setText(jsonOption.text, this.question.block);
         this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.block);
-        this.resourceNames = jsonOption.resources;
-        this.resources = _.map(jsonOption.resources, (r: string):string => {
-            return makeResource(r, this.question.block);
-        });
+        this.resourceNames = _.map(jsonOption.resources, (r) => {return setOrSample(r, this.question.block)});
+        this.resources = _.map(this.resourceNames, makeResource);
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         this.tags = jsonOption.tags;
     }

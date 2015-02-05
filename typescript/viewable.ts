@@ -32,11 +32,10 @@ function getFeedback(feedback, ident: string, block: Block): Statement{
     }
 }
 
-function makeResource(jsonResource: string, block: Block): string{ //TODO ogg can also be video, need to disambiguate
+function makeResource(resource: string): string{ //TODO ogg can also be video, need to disambiguate
     var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
         'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4':
         'video', 'webm': 'video'};
-    var resource = setOrSample(jsonResource, block);
     var extension = resource.split('.').pop().toLowerCase();
     var fileType = fileTypeMap[extension];
     if (fileType === 'img') {

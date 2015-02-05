@@ -11,6 +11,7 @@ class Page implements Viewable, Resettable{
     public text: string;
     public id: string;
     public condition: string;
+    public resourceNames: string[];
     public resources: string[];
     public tags;
     public record: TrialRecord;
@@ -20,9 +21,8 @@ class Page implements Viewable, Resettable{
         this.id = jsonPage.id;
         this.text = setText(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
-        this.resources = _.map(jsonPage.resources, (r: string):string => {
-            return makeResource(r, this.block);
-        });
+        this.resourceNames = _.map(jsonPage.resources, (r) => {return setOrSample(r, this.block)});
+        this.resources = _.map(this.resourceNames, makeResource);
         this.tags = jsonPage.tags;
         this.record = new TrialRecord(
                 this.id,
@@ -30,7 +30,7 @@ class Page implements Viewable, Resettable{
                 this.condition,
                 this.block.containerIDs,
                 this.tags,
-                jsonPage.resources);
+                this.resourceNames);
     }
 
     public advance(experimentRecord):void {}
@@ -150,6 +150,9 @@ class Question extends Page{
     reset(){
         this.record = this.record.reset();
         this.orderOptions();
+        if (this.feedback){
+            this.feedback.reset();
+        }
     }
 
     private orderOptions(){
