@@ -12,6 +12,7 @@ class ResponseOption implements Viewable{
     public feedback: Statement;
     public correct: boolean;
     public tags;
+    public resourceNames: string[];
     public resources: string[];
 
     constructor(jsonOption, public question: Question){
@@ -19,6 +20,7 @@ class ResponseOption implements Viewable{
         this.id = jsonOption.id;
         this.text = setText(jsonOption.text, this.question.block);
         this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.block);
+        this.resourceNames = jsonOption.resources;
         this.resources = _.map(jsonOption.resources, (r: string):string => {
             return makeResource(r, this.question.block);
         });
@@ -26,7 +28,7 @@ class ResponseOption implements Viewable{
         this.tags = jsonOption.tags;
     }
 
-    public run(){} //TODO make div with pars for resources and options
+    public run(){}
 
     public getResponse(){
         return [this.id, this.text];

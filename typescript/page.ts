@@ -30,7 +30,7 @@ class Page implements Viewable, Resettable{
                 this.condition,
                 this.block.containerIDs,
                 this.tags,
-                this.resources);
+                jsonPage.resources);
     }
 
     public advance(experimentRecord):void {}
@@ -162,7 +162,7 @@ class Question extends Page{
         }
         var optionOrder = _.pluck(this.options, 'id');
         var optionTexts = _.pluck(this.options, 'text');
-        var optionResources = _.pluck(this.options, 'resources');
+        var optionResources = _.pluck(this.options, 'resourceNames');
         var optionTags = _.pluck(this.options, 'tags');
         this.record.addOptionData(optionOrder, optionTexts, optionResources, optionTags);
     }

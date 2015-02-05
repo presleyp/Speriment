@@ -17,7 +17,7 @@ class TrialRecord {
     private optionOrder: string[]; // randomized each iteration
     private optionTexts: string[]; // can be sampled
     private optionResources: string[][]; // can be sampled
-    private optionTags: Object[];
+    private optionTags: Object;
     // response data
     private selectedPosition: number[];
     private selectedID: string[]; // redundant but used by RunIf
@@ -75,18 +75,18 @@ class TrialRecord {
         return new TrialRecord(this.pageID, this.pageText, this.condition, this.blockIDs, this.pageTags, this.pageResources);
     }
 
-    zipOptionTags(optionTags: any[]): Array<Object>{
+    zipOptionTags(optionTags: any[]): Object{
         // optionTags: [{tag1: option1value, tag2: option1value}, {tag1: option2value}, ...]
-        // want: {tag1: [option1value, option2value, ...], {tag2: [option1value, 'NA', ...], ...}
+        // want: {tag1: [option1value, option2value, ...], tag2: [option1value, 'NA', ...], ...}
         var optionTagNames: string[] = _.union.apply(_, _.map(optionTags, (t) => {return _.keys(t)}));
-        return _.map(optionTagNames, (tag: string): Object => {
+        var tagObject = {};
+        _.each(optionTagNames, (tag) => {
             var values = _.map(optionTags, (optionObject) => {
                 return _.has(optionObject, tag) ? optionObject[tag] : 'NA';
             });
-            var tagObject = {};
             tagObject[tag] = values;
-            return tagObject;
         });
+        return tagObject;
     }
 
     responseGiven(optionID){
@@ -119,8 +119,7 @@ class TrialRecord {
             OptionTexts: this.optionTexts,
             OptionResources: this.optionResources
             }
-        _.extend(row, this.pageTags);
-        _.each(this.optionTags, (t) => {_.extend(row, t)});
+        _.extend(row, this.pageTags, this.optionTags);
         return row;
     }
 

@@ -280,6 +280,59 @@ test("question display with text", function(){
     cleanUp();
 });
 
+test("reset page", function(){
+    var p1 = new Question({id: 'p1',
+                          text: 'hi',
+                          tags: {a: 'one', b: 'two'},
+                          resources: ['pageresource.png', 'second.png'],
+                          options: [{id: 'o1', text: 'A', tags: {c: 'three', d: 'four'}, resources: ['optionresource.jpg']},
+                              {id: 'o2', text: 'B', tags: {c: 'five', d: 'six'}, resources: ['optionresource.ogg']}]},
+                          fakeContainer);
+    strictEqual(p1.record.pageID, 'p1', 'page id set');
+    strictEqual(p1.record.pageText, 'hi', 'page text set');
+    strictEqual(p1.record.pageTags.a, 'one', 'set first page tag');
+    strictEqual(p1.record.pageTags.b, 'two', 'set second page tag');
+    strictEqual(p1.record.pageResources[0], 'pageresource.png', 'first page resource set');
+    strictEqual(p1.record.pageResources[1], 'second.png', 'second page resource set');
+    strictEqual(p1.record.optionOrder[0], p1.options[0].id, 'option order set');
+    strictEqual(p1.record.optionOrder[1], p1.options[1].id, 'option order set');
+    strictEqual(p1.record.optionTexts[0], p1.options[0].text, 'option texts set');
+    strictEqual(p1.record.optionTexts[1], p1.options[1].text, 'option texts set');
+    strictEqual(p1.record.optionResources[0][0], p1.options[0].resourceNames[0], 'option resources set');
+    strictEqual(p1.record.optionResources[1][0], p1.options[1].resourceNames[0], 'option resources set');
+    strictEqual(p1.record.optionTags.c[0], p1.options[0].tags.c, 'option tags set');
+    strictEqual(p1.record.optionTags.c[1], p1.options[1].tags.c, 'option tags set');
+    strictEqual(p1.record.optionTags.d[0], p1.options[0].tags.d, 'option tags set');
+    strictEqual(p1.record.optionTags.d[1], p1.options[1].tags.d, 'option tags set');
+
+    p1.reset();
+
+    strictEqual(p1.record.pageID, 'p1', 'page id set');
+    strictEqual(p1.record.pageID, 'p1', 'page id set');
+    strictEqual(p1.record.pageText, 'hi', 'page text set');
+    strictEqual(p1.record.pageTags.a, 'one', 'set first page tag');
+    strictEqual(p1.record.pageTags.b, 'two', 'set second page tag');
+    strictEqual(p1.record.pageResources[0], 'pageresource.png', 'first page resource set');
+    strictEqual(p1.record.pageResources[1], 'second.png', 'second page resource set');
+    strictEqual(p1.record.optionOrder[0], p1.options[0].id, 'option order set');
+    strictEqual(p1.record.optionOrder[1], p1.options[1].id, 'option order set');
+    strictEqual(p1.record.optionTexts[0], p1.options[0].text, 'option texts set');
+    strictEqual(p1.record.optionTexts[1], p1.options[1].text, 'option texts set');
+    strictEqual(p1.record.optionResources[0][0], p1.options[0].resourceNames[0], 'option resources set');
+    strictEqual(p1.record.optionResources[1][0], p1.options[1].resourceNames[0], 'option resources set');
+    strictEqual(p1.record.optionTags.c[0], p1.options[0].tags.c, 'option tags set');
+    strictEqual(p1.record.optionTags.c[1], p1.options[1].tags.c, 'option tags set');
+    strictEqual(p1.record.optionTags.d[0], p1.options[0].tags.d, 'option tags set');
+    strictEqual(p1.record.optionTags.d[1], p1.options[1].tags.d, 'option tags set');
+
+    var firstOptionIDs = _.times(10, function(n){
+        p1.reset();
+        return p1.options[0].id;
+    });
+    ok(_.contains(firstOptionIDs, 'o1'), 'reset shuffles options');
+    ok(_.contains(firstOptionIDs, 'o2'), 'reset shuffles options');
+});
+
 // asyncTest('statement enables next button after delay', function(){
 //     expect(1);
 //     Experiment.addElements();
