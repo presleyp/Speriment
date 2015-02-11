@@ -1,12 +1,12 @@
 {
     "name": "speriment",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Making experiments easier to express",
     "keywords": ["experiment", "Mechanical Turk", "linguistics", "psychology", "social science"],
     "bugs": "issues",
     "license": "GPL-2.0",
     "author": "Presley Pizzo",
-    "files": ["javascript/*", "test/*", "LICENSE"],
+    "files": ["javascript/*", "test/*", "css/*", "LICENSE"],
     "main": "javascript/speriment.js",
     "dependencies": {
         "jquery": ">= 2.1.0",

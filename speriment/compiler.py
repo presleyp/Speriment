@@ -33,7 +33,7 @@ class ExperimentEncoder(json.JSONEncoder):
         elif hasattr(new_obj, 'not_variable'):
             new_obj.not_variable = int(mapping[new_obj.not_variable])
         else:
-            if not new_obj.with_replacement:
+            if not hasattr(new_obj, 'with_replacement'):
                 new_obj._set_variable()
         return new_obj
 

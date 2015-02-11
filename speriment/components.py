@@ -46,7 +46,7 @@ class SampleFrom:
     _variable_maps = {} # {bankname: {variablename: index}}
 
     def __init__(self, bank, variable = None, not_variable = None, field = None,
-            with_replacement = True):
+            with_replacement = False):
         '''bank: string, the name of an information bank to sample from. A
         corresponding bank must be put in one of the Blocks containing this
         SampleFrom, or the Experiment.
@@ -98,7 +98,7 @@ class SampleFrom:
             self.field = field
 
     def _set_variable(self):
-        self.variable = int(self._id_generators[bank]._next_id())
+        self.variable = int(self._id_generators[self.bank]._next_id())
 
     def _validate(self):
         # TODO (not)var or without_r consistently for a given bank
