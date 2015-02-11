@@ -1,6 +1,6 @@
-import csv
+import csv, itertools
 from components import Component
-__all__ = ['get_rows', 'get_dicts', 'IDGenerator', 'make_experiment']
+__all__ = ['get_rows', 'get_dicts', 'group_by_col', 'IDGenerator', 'make_experiment']
 
 def get_rows(csvfile, sep = ','):
     '''csvfile: string, a filename of a csv file.
@@ -28,6 +28,18 @@ def get_dicts(csvfile, sep = ','):
     with open(csvfile, 'r') as f:
         dicts = csv.DictReader(f, delimiter = sep)
         return list(dicts)
+
+def group_by_col(rows, column):
+    '''rows: [[string]] (output of get_rows) or [{string: string}] (output of
+    get_dicts).
+
+    column: integer if [[string]], string if [{string: string}].
+
+    Returns: {column: rows}, a dictionary whose keys are the unique values in
+    the column provided, where each column value maps to a list of all rows with
+    that value.'''
+    return dict([(key, list(val)) for (key, val)
+        in itertools.groupby(rows, lambda r: r[column])])
 
 class IDGenerator:
     '''Creates an object to generate unique IDs for experimental components. You
