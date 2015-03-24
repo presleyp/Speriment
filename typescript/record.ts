@@ -210,8 +210,7 @@ class ExperimentRecord {
         var orderedRecords = this.sortByStart(flatRecords);
         var dataObjects = _.map(orderedRecords, (r) => {return r.writeData()});
         _.each(dataObjects, this.psiturk.recordTrialData);
-        this.psiturk.saveData();
-        this.psiturk.completeHIT();
+        this.psiturk.saveData({success: this.psiturk.completeHIT, error: this.psiturk.completeHIT});
     }
 
     private sortByStart(records: TrialRecord[]): TrialRecord[] {
