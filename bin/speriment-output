@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 '''
 Gets experimental results out of the database and table described in config.txt
-and writes the data to a csv file.
+and writes the data to a json or csv file.
 
-Usage: speriment-output filename tags excluded'''
+Usage: speriment-output [-j] filename [-e excluded]'''
 
 from sqlalchemy import create_engine, MetaData, Table
 import json
@@ -17,6 +17,8 @@ def parse():
             data gathered in an experiment and write it to a csv file.''')
     parser.add_argument('filename', type=str, help = '''File
             to write experimental results to in csv format.''')
+    parser.add_argument('-j', '--json', action = 'store_true', help = '''Write the output in JSON
+    format.''')
     parser.add_argument('-e', '--exclude', nargs='*',
             default=[], help = '''Worker IDs of any participants whose data you don't
             want to write to the output file.''')
@@ -30,54 +32,60 @@ def get_credentials():
     return DBURL, TABLENAME
 
 def retrieve(db_url, table_name, exclude = []):
-    # db_url = "mysql://username:password@host.org/database_name"
-    # table_name = 'my_experiment_table'
-    data_column_name = 'datastring'
+    # status codes PsiTurk gives subjects who completed experiment
+    statuses = [3,4,5,7]
+
     # boilerplace sqlalchemy setup
     engine = create_engine(db_url)
     metadata = MetaData()
     metadata.bind = engine
     table = Table(table_name, metadata, autoload=True)
-    # make a query and loop through
     s = table.select()
     rows = s.execute()
 
-    #status codes of subjects who completed experiment
-    statuses = [3,4,5,7]
-
-    #column to retrieve
-    data_column_name = 'datastring'
-
     # filter participants
-    data = [participant[data_column_name] for participant in rows
+    complete_participants = [participant for participant in rows
             if participant['status'] in statuses
-            and participant['uniqueid'].split(':')[0] not in exclude]
-    return data
+            and participant['workerid'] not in exclude]
+    return complete_participants
 
-def format_data(data):
-    # parse each participant's datastring
-    participants = [json.loads(participant) for participant in data]
+def format_data(complete_participants):
+    # column PsiTurk saves your data to
+    data_column_name = 'datastring'
+    # JSON property Speriment tells PsiTurk to log trial data to
+    # PsiTurk also keeps questiondata and eventdata, which Speriment doesn't use
+    data_property_name = 'data'
 
-    # push study and participant data into trial data
-    for participant in participants:
-        for trial in participant['data']:
+    # 'data' is a list of objects containing among other things 'uniqueid' and
+    # 'trialdata'. push uniqueid into trialdata and then use just trialdata.
+    # also push information outside of 'data' into 'trialdata'.
+    # this way, each row contains all the study-level and participant-level
+    # information.
+    trials = []
+    for participant in complete_participants:
+        json_data = json.loads(participant[data_column_name])
+        for trial in json_data[data_property_name]:
             trial['trialdata'].update({
                 'UniqueID': trial['uniqueid'],
                 'TrialNumber': trial['current_trial'],
-                'Version': participant['condition'],
+                'Version': participant['cond'],
                 'Permutation': participant['counterbalance'],
-                'HIT': participant['hitId'],
-                'WorkerID': participant['workerId']
+                'HIT': participant['hitid'],
+                'WorkerID': participant['workerid'],
+                'ExperimentVersion': participant['codeversion']
                 })
+            trials.append(trial['trialdata'])
+    return trials
 
-    # extract just trial data
-    trials = [trial['trialdata']
-            for participant in participants
-            for trial in participant['data']]
-
+def python_dataframe(trials, filename):
     data_frame = pd.DataFrame(trials)
     data_frame['ReactionTime'] = data_frame['EndTime'] - data_frame['StartTime']
-    return data_frame
+    data_frame.to_csv(filename)
+
+def write_json(trials, filename):
+    json_content = json.dumps(trials)
+    with open(filename, 'w') as f:
+        f.write(json_content)
 
 
 if __name__ == '__main__':
@@ -85,7 +93,11 @@ if __name__ == '__main__':
     args = parse()
     filename = args.filename
     exclude = args.exclude
+    json_output = args.json
     (db_url, table_name) = get_credentials()
     data = retrieve(db_url, table_name, exclude)
     formatted = format_data(data)
-    formatted.to_csv(filename)
+    if json_output:
+        write_json(formatted, filename)
+    else:
+        python_dataframe(formatted, filename)
