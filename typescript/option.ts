@@ -23,6 +23,7 @@ class ResponseOption implements Viewable{
         this.resourceNames = _.map(jsonOption.resources, (r) => {return setOrSample(r, this.question.block)});
         this.resources = _.map(this.resourceNames, makeResource);
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
+        _.each(jsonOption.tags, (value, key) => {jsonOption.tags[key] = setOrSample(jsonOption.tags[key], this.question.block)});
         this.tags = jsonOption.tags;
     }
 

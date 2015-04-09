@@ -23,6 +23,7 @@ class Page implements Viewable, Resettable{
         this.condition = setOrSample(jsonPage.condition, this.block);
         this.resourceNames = _.map(jsonPage.resources, (r) => {return setOrSample(r, this.block)});
         this.resources = _.map(this.resourceNames, makeResource);
+        _.each(jsonPage.tags, (value, key) => {jsonPage.tags[key] = setOrSample(jsonPage.tags[key], this.block)});
         this.tags = jsonPage.tags;
         this.record = new TrialRecord(
                 this.id,
