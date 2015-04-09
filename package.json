@@ -1,6 +1,6 @@
 {
     "name": "speriment",
-    "version": "0.5.2",
+    "version": "0.6.0",
     "description": "Making experiments easier to express",
     "keywords": ["experiment", "Mechanical Turk", "linguistics", "psychology", "social science"],
     "bugs": "issues",
@@ -10,10 +10,10 @@
     "main": "javascript/speriment.js",
     "dependencies": {
         "jquery": ">= 2.1.0",
-        "underscore": ">= 1.6.0"
+        "underscore": ">= 1.7.0"
     },
     "devDependencies": {
-        "typescript": "1.1.0-1",
+        "typescript": ">= 1.4",
         "qunitjs": "1.14.0"
     },
     "scripts": {"prepublish": "tsc typescript/*.ts --out javascript/speriment.js"},
