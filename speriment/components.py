@@ -132,9 +132,12 @@ class Component:
             if hasattr(new_component, att):
                 setattr(new_component, att, [item.new()
                     for item in getattr(new_component, att)])
-            elif hasattr(new_component, 'groups'):
-                new_component.groups = [[page.new() for page in group]
-                        for group in new_component.groups]
+        if hasattr(new_component, 'groups'):
+            new_component.groups = [[page.new() for page in group]
+                    for group in new_component.groups]
+        if hasattr(new_component, 'feedback'):
+            if isinstance(new_component.feedback, Page):
+                new_component.feedback = new_component.feedback.new()
         return new_component
 
     def _set_optional_args(self, **kwargs):
