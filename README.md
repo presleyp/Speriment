@@ -84,7 +84,14 @@ if multiple participants try to submit data at once. See the PsiTurk documentati
 
     `mv psiturk-example/ myproject/`
 
-3. Edit `config.txt` and the files in `templates`. Don't bother editing `exp.html` or `task.js` because Speriment will edit those.
+3. Edit your [configuration files](http://psiturk.readthedocs.org/en/latest/configuration.html) and the following files in `templates`:
+    - [ad.html](http://psiturk.readthedocs.org/en/latest/file_desc/ad_html.html)
+    - [complete.html](http://psiturk.readthedocs.org/en/latest/file_desc/complete_html.html)
+    - [consent.html](http://psiturk.readthedocs.org/en/latest/file_desc/consent_html.html)
+    - [default.html](http://psiturk.readthedocs.org/en/latest/file_desc/default_html.html)
+    - [error.html](http://psiturk.readthedocs.org/en/latest/file_desc/error_html.html)
+
+    Note that [exp.html](http://psiturk.readthedocs.org/en/latest/file_desc/exp_html.html) is required for PsiTurk, but you should not edit it, because Speriment does so automatically. Speriment also automatically edits `static/task.js`, so do not delete it.
 
 4. Write a Python script to generate a Speriment from a csv of your experimental
 materials. Put the csv file and the Python script in `myproject` (or whatever
@@ -96,18 +103,18 @@ you called the directory).
    
     `npm install speriment`
 
-6. Run your Python script.
+6. Run your Python script. It's important to do this after installing Speriment. If you accidentally do it in the wrong order, you can always rerun the script.
     
     `cd ~/myproject`
     
     `python myscript`
 
-7. Enter the PsiTurk shell.
+7. Enter the PsiTurk shell. If you're using a MySQL database, start its server first with `mysql.server start`.
     
     `psiturk`
 
 8. In the PsiTurk shell, turn on the server and, if you're using a tunnel, open a tunnel.
-    
+
     `server on`
     
     `tunnel open`
@@ -128,7 +135,9 @@ you called the directory).
 
     The PsiTurk shell also has other useful commands, so check out its documentation.
 
-12. Finally, use Speriment to retrieve and format your data, writing it to a
+12. Check on your experiment as it's running with PsiTurk commands like `hit list` and `worker list.` When the HIT is reviewable, you can run `worker approve` to pay workers.
+
+13. Finally, use Speriment to retrieve and format your data, writing it to a
     csv in your project directory that you can load into Python or R. Speriment
     comes with a command-line tool `speriment-output` to make this easy. It
     takes one required argument and one optional list of arguments. The required argument is
