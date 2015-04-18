@@ -19,9 +19,17 @@ class Block implements Resettable{
     banks;
     oldContents;
     criterion: number;
+    /* After a block has run cutoff times (count from 1), it will stop even
+     * if the criterion has not been reached. Blocks inside of it may end up
+     * running more times than that if they also have criteria. */
+    cutoff: number;
+    /* Block iterations are separate from Page iterations. Page iterations get
+     * recorded. Block iterations are just used to determine if the cutoff for
+     * looping has been reached. */
+    iteration: number;
 
     constructor(jsonBlock, public container: Container){
-        jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}, criterion: null});
+        jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}, criterion: null, cutoff: 1});
         this.runIf = jsonBlock.runIf;
         if (jsonBlock.runIf){
             if (_.has(jsonBlock.runIf, 'optionID')){
@@ -38,6 +46,8 @@ class Block implements Resettable{
         }
         this.id = jsonBlock.id;
         this.criterion = jsonBlock.criterion;
+        this.iteration = 1;
+        this.cutoff = jsonBlock.cutoff;
         this.banks = shuffleBanks(jsonBlock.banks);
         this.oldContents = [];
         this.containerIDs = this.container.containerIDs.concat(this.id);
@@ -70,7 +80,10 @@ class Block implements Resettable{
     shouldLoop(experimentRecord: ExperimentRecord): boolean {
         if (!this.criterion){
             return false;
-        } else {
+        } else if (this.iteration >= this.cutoff) {
+            return false;
+        }
+        else {
             var grades: boolean[] = experimentRecord.getBlockGrades(this.id);
             var metric: number;
 
@@ -91,6 +104,7 @@ class Block implements Resettable{
     reset(){
         this.contents = this.oldContents;
         this.oldContents = [];
+        this.iteration += 1;
         _.each(this.contents, (c) => {c.reset()});
     }
 

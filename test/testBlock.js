@@ -713,7 +713,7 @@ test('recording multiple iterations of the same question', function(){
 
 test('training block: whole number criterion not met', function(){
     Experiment.addElements();
-    var b1 = new InnerBlock({id: 'b1', pages: ps, criterion: 2}, fakeContainer);
+    var b1 = new InnerBlock({id: 'b1', pages: ps, criterion: 2, cutoff: 5}, fakeContainer);
     var er = new ExperimentRecord();
     b1.run(er);
     // choose wrong answer
@@ -728,7 +728,7 @@ test('training block: whole number criterion not met', function(){
 
 test('outer training block: whole number criterion not met', function(){
     Experiment.addElements();
-    var b1 = {id: 'b1', pages: ps, criterion: 2};
+    var b1 = {id: 'b1', pages: ps, criterion: 2, cutoff: 5};
     var b2 = new OuterBlock({id: 'b2', blocks: [b1]}, fakeContainer);
     var er = new ExperimentRecord();
     b2.run(er);
@@ -745,7 +745,7 @@ test('outer training block: whole number criterion not met', function(){
 test('training block: whole number criterion met', function(){
     Experiment.addElements();
     var er2 = new ExperimentRecord();
-    var b2 = new InnerBlock({id: 'b2', pages: ps, criterion: 2}, fakeContainer);
+    var b2 = new InnerBlock({id: 'b2', pages: ps, criterion: 2, cutoff: 5}, fakeContainer);
     b2.run(er2);
     // choose right answer
     $('#o1').prop('checked', true);
@@ -760,7 +760,7 @@ test('outer training block: whole number criterion met', function(){
     Experiment.addElements();
     var er2 = new ExperimentRecord();
     var b1 = {id: 'b1', pages: ps};
-    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 2}, fakeContainer);
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 2, cutoff: 5}, fakeContainer);
     b2.run(er2);
     // choose right answer
     $('#o1').prop('checked', true);
@@ -776,7 +776,7 @@ test('outer training block with inner ungraded block: whole number criterion met
     var er2 = new ExperimentRecord();
     var b1 = {id: 'b1', pages: ps};
     var b3 = {id: 'b3', pages: ps2}; // no correctness info
-    var b2 = new OuterBlock({id: 'b2', blocks: [b1, b3], criterion: 2}, fakeContainer);
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1, b3], criterion: 2, cutoff: 5}, fakeContainer);
     b2.run(er2);
     // choose right answer
     $('#o1').prop('checked', true);
@@ -798,7 +798,7 @@ test('outer training block with inner ungraded block: whole number criterion not
     var er2 = new ExperimentRecord();
     var b1 = {id: 'b1', pages: ps};
     var b3 = {id: 'b3', pages: ps2}; // no correctness info
-    var b2 = new OuterBlock({id: 'b2', blocks: [b1, b3], criterion: 2}, fakeContainer);
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1, b3], criterion: 2, cutoff: 5}, fakeContainer);
     b2.run(er2);
     // choose wrong answer
     $('#o2').prop('checked', true);
@@ -819,8 +819,8 @@ test('outer training block with inner ungraded block: whole number criterion not
 test('outer training block with inner training block: decimal criterion met', function(){
     Experiment.addElements();
     var er2 = new ExperimentRecord();
-    var b1 = {id: 'b1', pages: ps, criterion: 2};
-    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 0.9}, fakeContainer);
+    var b1 = {id: 'b1', pages: ps, criterion: 2, cutoff: 5};
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 0.9, cutoff: 5}, fakeContainer);
     b2.run(er2);
     // choose wrong answer
     $('#o2').prop('checked', true);
@@ -842,8 +842,8 @@ test('outer training block with inner training block: decimal criterion met', fu
 test('outer training block with inner training block: decimal criterion not met', function(){
     Experiment.addElements();
     var er2 = new ExperimentRecord();
-    var b1 = {id: 'b1', pages: ps, criterion: 1};
-    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 0.9}, fakeContainer);
+    var b1 = {id: 'b1', pages: ps, criterion: 1, cutoff: 5};
+    var b2 = new OuterBlock({id: 'b2', blocks: [b1], criterion: 0.9, cutoff: 5}, fakeContainer);
     b2.run(er2);
     // choose wrong answer
     $('#o2').prop('checked', true);
@@ -867,7 +867,7 @@ test('recording multiple iterations', function(){
     var pgs = [{id: 'p1', text: 'page1', options: [{id: 'o1', text:'A', correct:true}, {id:'o2', text:'B', correct:false}]},
         {id: 'p2', text:'page2', options: [{id: 'o3', text:'C', correct:true}, {id:'o4', text:'D', correct:false}]}];
 
-    var b1 = new InnerBlock({id: 'b1', pages: pgs, criterion: 0.9}, fakeContainer);
+    var b1 = new InnerBlock({id: 'b1', pages: pgs, criterion: 0.9, cutoff: 5}, fakeContainer);
     var er = new ExperimentRecord();
     b1.run(er);
 
@@ -922,7 +922,7 @@ test('recording multiple iterations', function(){
 
 test('recording multiple iterations, simpler version', function(){
     Experiment.addElements();
-    var b1 = new InnerBlock({id: 'b1', pages: [ps[0]], criterion: 0.9}, fakeContainer);
+    var b1 = new InnerBlock({id: 'b1', pages: [ps[0]], criterion: 0.9, cutoff: 5}, fakeContainer);
     var er = new ExperimentRecord();
     b1.run(er);
 
@@ -948,7 +948,7 @@ test('training block: whole number criterion met, feedback page', function(){
     var er = new ExperimentRecord();
     var qa = [{id: 'p5', text: 'page1', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o2', text:'B', correct:false}]},
         {id: 'p6', text:'page2', options: [{id: 'o1', text:'A', correct:true, feedback:'good job'}, {id:'o4', text:'B', correct:false}]}];
-    var bqa = new InnerBlock({id: 'b2', pages: qa, criterion: 2}, fakeContainer);
+    var bqa = new InnerBlock({id: 'b2', pages: qa, criterion: 2, cutoff: 5}, fakeContainer);
     bqa.run(er);
     // choose right answer
     $('#o1').prop('checked', true);
@@ -966,7 +966,7 @@ test('training block: whole number criterion met, feedback page', function(){
 test('training block: decimal criterion not met', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
-    var b3 = new InnerBlock({id: 'b3', pages: ps, criterion: 0.8}, fakeContainer);
+    var b3 = new InnerBlock({id: 'b3', pages: ps, criterion: 0.8, cutoff: 5}, fakeContainer);
     b3.run(er);
     // choose wrong answer
     $('#o2').prop('checked', true);
@@ -981,7 +981,7 @@ test('training block: decimal criterion not met', function(){
 test('training block: decimal criterion met', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
-    var b4 = new InnerBlock({id: 'b4', pages: ps, criterion: 0.5}, fakeContainer);
+    var b4 = new InnerBlock({id: 'b4', pages: ps, criterion: 0.5, cutoff: 5}, fakeContainer);
     b4.run(er);
     // choose right answer
     $('#o1').prop('checked', true);
@@ -995,7 +995,7 @@ test('training block: decimal criterion met', function(){
 test('training block: decimal criterion met on second try', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
-    var b6 = new InnerBlock({id: 'b6', pages: ps, criterion: 0.5}, fakeContainer);
+    var b6 = new InnerBlock({id: 'b6', pages: ps, criterion: 0.5, cutoff: 5}, fakeContainer);
     b6.run(er);
     //choose wrong answer
     $('#o2').prop('checked', true);
@@ -1016,8 +1016,8 @@ test('training block: decimal criterion met on second try', function(){
 test('training block: decimal criterion met, no correctness info', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();
-    ps.push({id:'p3', text:'page3', options: [{id: 'o1', text:'A'}, {id:'o2', text:'B'}]});
-    var b5 = new InnerBlock({pages: ps, id:'b5', criterion: 0.5}, fakeContainer);
+    var ps3 = ps.concat([{id:'p3', text:'page3', options: [{id: 'o1', text:'A'}, {id:'o2', text:'B'}]}]);
+    var b5 = new InnerBlock({pages: ps3, id:'b5', criterion: 0.5, cutoff: 5}, fakeContainer);
     var pageOrder = _.pluck(b5.contents, 'id');
     // choose right answer once and wrong answer on one graded page and one ungraded page
     // ungraded page doesn't affect metric
@@ -1033,6 +1033,21 @@ test('training block: decimal criterion met, no correctness info', function(){
     cleanUp();
 });
 
+test('training block: cutoff ends looping', function(){
+    Experiment.addElements();
+    var er = new ExperimentRecord();
+    var b3 = new InnerBlock({id: 'b3', pages: ps, criterion: 0.8, cutoff: 1}, fakeContainer);
+    b3.run(er);
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    clickNext();
+    //choose right answer
+    $('#o1').prop('checked', true);
+    throws(clickNext, CustomError, "block finishes because cutoff was met even though criterion wasn't, so advancing calls container's run");
+    cleanUp();
+
+});
+
 test('training shuffles pages and options', function(){
     Experiment.addElements();
     var sameFirstPages = [];
@@ -1042,7 +1057,7 @@ test('training shuffles pages and options', function(){
     var er = new ExperimentRecord();
 
     _.map(_.range(20), function(){
-        var b = new InnerBlock({id: 'b', pages: ps, criterion: 2}, fakeContainer);
+        var b = new InnerBlock({id: 'b', pages: ps, criterion: 2, cutoff: 5}, fakeContainer);
         b.run(er);
         var firstPage1 = b.oldContents[0].id;
         var firstOption1 = b.oldContents[0].options[0].id;

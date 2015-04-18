@@ -365,6 +365,13 @@ class Block(Component):
         should have the same keys. Bank information can be used for page text,
         option text, page feedback, option feedback, resource filenames, or page
         condition.
+
+        cutoff: integer, defaults to 1. The maximum number of times (counting
+        from 1) that a block can run. This keeps the experiment from running
+        forever if the participant fails to learn well enough to ever reach the
+        criterion. If you supply a criterion, you should also supply a cutoff.
+        The cutoff applies to the entire block only, so if a block within this
+        block loops, that will not affect the count.
         '''
 
         self._set_id(id_str)
