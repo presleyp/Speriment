@@ -9,11 +9,16 @@
 .response{
     margin: 50px;
     display: inline-block;
-
 }
 input{
     margin: 10px;
 }
 select{
     margin: 10px;
+}
+#container-consent{
+    overflow: auto;
+}
+#consent{
+    padding-bottom: 20px;
 }
