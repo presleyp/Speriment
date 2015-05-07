@@ -963,6 +963,55 @@ test('training block: whole number criterion met, feedback page', function(){
     cleanUp();
 });
 
+test('training block: options with page feedback recorded properly', function(){
+    Experiment.addElements();
+    var er = new ExperimentRecord();
+    var qa = [{id: 'p5', text: 'page1', options: [
+            {id: 'o1', text:'A', correct:true, feedback: {id: 'f1', text:'good job'}},
+            {id:'o2', text:'B', correct:false, feedback: {id: 'f2', text: 'sorry'}}
+        ]},
+        {id: 'p6', text:'page2', options: [
+            {id: 'o3', text:'A', correct:true, feedback: {id: 'f3', text: 'good job'}},
+            {id:'o4', text:'B', correct:false, feedback: {id: 'f4', text: 'not quite'}}
+        ]}];
+    var bqa = new InnerBlock({id: 'b2', pages: qa, criterion: 2, cutoff: 3}, fakeContainer);
+    bqa.run(er);
+
+    //iteration 1
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    $('#o4').prop('checked', true);
+    clickNext();
+    //feedback
+    clickNext();
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    $('#o4').prop('checked', true);
+    clickNext();
+    //feedback
+    clickNext();
+
+    //iteration 2
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    $('#o4').prop('checked', true);
+    clickNext();
+    //feedback
+    clickNext();
+    // choose wrong answer
+    $('#o2').prop('checked', true);
+    $('#o4').prop('checked', true);
+    clickNext();
+    //feedback
+    clickNext();
+
+    //check record
+    strictEqual(er.trialRecords.f2.length, 2, 'Both iterations of f2 recorded');
+    strictEqual(er.trialRecords.f4.length, 2, 'Both iterations of f4 recorded');
+
+    cleanUp();
+});
+
 test('training block: decimal criterion not met', function(){
     Experiment.addElements();
     var er = new ExperimentRecord();

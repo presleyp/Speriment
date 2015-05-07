@@ -154,6 +154,7 @@ class Question extends Page{
         if (this.feedback){
             this.feedback.reset();
         }
+        _.each(this.options, (o) => {o.reset()});
     }
 
     private orderOptions(){

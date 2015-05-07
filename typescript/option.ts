@@ -5,7 +5,7 @@
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
 
-class ResponseOption implements Viewable{
+class ResponseOption implements Viewable, Resettable{
 
     public text: string;
     public id: string;
@@ -47,6 +47,12 @@ class ResponseOption implements Viewable{
 
     public isCorrect(){
         return this.correct;
+    }
+
+    public reset(){
+        if (this.feedback){
+            this.feedback.reset();
+        }
     }
 
     public useKey(key: number){
