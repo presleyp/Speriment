@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='speriment',
-      version='0.6.0',
+      version='0.7.0',
       description='Making experiments easier to express',
       url='http://github.com/presleyp/speriment',
       author='Presley Pizzo',
