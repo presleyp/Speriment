@@ -75,6 +75,16 @@ approximately&nbsp;the&nbsp;same&nbsp;number&nbsp;of&nbsp;participants&nbsp;will
 There&nbsp;should&nbsp;be&nbsp;no&nbsp;overlap&nbsp;between&nbsp;the&nbsp;blocks&nbsp;in&nbsp;exchangeable&nbsp;and&nbsp;the<br>
 blocks&nbsp;in&nbsp;counterbalance.<br>
 &nbsp;<br>
+treatments:&nbsp;[[<a href="#Block">Block</a>]],&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[<a href="#Block">Block</a>].&nbsp;Uses<br>
+num_counters&nbsp;in&nbsp;PsiTurk's&nbsp;config.txt.&nbsp;The&nbsp;blocks&nbsp;listed&nbsp;in&nbsp;treatments<br>
+are&nbsp;specified&nbsp;as&nbsp;running&nbsp;conditionally,&nbsp;based&nbsp;on&nbsp;a&nbsp;variable&nbsp;that&nbsp;changes<br>
+per&nbsp;participant&nbsp;and&nbsp;can&nbsp;take&nbsp;on&nbsp;as&nbsp;many&nbsp;values&nbsp;as&nbsp;you&nbsp;specify&nbsp;in<br>
+num_counters&nbsp;in&nbsp;PsiTurk's&nbsp;config.txt.&nbsp;Each&nbsp;sublist&nbsp;of&nbsp;blocks&nbsp;shows&nbsp;which<br>
+blocks&nbsp;will&nbsp;run&nbsp;when&nbsp;the&nbsp;counter&nbsp;is&nbsp;set&nbsp;to&nbsp;one&nbsp;of&nbsp;its&nbsp;possible<br>
+variables.&nbsp;The&nbsp;number&nbsp;of&nbsp;sublists&nbsp;should&nbsp;equal&nbsp;num_counters.&nbsp;Blocks<br>
+contained&nbsp;by&nbsp;this&nbsp;block&nbsp;that&nbsp;are&nbsp;not&nbsp;listed&nbsp;in&nbsp;treatments&nbsp;will&nbsp;run&nbsp;by<br>
+default.<br>
+&nbsp;<br>
 latin_square:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[<a href="#Page">Page</a>]],&nbsp;that&nbsp;is,<br>
 groups&nbsp;of&nbsp;Pages.&nbsp;If&nbsp;True,&nbsp;Pages&nbsp;are&nbsp;chosen&nbsp;from&nbsp;groups&nbsp;according&nbsp;to&nbsp;a<br>
 Latin&nbsp;Square.&nbsp;This&nbsp;process&nbsp;requires&nbsp;that&nbsp;all&nbsp;groups&nbsp;in&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;have<br>
@@ -84,7 +94,7 @@ group&nbsp;should&nbsp;be&nbsp;in&nbsp;the&nbsp;same&nbsp;order&nbsp;in&nbsp;ter
 condition.&nbsp;The&nbsp;condition&nbsp;attribute&nbsp;of&nbsp;Pages&nbsp;is&nbsp;not&nbsp;used&nbsp;to&nbsp;check&nbsp;the<br>
 order.<br>
 &nbsp;<br>
-pseudorandom:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;or&nbsp;[Pages],&nbsp;<br>
+pseudorandom:&nbsp;boolean,&nbsp;only&nbsp;valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;or&nbsp;[Pages],<br>
 all&nbsp;Pages&nbsp;have&nbsp;a&nbsp;condition&nbsp;attribute&nbsp;specified,&nbsp;and&nbsp;there&nbsp;will&nbsp;be&nbsp;an&nbsp;equal<br>
 number&nbsp;of&nbsp;each&nbsp;Pages&nbsp;of&nbsp;each&nbsp;condition&nbsp;displayed&nbsp;(therefore&nbsp;it&nbsp;is&nbsp;not<br>
 valid&nbsp;if&nbsp;contents&nbsp;is&nbsp;[[Pages]]&nbsp;and&nbsp;latin_square&nbsp;is&nbsp;False,&nbsp;because&nbsp;there's<br>
@@ -93,33 +103,39 @@ no&nbsp;two&nbsp;Pages&nbsp;with&nbsp;the&nbsp;same&nbsp;condition&nbsp;will&nbs
 &nbsp;<br>
 **kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
 &nbsp;<br>
-criterion:&nbsp;integer&nbsp;or&nbsp;float&nbsp;between&nbsp;0&nbsp;and&nbsp;1.&nbsp;If&nbsp;integer,&nbsp;it&nbsp;must&nbsp;be<br>
-less&nbsp;than&nbsp;or&nbsp;equal&nbsp;to&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;contained&nbsp;by&nbsp;this&nbsp;<a href="#Block">Block</a><br>
-(currently&nbsp;it&nbsp;can&nbsp;only&nbsp;be&nbsp;used&nbsp;on&nbsp;Blocks&nbsp;where&nbsp;contents&nbsp;is&nbsp;[<a href="#Page">Page</a>]&nbsp;or<br>
-[[<a href="#Page">Page</a>]],&nbsp;but&nbsp;eventually&nbsp;it&nbsp;will&nbsp;be&nbsp;usable&nbsp;with&nbsp;[<a href="#Block">Block</a>],&nbsp;and&nbsp;this<br>
-restriction&nbsp;will&nbsp;apply&nbsp;to&nbsp;the&nbsp;Pages&nbsp;that&nbsp;are&nbsp;ultimately&nbsp;contained&nbsp;by&nbsp;the<br>
-<a href="#Block">Block</a>)&nbsp;that&nbsp;have&nbsp;a&nbsp;specification&nbsp;for&nbsp;the&nbsp;correct&nbsp;attribute,&nbsp;or&nbsp;have<br>
-Options&nbsp;that&nbsp;do.&nbsp;The&nbsp;integer&nbsp;then&nbsp;represents&nbsp;the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;that<br>
-can&nbsp;be&nbsp;correct&nbsp;and&nbsp;were&nbsp;correct&nbsp;in&nbsp;a&nbsp;row&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>.&nbsp;The<br>
-idea&nbsp;is&nbsp;that&nbsp;participants&nbsp;may&nbsp;make&nbsp;mistakes&nbsp;at&nbsp;the&nbsp;beginning,&nbsp;but&nbsp;by&nbsp;the<br>
-end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;should&nbsp;give&nbsp;correct&nbsp;answers&nbsp;for&nbsp;this&nbsp;long&nbsp;of&nbsp;a&nbsp;streak<br>
-in&nbsp;order&nbsp;to&nbsp;show&nbsp;master.&nbsp;If&nbsp;it's&nbsp;a&nbsp;float,&nbsp;it&nbsp;represents&nbsp;a&nbsp;percentage&nbsp;of<br>
-Pages&nbsp;that&nbsp;can&nbsp;be&nbsp;correct&nbsp;that&nbsp;were&nbsp;correct&nbsp;out&nbsp;of&nbsp;the&nbsp;entire&nbsp;block,&nbsp;not<br>
-in&nbsp;a&nbsp;streak.&nbsp;Whether&nbsp;it's&nbsp;an&nbsp;integer&nbsp;or&nbsp;a&nbsp;float,&nbsp;this&nbsp;attribute&nbsp;signals<br>
-that&nbsp;a&nbsp;participant&nbsp;should&nbsp;see&nbsp;the&nbsp;(reshuffled)&nbsp;contents&nbsp;of&nbsp;this&nbsp;<a href="#Block">Block</a>&nbsp;as<br>
-many&nbsp;times&nbsp;as&nbsp;it&nbsp;takes&nbsp;to&nbsp;reach&nbsp;criterion&nbsp;before&nbsp;moving&nbsp;on&nbsp;to&nbsp;later<br>
-Blocks,&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;train&nbsp;participants&nbsp;before&nbsp;later&nbsp;testing&nbsp;them<br>
-on&nbsp;novel&nbsp;information.<br>
+criterion:&nbsp;integer&nbsp;or&nbsp;float&nbsp;between&nbsp;0&nbsp;and&nbsp;1.&nbsp;If&nbsp;integer,&nbsp;it&nbsp;represents<br>
+the&nbsp;number&nbsp;of&nbsp;Pages&nbsp;that&nbsp;can&nbsp;be&nbsp;correct&nbsp;(the&nbsp;<a href="#Page">Page</a>&nbsp;or&nbsp;its&nbsp;Options&nbsp;have&nbsp;a<br>
+'correct'&nbsp;argument)&nbsp;and&nbsp;were&nbsp;correct&nbsp;in&nbsp;a&nbsp;row&nbsp;at&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>.<br>
+The&nbsp;idea&nbsp;is&nbsp;that&nbsp;participants&nbsp;may&nbsp;make&nbsp;mistakes&nbsp;at&nbsp;the&nbsp;beginning,&nbsp;but&nbsp;by<br>
+the&nbsp;end&nbsp;of&nbsp;the&nbsp;<a href="#Block">Block</a>&nbsp;should&nbsp;give&nbsp;correct&nbsp;answers&nbsp;for&nbsp;this&nbsp;long&nbsp;of&nbsp;a<br>
+streak&nbsp;in&nbsp;order&nbsp;to&nbsp;show&nbsp;mastery.&nbsp;If&nbsp;it's&nbsp;a&nbsp;float,&nbsp;it&nbsp;represents&nbsp;a<br>
+percentage&nbsp;of&nbsp;Pages&nbsp;that&nbsp;can&nbsp;be&nbsp;correct&nbsp;that&nbsp;were&nbsp;correct&nbsp;out&nbsp;of&nbsp;the<br>
+entire&nbsp;block,&nbsp;not&nbsp;in&nbsp;a&nbsp;streak.&nbsp;Whether&nbsp;it's&nbsp;an&nbsp;integer&nbsp;or&nbsp;a&nbsp;float,&nbsp;this<br>
+attribute&nbsp;signals&nbsp;that&nbsp;a&nbsp;participant&nbsp;should&nbsp;see&nbsp;the&nbsp;(reshuffled)<br>
+contents&nbsp;of&nbsp;this&nbsp;<a href="#Block">Block</a>&nbsp;as&nbsp;many&nbsp;times&nbsp;as&nbsp;it&nbsp;takes&nbsp;to&nbsp;reach&nbsp;criterion<br>
+before&nbsp;moving&nbsp;on&nbsp;to&nbsp;later&nbsp;Blocks,&nbsp;and&nbsp;can&nbsp;be&nbsp;used&nbsp;to&nbsp;train&nbsp;participants<br>
+before&nbsp;later&nbsp;testing&nbsp;them&nbsp;on&nbsp;novel&nbsp;information.&nbsp;Pages&nbsp;are&nbsp;reshuffled&nbsp;but<br>
+Blocks&nbsp;are&nbsp;not&nbsp;re-exchanged.<br>
 &nbsp;<br>
 run_if:&nbsp;<a href="#RunIf">RunIf</a>,&nbsp;gives&nbsp;a&nbsp;condition&nbsp;that&nbsp;must&nbsp;be&nbsp;met&nbsp;in&nbsp;order&nbsp;for&nbsp;this&nbsp;<a href="#Block">Block</a><br>
 to&nbsp;display&nbsp;its&nbsp;contents,&nbsp;no&nbsp;matter&nbsp;the&nbsp;type&nbsp;of&nbsp;contents.&nbsp;See&nbsp;the&nbsp;<a href="#RunIf">RunIf</a><br>
 documentation&nbsp;for&nbsp;more&nbsp;information.<br>
 &nbsp;<br>
-banks:&nbsp;{string:&nbsp;[string]},&nbsp;a&nbsp;dictionary&nbsp;mapping&nbsp;bank&nbsp;names&nbsp;to&nbsp;banks,<br>
-where&nbsp;a&nbsp;bank&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;pieces&nbsp;of&nbsp;information.&nbsp;Within&nbsp;a&nbsp;bank,&nbsp;all<br>
-items&nbsp;should&nbsp;be&nbsp;for&nbsp;the&nbsp;same&nbsp;purpose.&nbsp;Bank&nbsp;information&nbsp;can&nbsp;be&nbsp;used&nbsp;for<br>
-page&nbsp;text,&nbsp;option&nbsp;text,&nbsp;page&nbsp;feedback,&nbsp;option&nbsp;feedback,&nbsp;resource<br>
-filenames,&nbsp;or&nbsp;page&nbsp;condition.</tt></dd></dl>
+banks:&nbsp;{string:&nbsp;[string]}&nbsp;or&nbsp;{string:&nbsp;[{string:&nbsp;string}]}.&nbsp;A&nbsp;dictionary<br>
+mapping&nbsp;bank&nbsp;names&nbsp;to&nbsp;banks,&nbsp;where&nbsp;a&nbsp;bank&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;pieces&nbsp;of<br>
+information&nbsp;(which&nbsp;may&nbsp;be&nbsp;simple&nbsp;-&nbsp;strings&nbsp;-&nbsp;or&nbsp;complex&nbsp;-&nbsp;dictionaries<br>
+of&nbsp;strings).&nbsp;Within&nbsp;a&nbsp;bank,&nbsp;all&nbsp;items&nbsp;should&nbsp;be&nbsp;for&nbsp;the&nbsp;same&nbsp;purpose.&nbsp;If<br>
+the&nbsp;pieces&nbsp;of&nbsp;information&nbsp;are&nbsp;complex,&nbsp;all&nbsp;dictionaries&nbsp;in&nbsp;the&nbsp;same&nbsp;bank<br>
+should&nbsp;have&nbsp;the&nbsp;same&nbsp;keys.&nbsp;Bank&nbsp;information&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;page&nbsp;text,<br>
+option&nbsp;text,&nbsp;page&nbsp;feedback,&nbsp;option&nbsp;feedback,&nbsp;resource&nbsp;filenames,&nbsp;or&nbsp;page<br>
+condition.<br>
+&nbsp;<br>
+cutoff:&nbsp;integer,&nbsp;defaults&nbsp;to&nbsp;1.&nbsp;The&nbsp;maximum&nbsp;number&nbsp;of&nbsp;times&nbsp;(counting<br>
+from&nbsp;1)&nbsp;that&nbsp;a&nbsp;block&nbsp;can&nbsp;run.&nbsp;This&nbsp;keeps&nbsp;the&nbsp;experiment&nbsp;from&nbsp;running<br>
+forever&nbsp;if&nbsp;the&nbsp;participant&nbsp;fails&nbsp;to&nbsp;learn&nbsp;well&nbsp;enough&nbsp;to&nbsp;ever&nbsp;reach&nbsp;the<br>
+criterion.&nbsp;If&nbsp;you&nbsp;supply&nbsp;a&nbsp;criterion,&nbsp;you&nbsp;should&nbsp;also&nbsp;supply&nbsp;a&nbsp;cutoff.<br>
+The&nbsp;cutoff&nbsp;applies&nbsp;to&nbsp;the&nbsp;entire&nbsp;block&nbsp;only,&nbsp;so&nbsp;if&nbsp;a&nbsp;block&nbsp;within&nbsp;this<br>
+block&nbsp;loops,&nbsp;that&nbsp;will&nbsp;not&nbsp;affect&nbsp;the&nbsp;count.</tt></dd></dl>
 
 <hr>
 Methods inherited from <a href="speriment.components.html#Component">Component</a>:<br>
@@ -128,10 +144,6 @@ data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you
 handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
 they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
 for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
-
-<hr>
-Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
-<dl><dt><strong>id_generator</strong> = None</dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -146,7 +158,7 @@ and&nbsp;among&nbsp;blocks&nbsp;within&nbsp;one&nbsp;experiment),&nbsp;then&nbsp
 experiment.<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Experiment-__init__"><strong>__init__</strong></a>(self, blocks, exchangeable<font color="#909090">=[]</font>, counterbalance<font color="#909090">=[]</font>, banks<font color="#909090">={}</font>)</dt><dd><tt>blocks:&nbsp;[<a href="#Block">Block</a>],&nbsp;the&nbsp;contents&nbsp;of&nbsp;the&nbsp;experiment.<br>
+<dl><dt><a name="Experiment-__init__"><strong>__init__</strong></a>(self, blocks, exchangeable<font color="#909090">=[]</font>, counterbalance<font color="#909090">=[]</font>, banks<font color="#909090">={}</font>, treatments<font color="#909090">=[]</font>)</dt><dd><tt>blocks:&nbsp;[<a href="#Block">Block</a>],&nbsp;the&nbsp;contents&nbsp;of&nbsp;the&nbsp;experiment.<br>
 &nbsp;<br>
 exchangeable:&nbsp;[<a href="#Block">Block</a>],&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;Blocks.&nbsp;These&nbsp;Blocks&nbsp;will&nbsp;be<br>
 considered&nbsp;exchangeable.&nbsp;See&nbsp;<a href="#Block">Block</a>&nbsp;documentation&nbsp;for&nbsp;more&nbsp;information.<br>
@@ -154,11 +166,23 @@ considered&nbsp;exchangeable.&nbsp;See&nbsp;<a href="#Block">Block</a>&nbsp;docu
 counterbalance:&nbsp;[<a href="#Block">Block</a>],&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;Blocks.&nbsp;See&nbsp;<a href="#Block">Block</a>&nbsp;documentation<br>
 for&nbsp;more&nbsp;information.<br>
 &nbsp;<br>
-banks:&nbsp;{string:&nbsp;[string]},&nbsp;a&nbsp;dictionary&nbsp;mapping&nbsp;bank&nbsp;names&nbsp;to&nbsp;banks,<br>
-where&nbsp;a&nbsp;bank&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;pieces&nbsp;of&nbsp;information.&nbsp;Within&nbsp;a&nbsp;bank,&nbsp;all<br>
-items&nbsp;should&nbsp;be&nbsp;for&nbsp;the&nbsp;same&nbsp;purpose.&nbsp;Bank&nbsp;information&nbsp;can&nbsp;be&nbsp;used&nbsp;for<br>
-page&nbsp;text,&nbsp;option&nbsp;text,&nbsp;page&nbsp;feedback,&nbsp;option&nbsp;feedback,&nbsp;resource<br>
-filenames,&nbsp;or&nbsp;page&nbsp;condition.</tt></dd></dl>
+treatments:&nbsp;[[<a href="#Block">Block</a>]],&nbsp;a&nbsp;subset&nbsp;of&nbsp;the&nbsp;Blocks.&nbsp;Uses<br>
+num_counters&nbsp;in&nbsp;PsiTurk's&nbsp;config.txt.&nbsp;The&nbsp;blocks&nbsp;listed&nbsp;in&nbsp;treatments<br>
+are&nbsp;specified&nbsp;as&nbsp;running&nbsp;conditionally,&nbsp;based&nbsp;on&nbsp;a&nbsp;variable&nbsp;that&nbsp;changes<br>
+per&nbsp;participant&nbsp;and&nbsp;can&nbsp;take&nbsp;on&nbsp;as&nbsp;many&nbsp;values&nbsp;as&nbsp;you&nbsp;specify&nbsp;in<br>
+num_counters&nbsp;in&nbsp;PsiTurk's&nbsp;config.txt.&nbsp;Each&nbsp;sublist&nbsp;of&nbsp;blocks&nbsp;shows&nbsp;which<br>
+blocks&nbsp;will&nbsp;run&nbsp;when&nbsp;the&nbsp;counter&nbsp;is&nbsp;set&nbsp;to&nbsp;one&nbsp;of&nbsp;its&nbsp;possible<br>
+variables.&nbsp;The&nbsp;number&nbsp;of&nbsp;sublists&nbsp;should&nbsp;equal&nbsp;num_counters.&nbsp;Blocks<br>
+that&nbsp;are&nbsp;not&nbsp;listed&nbsp;in&nbsp;treatments&nbsp;will&nbsp;run&nbsp;by&nbsp;default.<br>
+&nbsp;<br>
+banks:&nbsp;{string:&nbsp;[string]}&nbsp;or&nbsp;{string:&nbsp;[{string:&nbsp;string}]}.&nbsp;A&nbsp;dictionary<br>
+mapping&nbsp;bank&nbsp;names&nbsp;to&nbsp;banks,&nbsp;where&nbsp;a&nbsp;bank&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;pieces&nbsp;of<br>
+information&nbsp;(which&nbsp;may&nbsp;be&nbsp;simple&nbsp;-&nbsp;strings&nbsp;-&nbsp;or&nbsp;complex&nbsp;-&nbsp;dictionaries<br>
+of&nbsp;strings).&nbsp;Within&nbsp;a&nbsp;bank,&nbsp;all&nbsp;items&nbsp;should&nbsp;be&nbsp;for&nbsp;the&nbsp;same&nbsp;purpose.&nbsp;If<br>
+the&nbsp;pieces&nbsp;of&nbsp;information&nbsp;are&nbsp;complex,&nbsp;all&nbsp;dictionaries&nbsp;in&nbsp;the&nbsp;same&nbsp;bank<br>
+should&nbsp;have&nbsp;the&nbsp;same&nbsp;keys.&nbsp;Bank&nbsp;information&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;page&nbsp;text,<br>
+option&nbsp;text,&nbsp;page&nbsp;feedback,&nbsp;option&nbsp;feedback,&nbsp;resource&nbsp;filenames,&nbsp;or&nbsp;page<br>
+condition.</tt></dd></dl>
 
 <dl><dt><a name="Experiment-install"><strong>install</strong></a>(self, experiment_name)</dt><dd><tt>validates&nbsp;the&nbsp;structure&nbsp;of&nbsp;the&nbsp;experiment,&nbsp;writes&nbsp;it&nbsp;as&nbsp;a&nbsp;JSON&nbsp;object<br>
 in&nbsp;a&nbsp;JavaScript&nbsp;file,&nbsp;and&nbsp;gives&nbsp;PsiTurk&nbsp;access&nbsp;to&nbsp;Speriment&nbsp;and&nbsp;the&nbsp;JSON<br>
@@ -177,10 +201,6 @@ handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;diff
 they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
 for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
 
-<hr>
-Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
-<dl><dt><strong>id_generator</strong> = None</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -189,9 +209,10 @@ Data and other attributes inherited from <a href="speriment.components.html#Comp
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Option-__init__"><strong>__init__</strong></a>(self, text<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is&nbsp;the&nbsp;label&nbsp;for&nbsp;the&nbsp;<a href="#Option">Option</a><br>
+<dl><dt><a name="Option-__init__"><strong>__init__</strong></a>(self, text<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;string&nbsp;or&nbsp;[string].&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is&nbsp;the&nbsp;label&nbsp;for&nbsp;the&nbsp;<a href="#Option">Option</a><br>
 that&nbsp;will&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box,&nbsp;this&nbsp;is<br>
-not&nbsp;currently&nbsp;used.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+not&nbsp;currently&nbsp;used.&nbsp;The&nbsp;string&nbsp;or&nbsp;any&nbsp;string(s)&nbsp;in&nbsp;the&nbsp;list&nbsp;can&nbsp;be<br>
+<a href="#SampleFrom">SampleFrom</a>.<br>
 &nbsp;<br>
 id_str:&nbsp;String,&nbsp;optional,&nbsp;an&nbsp;identifier&nbsp;unique&nbsp;among&nbsp;all&nbsp;options&nbsp;in&nbsp;this<br>
 experiment.&nbsp;(Currently&nbsp;uniqueness&nbsp;in&nbsp;its&nbsp;page&nbsp;is&nbsp;sufficient&nbsp;but&nbsp;this&nbsp;may<br>
@@ -199,8 +220,12 @@ change&nbsp;in&nbsp;the&nbsp;future.)<br>
 &nbsp;<br>
 **kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
 &nbsp;<br>
-feedback:&nbsp;string,&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed&nbsp;if&nbsp;this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;chosen.<br>
-Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+feedback:&nbsp;string&nbsp;or&nbsp;<a href="#Page">Page</a>&nbsp;(without&nbsp;options),&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed<br>
+if&nbsp;this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;chosen.&nbsp;&nbsp;Can&nbsp;use&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;to&nbsp;choose&nbsp;string.<br>
+&nbsp;<br>
+resources:&nbsp;[string],&nbsp;filenames&nbsp;of&nbsp;any&nbsp;images,&nbsp;audio,&nbsp;or&nbsp;video&nbsp;that<br>
+should&nbsp;display&nbsp;with&nbsp;the&nbsp;option.&nbsp;Any&nbsp;resource&nbsp;can&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.&nbsp;Make&nbsp;sure<br>
+resources&nbsp;are&nbsp;inside&nbsp;your&nbsp;project&nbsp;directory.<br>
 &nbsp;<br>
 correct:&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;not&nbsp;a&nbsp;text&nbsp;box,&nbsp;a&nbsp;boolean&nbsp;representing&nbsp;whether<br>
 this&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;correct.&nbsp;If&nbsp;the&nbsp;<a href="#Option">Option</a>&nbsp;is&nbsp;a&nbsp;text&nbsp;box,&nbsp;a&nbsp;string<br>
@@ -208,10 +233,10 @@ representing&nbsp;a&nbsp;regular&nbsp;expression&nbsp;that&nbsp;any&nbsp;correct
 For&nbsp;example,&nbsp;correct&nbsp;=&nbsp;'hi.*'&nbsp;would&nbsp;mean&nbsp;that&nbsp;'hi'&nbsp;and&nbsp;'high'&nbsp;are&nbsp;both<br>
 correct&nbsp;inputs.<br>
 &nbsp;<br>
-tags:&nbsp;[string],&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to&nbsp;associate&nbsp;with&nbsp;this&nbsp;<a href="#Option">Option</a>.&nbsp;It<br>
-will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,&nbsp;but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the<br>
-data&nbsp;file.&nbsp;All&nbsp;options&nbsp;in&nbsp;the&nbsp;entire&nbsp;experiment&nbsp;must&nbsp;have&nbsp;the&nbsp;same<br>
-number&nbsp;of&nbsp;tags&nbsp;so&nbsp;that&nbsp;they&nbsp;will&nbsp;stay&nbsp;aligned&nbsp;in&nbsp;the&nbsp;output&nbsp;file.<br>
+tags:&nbsp;{string:&nbsp;string},&nbsp;a&nbsp;dictionary&nbsp;for&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to<br>
+associate&nbsp;with&nbsp;this&nbsp;<a href="#Option">Option</a>.&nbsp;The&nbsp;keys&nbsp;of&nbsp;the&nbsp;dictionary&nbsp;will&nbsp;become<br>
+columns&nbsp;in&nbsp;your&nbsp;output&nbsp;file.&nbsp;It&nbsp;will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,<br>
+but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the&nbsp;data&nbsp;file.<br>
 &nbsp;<br>
 Note&nbsp;that&nbsp;the&nbsp;type&nbsp;of&nbsp;an&nbsp;<a href="#Option">Option</a>&nbsp;(radio&nbsp;button,&nbsp;check&nbsp;box,&nbsp;dropdown,&nbsp;or<br>
 text&nbsp;box)&nbsp;is&nbsp;determined&nbsp;based&nbsp;on&nbsp;its&nbsp;data&nbsp;and&nbsp;the&nbsp;attributes&nbsp;of&nbsp;its<br>
@@ -225,10 +250,6 @@ handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;diff
 they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
 for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
 
-<hr>
-Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
-<dl><dt><strong>id_generator</strong> = None</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -237,7 +258,8 @@ Data and other attributes inherited from <a href="speriment.components.html#Comp
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="Page-__init__"><strong>__init__</strong></a>(self, text, options<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;The&nbsp;text&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+<dl><dt><a name="Page-__init__"><strong>__init__</strong></a>(self, text, options<font color="#909090">=None</font>, id_str<font color="#909090">=None</font>, **kwargs)</dt><dd><tt>text:&nbsp;string&nbsp;or&nbsp;[string],&nbsp;the&nbsp;text&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the&nbsp;page.&nbsp;The<br>
+string&nbsp;or&nbsp;any&nbsp;string(s)&nbsp;in&nbsp;the&nbsp;list&nbsp;can&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
 &nbsp;<br>
 options:&nbsp;[<a href="#Option">Option</a>],&nbsp;optional,&nbsp;the&nbsp;answer&nbsp;choices&nbsp;to&nbsp;be&nbsp;displayed&nbsp;on&nbsp;the<br>
 page.<br>
@@ -247,25 +269,26 @@ pages&nbsp;in&nbsp;the&nbsp;experiment.<br>
 &nbsp;<br>
 **kwargs:&nbsp;optional&nbsp;keyword&nbsp;arguments,&nbsp;which&nbsp;can&nbsp;include:<br>
 &nbsp;<br>
-feedback:&nbsp;string,&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed&nbsp;after&nbsp;an&nbsp;answer&nbsp;is<br>
-chosen.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
+feedback:&nbsp;string&nbsp;or&nbsp;<a href="#Page">Page</a>&nbsp;(without&nbsp;options),&nbsp;the&nbsp;feedback&nbsp;to&nbsp;be&nbsp;displayed<br>
+after&nbsp;an&nbsp;answer&nbsp;is&nbsp;chosen.&nbsp;Can&nbsp;use&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;to&nbsp;choose&nbsp;string.<br>
 &nbsp;<br>
 correct:&nbsp;If&nbsp;freetext&nbsp;is&nbsp;False,&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;id_str&nbsp;of&nbsp;the<br>
 correct&nbsp;<a href="#Option">Option</a>.&nbsp;If&nbsp;freetext&nbsp;is&nbsp;True,&nbsp;a&nbsp;string&nbsp;representing&nbsp;a&nbsp;regular<br>
 expression&nbsp;that&nbsp;a&nbsp;correct&nbsp;answer&nbsp;will&nbsp;match.<br>
 &nbsp;<br>
-tags:&nbsp;[string],&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to&nbsp;associate&nbsp;with&nbsp;this&nbsp;<a href="#Page">Page</a>.&nbsp;It<br>
-will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,&nbsp;but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the<br>
-data&nbsp;file.&nbsp;All&nbsp;pages&nbsp;in&nbsp;the&nbsp;entire&nbsp;experiment&nbsp;must&nbsp;have&nbsp;the&nbsp;same&nbsp;number<br>
-of&nbsp;tags&nbsp;so&nbsp;that&nbsp;they&nbsp;will&nbsp;stay&nbsp;aligned&nbsp;in&nbsp;the&nbsp;output&nbsp;file.<br>
+resources:&nbsp;[string],&nbsp;filenames&nbsp;of&nbsp;any&nbsp;images,&nbsp;audio,&nbsp;or&nbsp;video&nbsp;that<br>
+should&nbsp;display&nbsp;on&nbsp;the&nbsp;page.&nbsp;Any&nbsp;resource&nbsp;can&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.&nbsp;Make&nbsp;sure<br>
+resources&nbsp;are&nbsp;inside&nbsp;your&nbsp;project&nbsp;directory.<br>
+&nbsp;<br>
+tags:&nbsp;{string:&nbsp;string},&nbsp;a&nbsp;dictionary&nbsp;for&nbsp;any&nbsp;metadata&nbsp;you&nbsp;want&nbsp;to<br>
+associate&nbsp;with&nbsp;this&nbsp;<a href="#Page">Page</a>.&nbsp;The&nbsp;keys&nbsp;of&nbsp;the&nbsp;dictionary&nbsp;will&nbsp;become<br>
+columns&nbsp;in&nbsp;your&nbsp;output&nbsp;file.&nbsp;It&nbsp;will&nbsp;not&nbsp;be&nbsp;used&nbsp;in&nbsp;the&nbsp;experiment,<br>
+but&nbsp;will&nbsp;be&nbsp;passed&nbsp;through&nbsp;to&nbsp;the&nbsp;data&nbsp;file.<br>
 &nbsp;<br>
 condition:&nbsp;string,&nbsp;the&nbsp;condition&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;belongs&nbsp;to&nbsp;in&nbsp;the<br>
 experimental&nbsp;manipulation.&nbsp;Used&nbsp;if&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;is&nbsp;in&nbsp;a&nbsp;block&nbsp;where<br>
 pseudorandom&nbsp;is&nbsp;True,&nbsp;to&nbsp;keep&nbsp;Pages&nbsp;with&nbsp;the&nbsp;same&nbsp;condition&nbsp;from<br>
 appearing&nbsp;in&nbsp;a&nbsp;row.&nbsp;Can&nbsp;also&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
-&nbsp;<br>
-resources:&nbsp;[string],&nbsp;filenames&nbsp;of&nbsp;any&nbsp;images,&nbsp;audio,&nbsp;or&nbsp;video&nbsp;that<br>
-should&nbsp;display&nbsp;on&nbsp;the&nbsp;page.&nbsp;Any&nbsp;resource&nbsp;can&nbsp;be&nbsp;<a href="#SampleFrom">SampleFrom</a>.<br>
 &nbsp;<br>
 ordered:&nbsp;boolean,&nbsp;whether&nbsp;the&nbsp;Options&nbsp;for&nbsp;this&nbsp;<a href="#Page">Page</a>&nbsp;need&nbsp;to&nbsp;be&nbsp;kept&nbsp;in<br>
 the&nbsp;order&nbsp;in&nbsp;which&nbsp;they&nbsp;were&nbsp;given.&nbsp;If&nbsp;True,&nbsp;the&nbsp;Options&nbsp;may&nbsp;be&nbsp;reversed<br>
@@ -291,10 +314,6 @@ data&nbsp;as&nbsp;one&nbsp;you've&nbsp;already&nbsp;constructed&nbsp;if&nbsp;you
 handle&nbsp;IDs.&nbsp;The&nbsp;two&nbsp;components&nbsp;will&nbsp;have&nbsp;different&nbsp;IDs,&nbsp;so<br>
 they&nbsp;can&nbsp;coexist&nbsp;in&nbsp;an&nbsp;experiment&nbsp;and&nbsp;won't&nbsp;be&nbsp;confused&nbsp;with&nbsp;each&nbsp;other,<br>
 for&nbsp;instance&nbsp;if&nbsp;one&nbsp;is&nbsp;referred&nbsp;to&nbsp;in&nbsp;a&nbsp;<a href="#RunIf">RunIf</a>.</tt></dd></dl>
-
-<hr>
-Data and other attributes inherited from <a href="speriment.components.html#Component">Component</a>:<br>
-<dl><dt><strong>id_generator</strong> = None</dl>
 
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -328,13 +347,44 @@ criterion.</tt></dd></dl>
 <td colspan=3 valign=bottom>&nbsp;<br>
 <font color="#000000" face="helvetica, arial"><a name="SampleFrom">class <strong>SampleFrom</strong></a></font></td></tr>
     
-<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Stands&nbsp;in&nbsp;place&nbsp;of&nbsp;a&nbsp;value&nbsp;of&nbsp;a&nbsp;<a href="#Page">Page</a>&nbsp;or&nbsp;<a href="#Option">Option</a>&nbsp;and&nbsp;tells&nbsp;the&nbsp;program&nbsp;to<br>
+randomly&nbsp;choose&nbsp;a&nbsp;value&nbsp;to&nbsp;go&nbsp;there&nbsp;on&nbsp;a&nbsp;per-participant&nbsp;basis.&nbsp;Once<br>
+sampled,&nbsp;the&nbsp;choice&nbsp;will&nbsp;remain&nbsp;in&nbsp;place&nbsp;for&nbsp;all&nbsp;iterations&nbsp;of&nbsp;the&nbsp;block.<br>
+Sampling&nbsp;happens&nbsp;after&nbsp;pages&nbsp;are&nbsp;chosen&nbsp;from&nbsp;groups.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="SampleFrom-__init__"><strong>__init__</strong></a>(self, bank)</dt><dd><tt>bank:&nbsp;string,&nbsp;the&nbsp;name&nbsp;of&nbsp;an&nbsp;information&nbsp;bank&nbsp;to&nbsp;sample&nbsp;from.<br>
-Sampling&nbsp;is&nbsp;per-participant,&nbsp;random,&nbsp;and&nbsp;without&nbsp;replacement&nbsp;during&nbsp;an<br>
-experiment.&nbsp;Once&nbsp;sampled,&nbsp;the&nbsp;choice&nbsp;will&nbsp;remain&nbsp;in&nbsp;place&nbsp;for&nbsp;all<br>
-iterations&nbsp;of&nbsp;the&nbsp;block.&nbsp;Sampling&nbsp;happens&nbsp;after&nbsp;pages&nbsp;are&nbsp;chosen&nbsp;from<br>
-groups.</tt></dd></dl>
+<dl><dt><a name="SampleFrom-__init__"><strong>__init__</strong></a>(self, bank, variable<font color="#909090">=None</font>, not_variable<font color="#909090">=None</font>, field<font color="#909090">=None</font>, with_replacement<font color="#909090">=False</font>)</dt><dd><tt>bank:&nbsp;string,&nbsp;the&nbsp;name&nbsp;of&nbsp;an&nbsp;information&nbsp;bank&nbsp;to&nbsp;sample&nbsp;from.&nbsp;A<br>
+corresponding&nbsp;bank&nbsp;must&nbsp;be&nbsp;put&nbsp;in&nbsp;one&nbsp;of&nbsp;the&nbsp;Blocks&nbsp;containing&nbsp;this<br>
+<a href="#SampleFrom">SampleFrom</a>,&nbsp;or&nbsp;the&nbsp;<a href="#Experiment">Experiment</a>.<br>
+&nbsp;<br>
+variable:&nbsp;string&nbsp;or&nbsp;integer,&nbsp;optional.&nbsp;Like&nbsp;a&nbsp;variable&nbsp;x,&nbsp;it&nbsp;doesn't<br>
+matter&nbsp;what&nbsp;you&nbsp;call&nbsp;it,&nbsp;it&nbsp;just&nbsp;matters&nbsp;whether&nbsp;another&nbsp;variable&nbsp;has<br>
+the&nbsp;same&nbsp;name&nbsp;or&nbsp;a&nbsp;different&nbsp;one.&nbsp;If&nbsp;you&nbsp;give&nbsp;two&nbsp;SampleFroms&nbsp;the&nbsp;same<br>
+bank&nbsp;and&nbsp;variable,&nbsp;they&nbsp;will&nbsp;sample&nbsp;the&nbsp;same&nbsp;value&nbsp;for&nbsp;a&nbsp;given<br>
+participant&nbsp;(but&nbsp;likely&nbsp;different&nbsp;values&nbsp;for&nbsp;different&nbsp;participants).&nbsp;If<br>
+you&nbsp;give&nbsp;them&nbsp;the&nbsp;same&nbsp;bank&nbsp;and&nbsp;different&nbsp;variables,&nbsp;they&nbsp;will&nbsp;sample<br>
+different&nbsp;values.<br>
+&nbsp;<br>
+not_variable:&nbsp;string&nbsp;or&nbsp;integer,&nbsp;optional.&nbsp;If&nbsp;you&nbsp;give&nbsp;two&nbsp;SampleFroms<br>
+the&nbsp;same&nbsp;bank&nbsp;and&nbsp;give&nbsp;one&nbsp;variable&nbsp;x&nbsp;and&nbsp;the&nbsp;other&nbsp;not_variable&nbsp;x,&nbsp;they<br>
+will&nbsp;not&nbsp;sample&nbsp;the&nbsp;same&nbsp;value.&nbsp;not_variable&nbsp;is&nbsp;ignored&nbsp;if&nbsp;you&nbsp;give<br>
+a&nbsp;variable.<br>
+&nbsp;<br>
+field:&nbsp;string,&nbsp;optional.&nbsp;Use&nbsp;with&nbsp;a&nbsp;bank&nbsp;made&nbsp;up&nbsp;of&nbsp;dictionaries&nbsp;where<br>
+each&nbsp;dictionary&nbsp;has&nbsp;the&nbsp;same&nbsp;keys.&nbsp;field&nbsp;is&nbsp;the&nbsp;key&nbsp;you&nbsp;want&nbsp;to&nbsp;access.<br>
+If&nbsp;you&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;a&nbsp;bank&nbsp;of&nbsp;dictionaries&nbsp;that&nbsp;all&nbsp;contain&nbsp;x&nbsp;and&nbsp;y&nbsp;keys,<br>
+and&nbsp;field&nbsp;is&nbsp;x,&nbsp;you&nbsp;will&nbsp;get&nbsp;one&nbsp;of&nbsp;the&nbsp;x&nbsp;values.<br>
+&nbsp;<br>
+with_replacement:&nbsp;boolean,&nbsp;optional.&nbsp;Defaults&nbsp;to&nbsp;False.&nbsp;Invalid&nbsp;when<br>
+variable&nbsp;or&nbsp;not_variable&nbsp;is&nbsp;given.&nbsp;False&nbsp;is&nbsp;a&nbsp;shorthand<br>
+for&nbsp;giving&nbsp;this&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;a&nbsp;variable&nbsp;that&nbsp;is&nbsp;not&nbsp;used&nbsp;elsewhere&nbsp;in&nbsp;the<br>
+experiment.&nbsp;Thus,&nbsp;False&nbsp;means&nbsp;this&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;will&nbsp;not&nbsp;sample&nbsp;the&nbsp;same<br>
+value&nbsp;as&nbsp;another&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;on&nbsp;the&nbsp;same&nbsp;bank&nbsp;that&nbsp;has&nbsp;a&nbsp;variable,<br>
+not_variable,&nbsp;or&nbsp;with_replacement&nbsp;set&nbsp;to&nbsp;False.&nbsp;True&nbsp;is&nbsp;a&nbsp;shorthand&nbsp;for<br>
+"pick&nbsp;anything&nbsp;at&nbsp;all."&nbsp;Thus,&nbsp;a&nbsp;True&nbsp;setting&nbsp;on&nbsp;one&nbsp;<a href="#SampleFrom">SampleFrom</a>&nbsp;overrides<br>
+False&nbsp;settings&nbsp;on&nbsp;other&nbsp;SampleFroms&nbsp;on&nbsp;the&nbsp;same&nbsp;bank:&nbsp;they&nbsp;may&nbsp;sample<br>
+the&nbsp;same&nbsp;value.</tt></dd></dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">

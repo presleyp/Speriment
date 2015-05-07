@@ -18,7 +18,8 @@
     
 <tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="csv.html">csv</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+</td><td width="25%" valign=top><a href="itertools.html">itertools</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ee77aa">
 <td colspan=3 valign=bottom>&nbsp;<br>
@@ -44,7 +45,7 @@ with&nbsp;<a href="#-make_experiment">make_experiment</a>(<a href="#IDGenerator"
 &nbsp;&nbsp;&nbsp;&nbsp;&lt;experiment&nbsp;code&gt;<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="IDGenerator-__init__"><strong>__init__</strong></a>(self, seed<font color="#909090">=0</font>)</dt><dd><tt>seed:&nbsp;optional,&nbsp;an&nbsp;integer&nbsp;to&nbsp;start&nbsp;making&nbsp;IDs&nbsp;at.</tt></dd></dl>
+<dl><dt><a name="IDGenerator-__init__"><strong>__init__</strong></a>(self, seed<font color="#909090">=-1</font>)</dt><dd><tt>seed:&nbsp;optional,&nbsp;an&nbsp;integer&nbsp;to&nbsp;start&nbsp;making&nbsp;IDs&nbsp;at.</tt></dd></dl>
 
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -68,6 +69,14 @@ to&nbsp;comma.<br>
 &nbsp;<br>
 Returns:&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;row&nbsp;in&nbsp;the&nbsp;file)&nbsp;of&nbsp;lists&nbsp;(one&nbsp;for&nbsp;each&nbsp;cell&nbsp;in<br>
 the&nbsp;row)&nbsp;of&nbsp;strings.</tt></dd></dl>
+ <dl><dt><a name="-group_by_col"><strong>group_by_col</strong></a>(rows, column)</dt><dd><tt>rows:&nbsp;[[string]]&nbsp;(output&nbsp;of&nbsp;get_rows)&nbsp;or&nbsp;[{string:&nbsp;string}]&nbsp;(output&nbsp;of<br>
+get_dicts).<br>
+&nbsp;<br>
+column:&nbsp;integer&nbsp;if&nbsp;[[string]],&nbsp;string&nbsp;if&nbsp;[{string:&nbsp;string}].<br>
+&nbsp;<br>
+Returns:&nbsp;{column:&nbsp;rows},&nbsp;a&nbsp;dictionary&nbsp;whose&nbsp;keys&nbsp;are&nbsp;the&nbsp;unique&nbsp;values&nbsp;in<br>
+the&nbsp;column&nbsp;provided,&nbsp;where&nbsp;each&nbsp;column&nbsp;value&nbsp;maps&nbsp;to&nbsp;a&nbsp;list&nbsp;of&nbsp;all&nbsp;rows&nbsp;with<br>
+that&nbsp;value.</tt></dd></dl>
  <dl><dt><a name="-make_experiment"><strong>make_experiment</strong></a>(id_generator)</dt><dd><tt>id_generator:&nbsp;<a href="#IDGenerator">IDGenerator</a>,&nbsp;an&nbsp;object&nbsp;that&nbsp;will&nbsp;make&nbsp;unique&nbsp;IDs&nbsp;for<br>
 everything&nbsp;in&nbsp;an&nbsp;Experiment.<br>
 &nbsp;<br>
@@ -86,5 +95,5 @@ with&nbsp;<a href="#-make_experiment">make_experiment</a>(<a href="#IDGenerator"
 <font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>__all__</strong> = ['get_rows', 'get_dicts', 'IDGenerator', 'make_experiment']</td></tr></table>
+<td width="100%"><strong>__all__</strong> = ['get_rows', 'get_dicts', 'group_by_col', 'IDGenerator', 'make_experiment']</td></tr></table>
 </body></html>
