@@ -39,8 +39,14 @@ function makeResource(resource: string): string{ //TODO ogg can also be video, n
     var extension = resource.split('.').pop().toLowerCase();
     var fileType = fileTypeMap[extension];
     if (fileType === 'img') {
+        var image = new Image();
+        image.src = resource;
         return '<img src="' + resource + '" alt="' + resource + '">';
     } else {
+        if (fileType == 'audio') {
+            var audio = new Audio();
+            audio.src = resource;
+        }
         var mediaType = extension === 'mp3' ? 'audio/mpeg' : fileType + '/' + extension;
         return '<' + fileType + ' controls><source src="' + resource + '" type="' + mediaType + '"></' + fileType + '>';
     }
