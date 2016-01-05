@@ -3,13 +3,9 @@
 /// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="runif.ts"/>
+/// <reference path="resettable.ts"/>
 /// <reference path="../node_modules/jquery/jquery.d.ts" />
 /// <reference path="../node_modules/underscore/underscore.d.ts" />
-
-interface Resettable{
-    reset(): void;
-    run(experimentRecord: ExperimentRecord): void;
-}
 
 class Block implements Resettable{
     id: string;
@@ -57,24 +53,24 @@ class Block implements Resettable{
         if (_.isEmpty(this.contents)){
             if (this.shouldLoop(experimentRecord)){
                 this.reset();
-                this.runChild(experimentRecord);
+                runChild(this.contents, this.oldContents, experimentRecord);
             } else {
                 this.container.run(experimentRecord);
             }
         } else {
             if (this.runIf.shouldRun(experimentRecord)){
-                this.runChild(experimentRecord);
+                runChild(this.contents, this.oldContents, experimentRecord);
             } else {
                 this.container.run(experimentRecord);
             }
         }
     }
 
-    runChild(experimentRecord: ExperimentRecord){
-        var nextChild = this.contents.shift();
-        this.oldContents.push(nextChild);
-        nextChild.run(experimentRecord);
-    }
+    // runChild(experimentRecord: ExperimentRecord){
+    //     var nextChild = this.contents.shift();
+    //     this.oldContents.push(nextChild);
+    //     nextChild.run(experimentRecord);
+    // }
 
     // have to meet or exceed criterion to move on; otherwise you repeat this block
     shouldLoop(experimentRecord: ExperimentRecord): boolean {
@@ -102,10 +98,8 @@ class Block implements Resettable{
     }
 
     reset(){
-        this.contents = this.oldContents;
-        this.oldContents = [];
         this.iteration += 1;
-        _.each(this.contents, (c) => {c.reset()});
+        reset(this.contents, this.oldContents);
     }
 
 }
