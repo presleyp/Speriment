@@ -66,12 +66,6 @@ class Block implements Resettable{
         }
     }
 
-    // runChild(experimentRecord: ExperimentRecord){
-    //     var nextChild = this.contents.shift();
-    //     this.oldContents.push(nextChild);
-    //     nextChild.run(experimentRecord);
-    // }
-
     // have to meet or exceed criterion to move on; otherwise you repeat this block
     shouldLoop(experimentRecord: ExperimentRecord): boolean {
         if (!this.criterion){
@@ -99,7 +93,7 @@ class Block implements Resettable{
 
     reset(){
         this.iteration += 1;
-        reset(this.contents, this.oldContents);
+        resetContents(this.contents, this.oldContents);
     }
 
 }
