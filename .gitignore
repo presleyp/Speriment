@@ -9,3 +9,4 @@ build/*
 doc/sampleJSON.json
 javascript/
 test/example_experiment.json
+typescript/*.js

@@ -2,8 +2,8 @@
 /// <reference path="block.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="viewable.ts"/>
-/// <reference path="../node_modules/jquery/jquery.d.ts" />
-/// <reference path="../node_modules/underscore/underscore.d.ts" />
+/// <reference path="../typings/jquery/jquery.d.ts" />
+/// <reference path="../typings/underscore/underscore.d.ts" />
 
 class Page implements Viewable, Resettable{
     public static dropdownThreshold: number = 7;
