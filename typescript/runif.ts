@@ -2,8 +2,8 @@
 /// <reference path="container.ts"/>
 /// <reference path="page.ts"/>
 /// <reference path="option.ts"/>
-/// <reference path="../node_modules/jquery/jquery.d.ts" />
-/// <reference path="../node_modules/underscore/underscore.d.ts" />
+/// <reference path="../typings/jquery/jquery.d.ts" />
+/// <reference path="../typings/underscore/underscore.d.ts" />
 
 class RunIf{
     constructor(){}

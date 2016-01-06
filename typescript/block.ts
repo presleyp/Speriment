@@ -4,8 +4,8 @@
 /// <reference path="option.ts"/>
 /// <reference path="runif.ts"/>
 /// <reference path="resettable.ts"/>
-/// <reference path="../node_modules/jquery/jquery.d.ts" />
-/// <reference path="../node_modules/underscore/underscore.d.ts" />
+/// <reference path="../typings/jquery/jquery.d.ts" />
+/// <reference path="../typings/underscore/underscore.d.ts" />
 
 class Block implements Resettable{
     id: string;
