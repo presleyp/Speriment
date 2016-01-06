@@ -7,10 +7,11 @@ interface Resettable{
     run(experimentRecord: ExperimentRecord): void;
 }
 
-function resetContents(contents: any[], oldContents: any[]) {
+function resetContents(contents: any[], oldContents: any[]){
     contents = oldContents;
     oldContents = [];
     _.each(contents, (c) => {c.reset()});
+    return {contents: contents, oldContents: oldContents}
 }
 
 function runChild(contents, oldContents, experimentRecord: ExperimentRecord){

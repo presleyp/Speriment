@@ -36,7 +36,9 @@ class Item implements Resettable {
     }
 
     reset(): void {
-        resetContents(this.contents, this.oldContents);
+        var newContents = resetContents(this.contents, this.oldContents);
+        this.contents = newContents.contents;
+        this.oldContents = newContents.oldContents;
     }
 
 }

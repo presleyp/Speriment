@@ -93,7 +93,9 @@ class Block implements Resettable{
 
     reset(){
         this.iteration += 1;
-        resetContents(this.contents, this.oldContents);
+        var newContents = resetContents(this.contents, this.oldContents);
+        this.contents = newContents.contents;
+        this.oldContents = newContents.oldContents;
     }
 
 }
@@ -133,7 +135,7 @@ class InnerBlock extends Block{
         if (jsonBlock.groups){
             this.contents = this.choosePages(jsonBlock.groups, container.version);
         } else {
-            this.contents = this.makePages(jsonBlock.pages);
+            this.contents = makePages(jsonBlock.pages, this);
         }
         this.orderPages();
     }
@@ -143,20 +145,9 @@ class InnerBlock extends Block{
         this.orderPages();
     }
 
-    private makePages(jsonPages): Page[] {
-        var pages = _.map<any,Page>(jsonPages, (p)=>{
-            if (p.options){
-                return new Question(p, this);
-            } else {
-                return new Statement(p, this);
-            }
-        });
-        return pages;
-    }
-
     private choosePages(groups, version): Page[] {
         var pages = this.latinSquare ? this.chooseLatinSquare(groups, version) : this.chooseRandom(groups);
-        return this.makePages(pages);
+        return makePages(pages, this);
     }
 
     private orderPages(): void{
