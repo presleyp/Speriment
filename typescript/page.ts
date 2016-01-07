@@ -10,14 +10,16 @@ class Page implements Viewable, Resettable{
     public static SPACEKEY = 32;
     public text: string;
     public id: string;
+    public block: Block;
     public condition: string;
     public resourceNames: string[];
     public resources: string[];
     public tags;
     public record: TrialRecord;
 
-    constructor(jsonPage, public block){
+    constructor(jsonPage, public item){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
+        this.block = this.item.block;
         this.id = jsonPage.id;
         this.text = setText(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
@@ -29,6 +31,7 @@ class Page implements Viewable, Resettable{
                 this.id,
                 this.text,
                 this.condition,
+                this.item,
                 this.block.containerIDs,
                 this.tags,
                 this.resourceNames);
@@ -96,7 +99,7 @@ class Question extends Page{
             }
         }
         this.keyboard = jQuestion.keyboard;
-        this.feedback = getFeedback(jQuestion.feedback, this.id, block);
+        this.feedback = getFeedback(jQuestion.feedback, this.id, this.item);
         this.options = _.map(jQuestion.options, (o):ResponseOption => {
             if (jQuestion.options.length > Page.dropdownThreshold){
                 return new DropDownOption(o, this, this.exclusive);

@@ -20,12 +20,12 @@ function setText(text, block: Block): string{
     }
 }
 
-function getFeedback(feedback, ident: string, block: Block): Statement{
+function getFeedback(feedback, ident: string, item: Item): Statement{
     if (feedback){
         if (_.isObject(feedback)){
-            return new Statement(feedback, block);
+            return new Statement(feedback, item);
         } else {
-            return new Statement({text: setOrSample(feedback, block), id: ident + "_feedback"}, block);
+            return new Statement({text: setOrSample(feedback, item.block), id: ident + "_feedback"}, item);
         }
     } else {
         return null;
@@ -51,7 +51,6 @@ function makeResource(resource: string): string{ //TODO ogg can also be video, n
         return '<' + fileType + ' controls><source src="' + resource + '" type="' + mediaType + '"></' + fileType + '>';
     }
 }
-
 
 function setOrSample(property, block: Block){
     if (_.isObject(property) && _.has(property, 'sampleFrom')){
@@ -83,5 +82,3 @@ function sampleFromBank(ancestor, property){
         return sampleFromBank(ancestor.container, property);
     }
 }
-
-

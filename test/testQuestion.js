@@ -1,6 +1,8 @@
+fakeItem = {block: {}};
+
 test("statement initialization", function(){
     var jsonq = {"text": "Do I pass?", id: "q1"};
-    var q = new Statement(jsonq, {});
+    var q = new Statement(jsonq, fakeItem);
     strictEqual(q.text, "Do I pass?", "statement text not set properly");
     strictEqual(q.isLast, undefined, "statement.isLast not set properly");
     strictEqual(q.id, "q1", "statment id not set properly");
@@ -8,7 +10,7 @@ test("statement initialization", function(){
     q.isLast = true;
     strictEqual(q.isLast, true, "statement.isLast not set properly");
     jsonq.condition = "a";
-    var q2 = new Statement(jsonq, {});
+    var q2 = new Statement(jsonq, fakeItem);
     strictEqual(q2.condition, "a");
 });
 
@@ -16,7 +18,7 @@ test("question initialization", function(){
     var jsonq = {"text": "some text", id: "q2", ordered: false, exclusive: false,
         options: [{text: "option A", id: "o1"},
             {text: "option B", id: "o2", branchTo: 3}]};
-    var q = new Question(jsonq, {});
+    var q = new Question(jsonq, fakeItem);
     strictEqual(q.text, "some text", "question text not set properly");
     strictEqual(q.id, "q2", "question id not set properly");
     strictEqual(q.ordered, false, "question.ordered not set properly");
@@ -36,7 +38,7 @@ test("page with sampling", function(){
             {text: 'option2', id: 'o2', feedback: {text: {sampleFrom: 'optionfeedback', notVariable: 0}}}]};
     var block = {'id': 'b', 'banks': {'questions': ['one', 'two'], 'conds': ['a', 'b', 'c'], 'resourcebank': ['r1.mp3', 'r2.mp3'],
     'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no'], optionresource: ['r3.mp3']}};
-    var q = new Question(jsonq, block);
+    var q = new Question(jsonq, {block: block});
     // bank shuffling is done at the block level; pages always use variables as indices
     strictEqual(q.text, 'two', 'text is last element of text bank');
     strictEqual(q.condition, 'c', 'condition is last element of condition bank');
@@ -53,7 +55,7 @@ test("page with sampling", function(){
 test("checkbox options", function(){
     // exclusive is false and number of options is low so should be checkboxes
     var jsonq = {"text": "Do I pass?", "ordered": true, "freetext": false, "exclusive": false, "options": [{"text": "option A"}, {"text": "option B", "branchTo": 1}]};
-    var q = new Question(jsonq, {'id': 1});
+    var q = new Question(jsonq, {'id': 1, block: {}});
     strictEqual(q.options.length, 2, "options not created properly");
     ok(q.options[0] instanceof CheckOption, "CheckOption should have been created");
 });
@@ -61,7 +63,7 @@ test("checkbox options", function(){
 test("radio options", function(){
     // exclusive is false and number of options is low so should be checkboxes
     var jsonq = {id: "12", "text": "Do I pass?", "ordered": true, exclusive: true, "freetext": false, "options": [{"text": "option A"}, {"text": "option B", "branchTo": 1}]};
-    var q = new Question(jsonq, true, false, {}, {});
+    var q = new Question(jsonq, fakeItem);
     strictEqual(q.options.length, 2);
     ok(q.options[0] instanceof RadioOption, "RadioOption should have been created");
     ok(q.options[0].question instanceof Question, "question sending option wrong 'this'");
@@ -69,8 +71,8 @@ test("radio options", function(){
 
 test("dropdown options", function(){
     var os = _.map(_.range(8), function(i){return {text: i.toString(), id: i};});
-    var q = new Question({text: "q", id: 10, exclusive: true, options: os}, {});
-    var q2 = new Question({text: "q2", id: 11, exclusive: false, options: os}, {});
+    var q = new Question({text: "q", id: 10, exclusive: true, options: os}, fakeItem);
+    var q2 = new Question({text: "q2", id: 11, exclusive: false, options: os}, fakeItem);
     ok(q.options[0] instanceof DropDownOption, "DropDownOption should have been created");
     strictEqual(q.options[0].exclusive, true, "DropDownOption doesn't know exclusivity");
     ok(q2.options[0] instanceof DropDownOption, "DropDownOption should have been created even though exclusive is false");
@@ -78,13 +80,13 @@ test("dropdown options", function(){
 });
 
 test("text option", function(){
-    var q = new Question( {text: "q", id: 1, freetext: true, options:[{id: 2, text: ''}]}, {} );
+    var q = new Question( {text: "q", id: 1, freetext: true, options:[{id: 2, text: ''}]}, fakeItem);
     ok(q.options[0] instanceof TextOption);
 });
 
 test("question with feedback", function(){
     var q = new Question({id: 2, "text": "here's the question", feedback: "here's the feedback",
-                         options: [{text: "option A", id:"o1"}, {text: "option B", id:"o2"}]}, {});
+                         options: [{text: "option A", id:"o1"}, {text: "option B", id:"o2"}]}, fakeItem);
     strictEqual(q.options.length, 2);
     ok(q.feedback instanceof Statement, "Statement not created from feedback");
     strictEqual(q.feedback.text, "here's the feedback", "feedback text not set properly");
@@ -93,7 +95,7 @@ test("question with feedback", function(){
 test("question with options with feedback", function(){
     var q = new Question({id: 2, "text": "here's the question",
                          options: [{text: "option A", id:"o1", feedback: "that's right!"},
-                             {text: "option B", id:"o2", feedback: "not quite"}]}, {});
+                             {text: "option B", id:"o2", feedback: "not quite"}]}, fakeItem);
     strictEqual(q.options.length, 2, "options should be initialized");
     ok(!q.feedback, "question should not have feedback");
     ok(q.options[0].feedback, "option should have feedback");
@@ -108,10 +110,10 @@ test("option ordering", function(){
     var scaleResults = [];
     var bagResults = [];
     for (var i = 0; i < 30; i++){
-        var s = new Question(scale, {});
+        var s = new Question(scale, fakeItem);
         s.orderOptions();
         scaleResults.push(s.options[1].id === 2);
-        var b = new Question(bag, {});
+        var b = new Question(bag, fakeItem);
         b.orderOptions();
         bagResults.push(b.options[1].id === 5);
     }
@@ -139,7 +141,7 @@ test("statement display", function(){
     Experiment.addElements();
     strictEqual($("div.navigation").length, 1, "setup didn't work");
     var jsons = {"text": "Do I pass?", id: "s1"};
-    var s = new Statement(jsons, {});
+    var s = new Statement(jsons, fakeItem);
     s.run();
     strictEqual($("#pagetext").text(), "Do I pass?", "statement text not appended properly");
     strictEqual($(".response").text(), '', "statement shouldn't put anything in answer paragraph");
@@ -161,7 +163,7 @@ test("statement display", function(){
 test("question display with radios", function(){
     Experiment.addElements();
     var opts = [{text: "A", id: "o1", correct: true}, {text: "B", id: "o2", correct: false}];
-    var q = new Question({text: "Do I pass?", id: "q1", options: opts}, {});
+    var q = new Question({text: "Do I pass?", id: "q1", options: opts}, fakeItem);
     q.run();
     strictEqual($("#pagetext").text(), "Do I pass?", "is question text accurate?");
     strictEqual($(".response :input").length, 2, "did option inputs get appended?");
@@ -198,7 +200,7 @@ test("question display with radios", function(){
 test("question display with checkboxes", function(){
     Experiment.addElements();
     var opts = [{text: "A", id: "o1", correct: true}, {text: "B", id: "o2", correct: false}];
-    var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: opts}, {});
+    var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: opts}, fakeItem);
     q.run();
     strictEqual($(".response *").length, 4, "did option inputs and labels get appended?");
     strictEqual($(":button").length, 1, "should be a next button");
@@ -225,7 +227,7 @@ test("question display with checkboxes", function(){
 test("question display with dropdown", function(){
     Experiment.addElements();
     var os = _.map(_.range(8), function(i){return {text: i.toString(), id: i.toString()};});
-    var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: os}, {});
+    var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: os}, fakeItem);
     q.run();
     strictEqual($(".response *").length, 9, "did select and its options get appended?");
     strictEqual($("option").length, 8, "did options get appended?");
@@ -252,7 +254,7 @@ test("question display with dropdown", function(){
 test("question display with text", function(){
     Experiment.addElements();
     var opt = [{id: "o1", text: "starter", correct: /hello/}];
-    var q = new Question({text: "Do I pass?", id: "q1", freetext: true, options: opt}, {});
+    var q = new Question({text: "Do I pass?", id: "q1", freetext: true, options: opt}, fakeItem);
     q.run();
 
     strictEqual($(".response input").length, 1, "did textbox get appended?");
@@ -287,7 +289,7 @@ test("reset page", function(){
                           resources: ['pageresource.png', 'second.png'],
                           options: [{id: 'o1', text: 'A', tags: {c: 'three', d: 'four'}, resources: ['optionresource.jpg']},
                               {id: 'o2', text: 'B', tags: {c: 'five', d: 'six'}, resources: ['optionresource.ogg']}]},
-                          fakeContainer);
+                          fakeItem);
     strictEqual(p1.record.pageID, 'p1', 'page id set');
     strictEqual(p1.record.pageText, 'hi', 'page text set');
     strictEqual(p1.record.pageTags.a, 'one', 'set first page tag');

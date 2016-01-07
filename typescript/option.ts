@@ -19,7 +19,7 @@ class ResponseOption implements Viewable, Resettable{
         jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null, resources: null});
         this.id = jsonOption.id;
         this.text = setText(jsonOption.text, this.question.block);
-        this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.block);
+        this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.item);
         this.resourceNames = _.map(jsonOption.resources, (r) => {return setOrSample(r, this.question.block)});
         this.resources = _.map(this.resourceNames, makeResource);
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong

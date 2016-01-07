@@ -10,12 +10,21 @@ class Item implements Resettable {
     id: string;
     condition: string;
     contents: Page[];
-    oldContents: Page[];
+    oldContents: Page[] = [];
 
-    constructor(jsonItem, public block){
-        this.id = jsonItem.id;
-        this.contents = makePages(jsonItem.pages, this);
+    constructor(jsonItem, public block: Block){
+        this.contents = this.makePages(jsonItem.pages);
+        this.id = this.getID(jsonItem.id);
         this.condition = this.getCondition(jsonItem.condition);
+    }
+
+    getID(id): string {
+        if (!_.isUndefined(id)) {
+            return id;
+        } else {
+            var page_id = this.contents[0].id;
+            return page_id + '-item';
+        }
     }
 
     getCondition(cond): string {
@@ -25,6 +34,17 @@ class Item implements Resettable {
             var conds = _.pluck(this.contents, 'condition');
             return _.find(conds, (c) => !_.isUndefined(c));
         }
+    }
+
+    makePages(jsonPages): Page[] {
+        var pages = _.map<any,Page>(jsonPages, (p)=>{
+            if (p.options){
+                return new Question(p, this);
+            } else {
+                return new Statement(p, this);
+            }
+        });
+        return pages;
     }
 
     run(experimentRecord: ExperimentRecord): void {

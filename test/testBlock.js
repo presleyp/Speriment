@@ -6,6 +6,12 @@ function cleanUp(){
     $('#experimentDiv').remove();
 }
 
+// for items containing one page each
+function getPageProperties(items, property){
+    pagelists = _.pluck(items, 'contents');
+    return _.map(pagelists, function(p){return p[0][property];});
+}
+
 test("sampleFromBank", function(){
     var parent = {banks: {bank1: [{'s': 'apple', 'p': 'apples'}, {'s': 'tree', 'p': 'trees'}]}};
     var prop = {sampleFrom: 'bank1', variable: 0, field: 's'};
@@ -50,7 +56,8 @@ test("sampling without replacement", function(){
         {id: 'p3', text: {sampleFrom: 'ps', variable: 2}}],
         banks: {'ps': ['one', 'two', 'three']}};
     var b = new InnerBlock(jsonb, fakeContainer);
-    var texts = _.pluck(b.contents, 'text');
+    var pages = _.pluck(b.contents, 'contents');
+    var texts = _.map(pages, function(pagelist){return pagelist[0].text;});
     strictEqual(_.unique(texts).length, 3, 'sampling is without replacement');
 });
 
@@ -61,8 +68,8 @@ test("sampling from outer block", function(){
         {id: 'p6', text: {sampleFrom: 'ps', variable: 5}}]};
     var outerb = {id: 'b3', blocks: [jsonb, jsonb2], banks: {'ps': ['one', 'two', 'three', 'four', 'five', 'six']}};
     var b = new OuterBlock(outerb, fakeContainer);
-    var texts1 = _.pluck(b.contents[0].contents, 'text');
-    var texts2 = _.pluck(b.contents[1].contents, 'text');
+    var texts1 = _.map(_.pluck(b.contents[0].contents, 'contents'), function(pagelist){return pagelist[0].text;});
+    var texts2 = _.map(_.pluck(b.contents[1].contents, 'contents'), function(pagelist){return pagelist[0].text;});
     strictEqual(_.unique(_.union(texts1, texts2)).length, 6, 'sampling is without replacement');
 });
 
@@ -73,8 +80,8 @@ test("sampling from outer block with fields", function(){
         {id: 'p6', text: {sampleFrom: 'ps', variable: 2, field: 'b'}}]};
     var outerb = {id: 'b3', blocks: [jsonb, jsonb2], banks: {'ps': [{'a': 'one', 'b': 'two'}, {'a': 'three', 'b': 'four'}, {'a': 'five', 'b': 'six'}]}};
     var b = new OuterBlock(outerb, fakeContainer);
-    var texts1 = _.pluck(b.contents[0].contents, 'text');
-    var texts2 = _.pluck(b.contents[1].contents, 'text');
+    var texts1 = _.map(_.pluck(b.contents[0].contents, 'contents'), function(pagelist){return pagelist[0].text;});
+    var texts2 = _.map(_.pluck(b.contents[1].contents, 'contents'), function(pagelist){return pagelist[0].text;});
     strictEqual(_.unique(_.union(texts1, texts2)).length, 6, 'sampling is without replacement');
 });
 
@@ -84,11 +91,11 @@ test("create inner block", function(){
     var jsonb = {id: "b1", pages:[{text:"one", id:"p1"}, {text:"two", id:"p2", freetext: true, options: [{id: "o1"}]}]};
     var b = new InnerBlock(jsonb, fakeContainer);
     strictEqual(b.contents.length, 2, "are pages initialized properly?");
-    _.each(b.contents, function(p){
-        if (p.id === "p1"){
-            ok(p instanceof Statement, "should be a Statement");
+    _.each(b.contents, function(i){
+        if (i.contents[0].id === "p1"){
+            ok(i.contents[0] instanceof Statement, "should be a Statement");
         } else {
-            ok(p instanceof Question, "should be a Question");
+            ok(i.contents[0] instanceof Question, "should be a Question");
         }
     });
     strictEqual(b.runIf.shouldRun({}), true, "runIf defaults to returning true");
@@ -102,11 +109,11 @@ test("create inner block", function(){
     var jsongroup = {id: "b1", groups:[[{text: "page1", id: "p1"}, {text:"page2", id:"p2", options: [{id: "o1"}]}]]};
     var b3 = new InnerBlock(jsongroup, {version: 0, containerIDs: []});
     strictEqual(b3.contents.length, 1, "initialization from groups");
-    _.each(b3.contents, function(p){
-        if (p.id === "p1"){
-            ok(p instanceof Statement, "should be a Statement");
+    _.each(b3.contents, function(i){
+        if (i.contents[0].id === "p1"){
+            ok(i.contents[0] instanceof Statement, "should be a Statement");
         } else {
-            ok(p instanceof Question, "should be a Question");
+            ok(i.contents[0] instanceof Question, "should be a Question");
         }
     });
     cleanUp();
@@ -154,11 +161,11 @@ test("choosing pages", function(){
 test("test latin square", function(){
     var gps = [[{id: '1a', text: '1a'}, {id: '1b', text: '1b'}], [{id: '2a', text: '2a'}, {id: '2b', text: '2b'}]];
     var b1 = new InnerBlock({id: 'b1', groups: gps, latinSquare: true}, {version: 0, containerIDs: []});
-    var ids = _.pluck(b1.contents, 'id');
+    var ids = [b1.contents[0].contents[0].id, b1.contents[1].contents[0].id];
     ids.sort();
     ok(_.isEqual(ids, ['1a', '2b']), 'Latin Square should work on version 0.');
     var b2 = new InnerBlock({id: 'b2', groups: gps, latinSquare: true}, {version: 1, containerIDs: []});
-    var ids2 = _.pluck(b2.contents, 'id');
+    var ids2 = [b2.contents[0].contents[0].id, b2.contents[1].contents[0].id];
     ids2.sort();
     ok(_.isEqual(ids2, ['1b', '2a']), 'Latin Square should work on version 1.');
 
@@ -189,7 +196,7 @@ test("test latin square", function(){
             "id": "19"
         };
     var b3 = new InnerBlock(jb3, {version: 0, containerIDs: []});
-    ok(_.isEqual(_.pluck(b3.contents, 'text').sort(), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
+    ok(_.isEqual([b3.contents[0].contents[0].text, b3.contents[1].contents[0].text].sort(), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
 });
 
 test("ordering pages", function(){
@@ -247,7 +254,7 @@ test("statement calling container's run", function(){
 
     // first statement displays
     var text1 = $("#pagetext").text();
-    var id1 = b.oldContents[0].id;
+    var id1 = b.oldContents[0].oldContents[0].id;
     notEqual(text1, "", "statement should display");
     strictEqual($(":button").length, 1, "there should be a next button");
 
@@ -292,17 +299,17 @@ test("question calling run", function(){
     b.run(er);
 
     var text1 = $("#pagetext").text();
-    var id1 = b.oldContents[0].id;
+    var id1 = b.oldContents[0].oldContents[0].id;
     notEqual(text1, "", "question text should display");
     // strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
     // strictEqual($("#continue").prop("disabled"), true, "next button should be disabled");
 
     // currently displayed page is at end of block's oldContents now
-    var oid = b.oldContents[0].options[0].id;
+    var oid = b.oldContents[0].oldContents[0].options[0].id;
 
     strictEqual($("#"+oid).val(), '', "text box should be empty");
     strictEqual($(".response input").val(), '', "text box should be empty");
-    strictEqual(b.oldContents[0].options[0].selected(), false, "option should know it's unselected");
+    strictEqual(b.oldContents[0].oldContents[0].options[0].selected(), false, "option should know it's unselected");
 
     // strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
 
@@ -331,11 +338,11 @@ test("question calling run", function(){
     notEqual(text1, $("#pagetext").text(), "next question text should display after click");
     notEqual("", $("#pagetext").text(), "next question text should display after click");
     strictEqual($(".response input").val().length, 0, "text box should be empty");
-    strictEqual(b.oldContents[1].options[0].selected(), false, "option should know it's unselected");
+    strictEqual(b.oldContents[1].oldContents[0].options[0].selected(), false, "option should know it's unselected");
 
     $(".response input").val('more text');
 
-    strictEqual(b.oldContents[1].options[0].selected(), true, "option should know it's selected");
+    strictEqual(b.oldContents[1].oldContents[0].options[0].selected(), true, "option should know it's selected");
 
     throws(clickNext, CustomError, "at end of block, block's container's run should be called");
 
@@ -351,7 +358,7 @@ test("question with answer calling run", function(){
     b.run(er);
 
     var text1 = $("#pagetext").text();
-    var id1 = b.oldContents[0].id;
+    var id1 = b.oldContents[0].oldContents[0].id;
     strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
 
     $(":input[type='text']").val("hi");
@@ -1067,7 +1074,7 @@ test('training block: decimal criterion met, no correctness info', function(){
     var er = new ExperimentRecord();
     var ps3 = ps.concat([{id:'p3', text:'page3', options: [{id: 'o1', text:'A'}, {id:'o2', text:'B'}]}]);
     var b5 = new InnerBlock({pages: ps3, id:'b5', criterion: 0.5, cutoff: 5}, fakeContainer);
-    var pageOrder = _.pluck(b5.contents, 'id');
+    var pageOrder = getPageProperties(b5.contents, 'id');
     // choose right answer once and wrong answer on one graded page and one ungraded page
     // ungraded page doesn't affect metric
     var answers = _.map(pageOrder, function(p){return p === 'p2' ? '#o1' : '#o2';});
@@ -1108,15 +1115,15 @@ test('training shuffles pages and options', function(){
     _.map(_.range(20), function(){
         var b = new InnerBlock({id: 'b', pages: ps, criterion: 2, cutoff: 5}, fakeContainer);
         b.run(er);
-        var firstPage1 = b.oldContents[0].id;
-        var firstOption1 = b.oldContents[0].options[0].id;
+        var firstPage1 = b.oldContents[0].oldContents[0].id;
+        var firstOption1 = b.oldContents[0].oldContents[0].options[0].id;
         $('#o1').prop('checked', true);
         clickNext();
         $('#o2').prop('checked', true);
         clickNext();
 
-        var firstPage2 = b.oldContents[0].id;
-        var firstOption2 = b.oldContents[0].options[0].id;
+        var firstPage2 = b.oldContents[0].oldContents[0].id;
+        var firstOption2 = b.oldContents[0].oldContents[0].options[0].id;
         sameFirstPages.push(firstPage1 === firstPage2);
         sameFirstOptions.push(firstOption1 === firstOption2);
     });

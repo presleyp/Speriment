@@ -6,6 +6,7 @@ class TrialRecord {
     private pageID: string;
     private pageText: string; // can be sampled
     private pageResources: string[]; // can be sampled
+    private itemID: string;
     private blockIDs: string[];
     private condition: string; // can be sampled
     private pageTags: Object;
@@ -24,10 +25,11 @@ class TrialRecord {
     private selectedText: string[]; // needed for text options
     private correct;
 
-    constructor(pageID: string, pageText: string, condition: string, containers: string[], tags: Object, resources: string[]){
+    constructor(pageID: string, pageText: string, condition: string, item: string, containers: string[], tags: Object, resources: string[]){
         this.pageID = pageID;
         this.pageText = pageText;
         this.condition = condition;
+        this.itemID = item;
         this.blockIDs = containers;
         this.pageTags = tags;
         this.pageResources = resources;
@@ -72,7 +74,7 @@ class TrialRecord {
     }
 
     reset(): TrialRecord {
-        return new TrialRecord(this.pageID, this.pageText, this.condition, this.blockIDs, this.pageTags, this.pageResources);
+        return new TrialRecord(this.pageID, this.pageText, this.condition, this.itemID, this.blockIDs, this.pageTags, this.pageResources);
     }
 
     zipOptionTags(optionTags: any[]): Object{
@@ -105,6 +107,7 @@ class TrialRecord {
         var row = {
             PageID: this.pageID,
             PageText: this.pageText,
+            ItemID: this.itemID,
             BlockIDs: this.blockIDs,
             StartTime: this.startTime,
             EndTime: this.endTime,
