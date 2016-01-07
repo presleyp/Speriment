@@ -199,6 +199,33 @@ test("test latin square", function(){
     ok(_.isEqual([b3.contents[0].contents[0].text, b3.contents[1].contents[0].text].sort(), ['1A', '2B']), 'latin square should work on excerpt from example JSON');
 });
 
+test("test latin square with multi-page items", function(){
+    var gps = [
+      [
+        {id: 'i1', pages: [{id: 'i1p1', text: ''}, {id: 'i1p2', text: ''}]},
+        {id: 'i2', pages: [{id: 'i2p1', text: ''}, {id: 'i2p2', text: ''}]}
+      ],
+      [
+        {id: 'i3', pages: [{id: 'i3p1', text: '2a'}, {id: 'i3p2', text: '2a2'}]},
+        {id: 'i4', pages: [{id: 'i4p1', text: '2b'}, {id: 'i4p2', text: '2b2'}]}
+      ]
+    ];
+    var b1 = new InnerBlock({id: 'b1', groups: gps, latinSquare: true}, {version: 0, containerIDs: []});
+    var version0items = [b1.contents[0], b1.contents[1]];
+    version0items = _.sortBy(version0items, function(i){return i.id;});
+    ok(_.isEqual(_.pluck(version0items, 'id'), ['i1', 'i4']), 'Latin Square should work on version 0.');
+    console.log(version0items[1].contents);
+    ok(_.isEqual(_.pluck(version0items[0].contents, 'id'), ['i1p1', 'i1p2']), 'Pages should stay in order.');
+    ok(_.isEqual(_.pluck(version0items[1].contents, 'id'), ['i4p1', 'i4p2']), 'Pages should stay in order.');
+    var b2 = new InnerBlock({id: 'b2', groups: gps, latinSquare: true}, {version: 1, containerIDs: []});
+    var version1items = [b2.contents[0], b2.contents[1]];
+    version1items = _.sortBy(version1items, function(i){return i.id;});
+    ok(_.isEqual(_.pluck(version1items, 'id'), ['i2', 'i3']), 'Latin Square should work on version 1.');
+    ok(_.isEqual(_.pluck(version1items[0].contents, 'id'), ['i2p1', 'i2p2']), 'Pages should stay in order.');
+    ok(_.isEqual(_.pluck(version1items[1].contents, 'id'), ['i3p1', 'i3p2']), 'Pages should stay in order.');
+});
+
+
 test("ordering pages", function(){
     // groups with three conditions each, in the same order
     var grps = _.map(_.range(6), function(i){
@@ -271,6 +298,7 @@ test("statement calling container's run", function(){
     strictEqual(er.trialRecords[id1].length, 1, 'only one iteration recorded so far');
     strictEqual(rec.blockIDs[0], b.id, 'block id recorded');
     ok(_.contains([pgs[0].id, pgs[1].id], rec.pageID), 'id recorded');
+    ok(_.contains([pgs[0].id + '-item', pgs[1].id + '-item'], rec.itemID), 'item id recorded');
     ok(_.contains([pgs[0].text, pgs[1].text], rec.pageText), 'text recorded');
     ok(rec.startTime, 'start time recorded');
     ok(rec.endTime, 'end time recorded');

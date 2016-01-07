@@ -31,7 +31,7 @@ class Page implements Viewable, Resettable{
                 this.id,
                 this.text,
                 this.condition,
-                this.item,
+                this.item.id,
                 this.block.containerIDs,
                 this.tags,
                 this.resourceNames);
