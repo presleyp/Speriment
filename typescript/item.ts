@@ -11,11 +11,13 @@ class Item implements Resettable {
     condition: string;
     contents: Page[];
     oldContents: Page[] = [];
+    tags;
 
     constructor(jsonItem, public block: Block){
         this.id = this.getID(jsonItem.id, jsonItem.pages);
         this.contents = this.makePages(jsonItem.pages);
         this.condition = this.getCondition(jsonItem.condition);
+        this.tags = jsonItem.tags;
     }
 
     getID(id, jsonPages): string {
