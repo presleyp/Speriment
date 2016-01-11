@@ -11,12 +11,14 @@ class Item implements Resettable {
     condition: string;
     contents: Page[];
     oldContents: Page[] = [];
+    runIf: RunIf;
     tags;
 
     constructor(jsonItem, public block: Block){
         this.id = this.getID(jsonItem.id, jsonItem.pages);
         this.contents = this.makePages(jsonItem.pages);
         this.condition = this.getCondition(jsonItem.condition);
+        this.runIf = createRunIf(jsonItem.runIf);
         this.tags = jsonItem.tags;
     }
 
@@ -49,7 +51,7 @@ class Item implements Resettable {
     }
 
     run(experimentRecord: ExperimentRecord): void {
-        if (_.isEmpty(this.contents)){
+        if (_.isEmpty(this.contents) || !this.runIf.shouldRun(experimentRecord)){
             this.block.run(experimentRecord);
         } else {
             runChild(this.contents, this.oldContents, experimentRecord);

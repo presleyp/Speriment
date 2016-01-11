@@ -38,19 +38,16 @@ class Block implements Resettable{
     }
 
     run(experimentRecord: ExperimentRecord){
-        if (_.isEmpty(this.contents)){
-            if (this.shouldLoop(experimentRecord)){
-                this.reset();
-                runChild(this.contents, this.oldContents, experimentRecord);
-            } else {
-                this.container.run(experimentRecord);
-            }
+        var shouldRun = this.runIf.shouldRunI(experimentRecord);
+        var shouldLoop = this.shouldLoop(experimentRecord);
+        var done = _.isEmpty(this.contents);
+        if (!shouldRun || done && !shouldLoop) {
+            this.container.run(experimentRecord);
         } else {
-            if (this.runIf.shouldRun(experimentRecord)){
-                runChild(this.contents, this.oldContents, experimentRecord);
-            } else {
-                this.container.run(experimentRecord);
+            if (done) {
+                this.reset();
             }
+            runChild(this.contents, this.oldContents, experimentRecord);
         }
     }
 

@@ -16,6 +16,7 @@ class Page implements Viewable, Resettable{
     public resources: string[];
     public tags;
     public record: TrialRecord;
+    public runIf: RunIf;
 
     constructor(jsonPage, public item){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
@@ -26,6 +27,7 @@ class Page implements Viewable, Resettable{
         this.resourceNames = _.map(jsonPage.resources, (r) => {return setOrSample(r, this.block)});
         this.resources = _.map(this.resourceNames, makeResource);
         _.each(jsonPage.tags, (value, key) => {jsonPage.tags[key] = setOrSample(jsonPage.tags[key], this.block)});
+        this.runIf = createRunIf(jsonPage.runIf);
         this.tags = jsonPage.tags;
         this.record = new TrialRecord(
                 this.id,
@@ -56,18 +58,22 @@ class Page implements Viewable, Resettable{
     }
 
     public run(experimentRecord){
-        $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
-        $(document).off('keypress').keypress((k:KeyboardEvent) => {
-            if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
-                this.advance(experimentRecord);
-                k.preventDefault();
-            }
-        });
-        this.disableNext();
-        $(OPTIONS).empty();
-        $(PAGE).empty().append(this.text);
-        $(RESOURCES).empty().append(_.map(this.resources, this.wrapResource));
-        $(CONTINUE).show();
+        if (this.runIf.shouldRun(experimentRecord)) {
+            $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
+            $(document).off('keypress').keypress((k:KeyboardEvent) => {
+                if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
+                    this.advance(experimentRecord);
+                    k.preventDefault();
+                }
+            });
+            this.disableNext();
+            $(OPTIONS).empty();
+            $(PAGE).empty().append(this.text);
+            $(RESOURCES).empty().append(_.map(this.resources, this.wrapResource));
+            $(CONTINUE).show();
+        } else {
+            this.item.run();
+        }
     }
 
     reset(){
@@ -117,7 +123,7 @@ class Question extends Page{
 
     public run(experimentRecord): void{
         super.run(experimentRecord);
-        _.each(this.options, (o:ResponseOption):void => {o.run()});
+        _.each(this.options, (o:ResponseOption):void => {o.run(experimentRecord)});
         if (this.keyboard){
             _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
         }
@@ -137,7 +143,7 @@ class Question extends Page{
         } else if (this.feedback){
             this.feedback.run(experimentRecord);
         } else {
-            this.block.run(experimentRecord);
+            this.item.run(experimentRecord);
         }
     }
 
@@ -189,7 +195,7 @@ class Statement extends Page{
     public advance(experimentRecord){
         this.record.setEndTime(new Date().getTime());
         experimentRecord.addRecord(this.record);
-        this.block.run(experimentRecord);
+        this.item.run(experimentRecord);
     }
 
 }
