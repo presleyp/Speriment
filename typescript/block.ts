@@ -38,7 +38,7 @@ class Block implements Resettable{
     }
 
     run(experimentRecord: ExperimentRecord){
-        var shouldRun = this.runIf.shouldRunI(experimentRecord);
+        var shouldRun = this.runIf.shouldRun(experimentRecord);
         var shouldLoop = this.shouldLoop(experimentRecord);
         var done = _.isEmpty(this.contents);
         if (!shouldRun || done && !shouldLoop) {

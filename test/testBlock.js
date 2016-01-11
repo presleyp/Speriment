@@ -393,17 +393,6 @@ test("question with answer calling run", function(){
     clickNext();
 
     var text2 = $("#pagetext").text();
-    //check recording TODO
-    /*
-    var entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 1, 'form should have one entry');
-    strictEqual(entries[0].page, b.oldContents[0].id, 'question should record its id');
-    ok(entries[0].startTime, 'question should record its start time');
-    ok(entries[0].endTime, 'question should record its end time');
-    ok(entries[0].startTime <= entries[0].endTime, 'start time should be before end time');
-    strictEqual(entries[0].selected[0], "hi", 'question should record the content of the text box');
-    strictEqual(entries[0].correct[0], null, 'question should record null when no correct answer was supplied');
-    */
 
     strictEqual($("#pagetext:contains('job')").length, 1, "answer should display after click");
 
@@ -428,18 +417,6 @@ test("question with answer calling run", function(){
     clickNext();
 
     strictEqual($("#pagetext:contains('job')").length, 1, "answer should display after click");
-
-    //check recording TODO
-    /*
-    entries = JSON.parse($("#surveyman").val()).responses;
-    strictEqual(entries.length, 3, 'form should have three entries');
-    strictEqual(entries[2].page, b.oldContents[1].id, 'question should record its id');
-    ok(entries[2].startTime, 'question should record its start time');
-    ok(entries[2].endTime, 'question should record its end time');
-    ok(entries[2].startTime < entries[2].endTime, 'start time should be before end time');
-    strictEqual(entries[2].selected[0], "hello", 'question should record the content of the text box');
-    strictEqual(entries[2].correct[0], null, 'question should record null when no correct answer was supplied');
-    */
 
     throws(clickNext, CustomError, "at end of block, block's container's run should be called");
     cleanUp();
