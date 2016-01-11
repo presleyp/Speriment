@@ -23,9 +23,11 @@ The outermost object is an `Experiment.`
 
 `Experiment`s contain `Block`s.
 
-`Block`s can contain other `Block`s, or `Page`s, or lists of `Page`s (called groups, but these have no special constructor).
+`Block`s can contain other `Block`s, or `Item`s, or lists of `Item`s (called groups, but these have no special constructor).
 
-`Page`s that pose questions contain `Option`s, and those that are instructions do not.
+`Items` contain instructions or pose questions. If an `Item` needs to display multiple pages, it contains a list of `Page`s.
+
+`Item`s and `Page`s can contain `Option`s, which are responses that participants can choose or fill out to answer questions.
 
 There are a few other objects and a handful of functions that you may also want to use to either process your data or build up your experiment.
 
@@ -64,6 +66,7 @@ Here are a few things Speriment can handle:
 - distribution of text and resources to pages on a per-participant basis. This uses
   `banks` defined in a block or the experiment, and `SampleFrom` objects in place of
   the string to be sampled from a bank.
+- self-paced reading. Each `Item` will have a list of `Page`s presenting a portion of a sentence.
 
 ###How do I run an experiment?
 You'll still need to follow all of the [instructions for using PsiTurk](psiturk.readthedocs.org).
@@ -163,7 +166,8 @@ Speriment records the following trial data and `speriment-output` gives it these
 - PageID: ID given or automatically generated for the page.
 - PageText: Text displayed on the page.
 - PageResources: Resources displayed on the page.
-- BlockIDs: IDs of all blocks that enclose this page
+- ItemID: ID of the item that contains this page.
+- BlockIDs: IDs of all blocks that enclose this page.
 - StartTime: The time when the page displayed. This is in milliseconds since
   1/1/1970, which makes it easy to do math on.
 - EndTime: The time when the participant clicked Next.
@@ -198,10 +202,9 @@ Speriment records the following trial data and `speriment-output` gives it these
 - WorkerID: Worker ID of the participant
 
 Finally, it returns the tags you included in your Python script:
-- User-defined columns: There will then be a column for each page tag you
-  supplied and a column for each option tag you supplied. Option tag values
-  will be grouped by option and giving in the order in which the options were
-  displayed.
+- User-defined columns: There will then be a column for each page tag, item tag,
+  and option tag you supplied. Option tag values will be grouped by option and
+  giving in the order in which the options were displayed.
 
 PsiTurk provides information about the version of the experiment (which they
 call condition) that was used for the purpose of Latin squares, the worker ID,
