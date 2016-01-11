@@ -4,7 +4,7 @@ from collections import Counter
 import copy, pkg_resources, json, jsonschema
 # more imports before Experiment
 
-__all__ = ['Experiment', 'Block', 'Page', 'Option', 'RunIf', 'SampleFrom']
+__all__ = ['Experiment', 'Block', 'Item', 'Page', 'Option', 'RunIf', 'SampleFrom']
 
 class RunIf:
     def __init__(self, page = None, option = None, regex = None, permutation =
@@ -220,11 +220,6 @@ class Page(Component):
         columns in your output file. It will not be used in the experiment,
         but will be passed through to the data file.
 
-        condition: string, the condition this Page belongs to in the
-        experimental manipulation. Used if this Page is in a block where
-        pseudorandom is True, to keep Pages with the same condition from
-        appearing in a row. Can also be SampleFrom.
-
         ordered: boolean, whether the Options for this Page need to be kept in
         the order in which they were given. If True, the Options may be reversed
         but will not be shuffled.
@@ -281,16 +276,103 @@ class Page(Component):
         self._validate_freetext()
         self._validate_keyboard()
 
+class Item(Component):
+    def __init__(self, pages = None, id_str = None, condition = None, tags = None, **kwargs):
+        '''
+        Items are the questions and instructions of an experiment. Their order
+        is randomized within their Blocks.  Often, an Item consists of one page
+        or "view." In this case, pass in all properties of that view to the
+        Item.
+
+        It is also possible to create an Item that presents multiple
+        pages in order. In that case, create a Page object for each page and
+        pass a list of them to the Item as the `pages` argument. The Item can
+        have its own condition and tags separate of its pages.
+
+        id_str: String, optional, an identifier for this item unique among all
+        items in the experiment.
+
+        pages: [Page], optional. Items contain one or more Pages and display
+        their Pages in order. An Item that only displays one Page will create
+        its Page automatically from its arguments.
+
+        **kwargs: optional keyword arguments, which can include:
+
+        tags: {string: string}, a dictionary for any metadata you want to
+        associate with this Item. The keys of the dictionary will become
+        columns in your output file. It will not be used in the experiment,
+        but will be passed through to the data file.
+
+        condition: string, the condition this Item belongs to in the
+        experimental manipulation. Used if this Item is in a block where
+        pseudorandom is True, to keep Items with the same condition from
+        appearing in a row. Can also be SampleFrom.
+
+        The following keyword arguments can only be included if there is no `pages`
+        argument:
+
+        text: string or [string], the text to be displayed on the page. The
+        string or any string(s) in the list can be SampleFrom.
+
+        options: [Option], optional, the answer choices to be displayed.
+
+        feedback: string or Page (without options), the feedback to be displayed
+        after an answer is chosen. Can use SampleFrom to choose string.
+
+        correct: If freetext is False, a string representing the id_str of the
+        correct Option. If freetext is True, a string representing a regular
+        expression that a correct answer will match.
+
+        resources: [string], filenames of any images, audio, or video that
+        should display on the page. Any resource can be SampleFrom. Make sure
+        resources are inside your project directory.
+
+        ordered: boolean, whether the Options for this Item need to be kept in
+        the order in which they were given. If True, the Options may be reversed
+        but will not be shuffled.
+
+        exclusive: boolean, whether the participant can choose only one Option
+        as their response.
+
+        freetext: boolean, whether the Option is a text box rather than multiple
+        choice.
+
+        keyboard: boolean or [character], representing how Options are to be
+        selected. If False, they are selected with the mouse. If True and there
+        are exactly two Options, the left is selected with the f key and the
+        right with the j key. If a list of characters, there must be as many
+        characters as options. They will be mapped onto the options from left to
+        right, as the options are displayed on the screen in shuffled order.
+
+        '''
+        self._set_id(id_str)
+        if pages:
+            self.pages = pages
+            if condition:
+                self.condition = condition
+            if tags:
+                self.tags = tags
+            if kwargs:
+                raise ValueError, '''Items that have a `pages` argument cannot
+                    also have any of the following arguments:
+                    ''' + kwargs.keys()
+        else:
+            if condition:
+                self.condition = condition
+            self.pages = [Page(tags = tags, **kwargs)]
+
 class Block(Component):
-    def __init__(self, pages = None, groups = None, blocks = None, id_str = None,
+    def __init__(self, pages = None, items = None, groups = None, blocks = None, id_str = None,
             exchangeable = [], counterbalance = [], treatments = [], latin_square = None, pseudorandom = None, **kwargs):
         '''
-        Exactly one of pages, groups, and blocks must be provided.
+        Exactly one of pages, groups, items, and blocks must be provided.
 
-        pages: [Page], the pages contained by this Block.
+        pages: [Page], the pages contained by this Block. They will be wrapped in Items automatically.
 
-        groups: [[Page]], the groups contained by this Block. One page from each
-        inner list of Pages will be displayed per participant.
+        items: [Item], the items contained by this Block. Any bare Page in this list will be automatically wrapped in an Item.
+
+        groups: [[Page]] or [[Item]], the groups contained by this Block. One Item from each
+        inner list of Items will be displayed per participant. Bare Pages will be wrapped in Items.
 
         blocks: [Block], the blocks contained by this Block.
 
@@ -378,6 +460,8 @@ class Block(Component):
         self._set_optional_args(**kwargs)
         if pages != None:
             self.pages = pages
+        if items != None:
+            self.items = items
         if groups != None:
             self.groups = groups
         if blocks != None:
@@ -423,9 +507,10 @@ class Block(Component):
 
     def _validate_contents(self):
         content_types = [attribute for attribute in
-                ['pages', 'groups', 'blocks'] if hasattr(self, attribute)]
+                ['pages', 'groups', 'items', 'blocks'] if hasattr(self, attribute)]
         if len(content_types) != 1:
-            raise ValueError, '''Block must have exactly one of pages, groups,
+            print content_types
+            raise ValueError, '''Block must have exactly one of pages, groups, items,
             and blocks.'''
 
     def _validate_pseudorandom(self):
