@@ -214,7 +214,6 @@ test("test latin square with multi-page items", function(){
     var version0items = [b1.contents[0], b1.contents[1]];
     version0items = _.sortBy(version0items, function(i){return i.id;});
     ok(_.isEqual(_.pluck(version0items, 'id'), ['i1', 'i4']), 'Latin Square should work on version 0.');
-    console.log(version0items[1].contents);
     ok(_.isEqual(_.pluck(version0items[0].contents, 'id'), ['i1p1', 'i1p2']), 'Pages should stay in order.');
     ok(_.isEqual(_.pluck(version0items[1].contents, 'id'), ['i4p1', 'i4p2']), 'Pages should stay in order.');
     var b2 = new InnerBlock({id: 'b2', groups: gps, latinSquare: true}, {version: 1, containerIDs: []});
@@ -466,6 +465,42 @@ var jsons = {blocks:[
         { id:'b4', pages: pgs3 }
     ]}
 ] };
+
+test("feedback runs conditionally on response", function(){
+    Experiment.addElements();
+    var p1 = {text:"page1", id:"p1", options:[{id: "o1", text: "a"}, {id:'o2', text:'b'} ] };
+    var f1a = {id: 'f1a', text: "good job", runIf: {pageID: 'p1', optionID: 'o1'}};
+    var f1b = {id: 'f1b', text: "not quite", runIf: {pageID: 'p1', optionID: 'o2'}};
+    var p2 = {text:"page2", id:"p2", options:[{id: "o1", text: "a"}, {id:'o2', text:'b'}] };
+    var f2a = {id: 'f2a', text: "good job", runIf: {pageID: 'p2', optionID: 'o1'}};
+    var f2b = {id: 'f2b', text: "not quite", runIf: {pageID: 'p2', optionID: 'o2'}};
+    var item = {id: 'i1', pages: [p1, f1a, f1b, p2, f2a, f2b]};
+    var b = new InnerBlock({id:"b1", items: [item]}, fakeContainer);
+
+    var er = new ExperimentRecord();
+    b.run(er);
+
+    var text1 = $("#pagetext").text();
+    strictEqual($("#pagetext:contains('page')").length, 1, "question text should display");
+    strictEqual($(".response input").length, 2, 'option buttons should display');
+    strictEqual($(".response label").length, 2, 'option labels should display');
+
+    $(":input[id='o1']").prop("checked", true);
+    clickNext();
+    strictEqual($("#pagetext").text(), "good job", "answer should display after click");
+
+    clickNext();
+
+    notEqual(text1, $("#pagetext").text(), "next question text should display after click");
+    strictEqual($("#pagetext:contains('page')").length, 1, "next question text should display after click");
+
+    $(":input[id='o2']").prop("checked", true);
+    clickNext();
+    strictEqual($("#pagetext").text(), "not quite", "answer should display after click");
+
+    throws(clickNext, CustomError, "at end of block, block's container's run should be called");
+    cleanUp();
+});
 
 test('create outerblock', function(){
     Experiment.addElements();

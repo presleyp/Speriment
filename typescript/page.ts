@@ -57,22 +57,26 @@ class Page implements Viewable, Resettable{
         return wrapper;
     }
 
+    public display(experimentRecord){
+        $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
+        $(document).off('keypress').keypress((k:KeyboardEvent) => {
+            if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
+                this.advance(experimentRecord);
+                k.preventDefault();
+            }
+        });
+        this.disableNext();
+        $(OPTIONS).empty();
+        $(PAGE).empty().append(this.text);
+        $(RESOURCES).empty().append(_.map(this.resources, this.wrapResource));
+        $(CONTINUE).show();
+    }
+
     public run(experimentRecord){
-        if (this.runIf.shouldRun(experimentRecord)) {
-            $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
-            $(document).off('keypress').keypress((k:KeyboardEvent) => {
-                if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
-                    this.advance(experimentRecord);
-                    k.preventDefault();
-                }
-            });
-            this.disableNext();
-            $(OPTIONS).empty();
-            $(PAGE).empty().append(this.text);
-            $(RESOURCES).empty().append(_.map(this.resources, this.wrapResource));
-            $(CONTINUE).show();
+        if (this.runIf.shouldRun(experimentRecord)){
+            this.display(experimentRecord);
         } else {
-            this.item.run();
+            this.item.run(experimentRecord);
         }
     }
 
@@ -121,8 +125,8 @@ class Question extends Page{
         this.orderOptions();
     }
 
-    public run(experimentRecord): void{
-        super.run(experimentRecord);
+    public display(experimentRecord): void{
+        super.display(experimentRecord);
         _.each(this.options, (o:ResponseOption):void => {o.run(experimentRecord)});
         if (this.keyboard){
             _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
@@ -186,8 +190,8 @@ class Question extends Page{
 
 class Statement extends Page{
 
-    public run(experimentRecord){
-        super.run(experimentRecord);
+    public display(experimentRecord){
+        super.display(experimentRecord);
         this.record.setStartTime(new Date().getTime());
         this.enableNext();
     }

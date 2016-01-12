@@ -347,30 +347,3 @@ test("zip option tags", function(){
     var zipped = t.zipOptionTags([{tag1: 'a', tag2: 'b'}, {tag1: 'c'}, {tag3: 'd', tag2: 'e'}]);
     ok(_.isEqual(zipped, {tag1: ['a', 'c', 'NA'], tag2: ['b', 'NA', 'e'], tag3: ['NA', 'NA', 'd']}), "zipOptionTags works");
 });
-
-// asyncTest('statement enables next button after delay', function(){
-//     expect(1);
-//     Experiment.addElements();
-//     var jsons = {"text": "Do I pass?", id: "s1"};
-//     var s = new Statement(jsons, {});
-//     s.run();
-
-//     setTimeout(function(){
-//         strictEqual($(":button").prop('disabled'), false, 'Next button should be enabled after 2 seconds');
-//         start();
-//     }, 2000);
-// });
-
-// asyncTest('statement enables submit button after delay', function(){
-//     expect(1);
-//     Experiment.addElements();
-//     var jsons = {"text": "Do I pass?", id: "s1"};
-//     var s = new Statement(jsons, {});
-//     s.isLast = true;
-//     s.run();
-
-//     setTimeout(function(){
-//         strictEqual($(":submit").prop('disabled'), false, 'Submit button should be enabled after 2 seconds');
-//         start();
-//     }, 2000);
-// });
