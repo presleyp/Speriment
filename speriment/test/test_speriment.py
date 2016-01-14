@@ -1,5 +1,5 @@
 from speriment import *
-import json
+import json, pytest
 
 def test_new():
     with make_experiment(IDGenerator()):
@@ -39,7 +39,7 @@ def test_item():
         p1 = Page(text = "hello")
         p2 = Page(text = "world")
         i1 = Item(pages = [p1, p2], condition = 'item_cond', tags = {'item_tag': 'has pages'})
-        i2 = Item(text = "hello", condition = 'item_cond', tags = {'page_tag': 'has text'})
+        i2 = Item(text = "hello", condition = 'item_cond', tags = {'item_tag': 'has text'})
         b1 = Block(items = [i1, i2])
         exp = Experiment(blocks = [b1])
         json_exp = exp.to_JSON()
@@ -54,4 +54,56 @@ def test_item():
         assert ji1['pages'][0]['text'] == 'hello'
         assert ji2['pages'][0]['text'] == 'hello'
         assert ji1['tags']['item_tag'] == 'has pages'
-        assert ji2['pages'][0]['tags']['page_tag'] == 'has text'
+        assert ji2['tags']['item_tag'] == 'has text'
+
+def test_feedback():
+    with make_experiment(IDGenerator()):
+        p1 = Page(text = "hello",
+                options = [Option('a', feedback = 'a is correct'), Option('b', feedback = Page('b is incorrect'))])
+        p2 = Page(text = "world", feedback = 'that was page 2')
+        p3 = Page(text = "third", feedback = Page('that was page 3'))
+        i1 = Item(pages = [p1, p2, p3])
+        i2 = Item(text = "hello", feedback = 'that was the first page of item 2')
+        b1 = Block(items = [i1, i2])
+        exp = Experiment(blocks = [b1])
+        json_exp = exp.to_JSON()
+        compiled_exp = json.loads(json_exp)
+        ji1 = compiled_exp['blocks'][0]['items'][0]
+        ji2 = compiled_exp['blocks'][0]['items'][1]
+        assert len(ji1['pages']) == 7
+        assert len(ji2['pages']) == 2
+        assert ji1['pages'][1]['text'] == "a is correct"
+        assert ji1['pages'][1]['runIf']['optionID'] == ji1['pages'][0]['options'][0]['id']
+        assert ji1['pages'][1]['runIf']['pageID'] == ji1['pages'][0]['id']
+        assert ji1['pages'][2]['text'] == "b is incorrect"
+        assert ji1['pages'][2]['runIf']['optionID'] == ji1['pages'][0]['options'][1]['id']
+        assert ji1['pages'][2]['runIf']['pageID'] == ji1['pages'][0]['id']
+        assert ji1['pages'][3]['text'] == "world"
+        assert ji1['pages'][4]['text'] == "that was page 2"
+        assert 'runIf' not in ji1['pages'][4]
+        assert ji1['pages'][5]['text'] == "third"
+        assert ji1['pages'][6]['text'] == "that was page 3"
+        assert 'runIf' not in ji1['pages'][6]
+        assert ji2['pages'][0]['text'] == "hello"
+        assert ji2['pages'][1]['text'] == "that was the first page of item 2"
+        assert 'runIf' not in ji2['pages'][1]
+
+def test_exactly_one():
+    with make_experiment(IDGenerator()):
+        with pytest.raises(ValueError):
+            b = Block(pages = [], groups = [])
+            b._validate()
+        b2 = Block(pages = [])
+        b2._validate()
+        with pytest.raises(ValueError):
+            b3 = Block()
+            b3._validate()
+
+def test_at_most_one():
+    s = SampleFrom(bank = 'a', variable = 0, not_variable = 1)
+    s2 = SampleFrom(bank = 'a', variable = 0)
+    s3 = SampleFrom(bank = 'a')
+    with pytest.raises(ValueError):
+        s._validate()
+    s2._validate()
+    s3._validate()

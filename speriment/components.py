@@ -7,9 +7,14 @@ import copy, pkg_resources, json, jsonschema
 __all__ = ['Experiment', 'Block', 'Item', 'Page', 'Option', 'RunIf', 'SampleFrom']
 
 class RunIf:
-    def __init__(self, page = None, option = None, regex = None, permutation =
+    def __init__(self, item = None, page = None, option = None, regex = None, permutation =
             None):
         '''
+        Exactly one of item, page, and permutation must be given.
+
+        item: Item, the Item to look at to see which answer was given. Use only for Items
+        that display only one page.
+
         page: Page, the Page to look at to see which answer was given.
 
         option: Option, optional. If given, the block containing this RunIf will
@@ -27,6 +32,8 @@ class RunIf:
         The reason RunIfs depend on "the last time" their page was displayed is
         that Pages can display multiple times if they are in Blocks with a
         criterion.'''
+        if item != None:
+            self.item_id = item.id_str
         if page != None:
             self.page_id = page.id_str
         if option != None:
@@ -36,8 +43,11 @@ class RunIf:
         if permutation != None:
             self.permutation = permutation
 
+    def validate(self):
+        exactly_one(self, ['item', 'page', 'permutation'])
+
 class SampleFrom:
-    '''Stands in place of a value of a Page or Option and tells the program to
+    '''Stands in place of a value of an Item, Page, or Option and tells the program to
     randomly choose a value to go there on a per-participant basis. Once
     sampled, the choice will remain in place for all iterations of the block.
     Sampling happens after pages are chosen from groups.'''
@@ -47,7 +57,10 @@ class SampleFrom:
 
     def __init__(self, bank, variable = None, not_variable = None, field = None,
             with_replacement = False):
-        '''bank: string, the name of an information bank to sample from. A
+        '''
+        At most one of variable, not_variable, and with_replacement can be given.
+
+        bank: string, the name of an information bank to sample from. A
         corresponding bank must be put in one of the Blocks containing this
         SampleFrom, or the Experiment.
 
@@ -61,16 +74,14 @@ class SampleFrom:
 
         not_variable: string or integer, optional. If you give two SampleFroms
         the same bank and give one variable x and the other not_variable x, they
-        will not sample the same value. not_variable is ignored if you give
-        a variable.
+        will not sample the same value.
 
         field: string, optional. Use with a bank made up of dictionaries where
         each dictionary has the same keys. field is the key you want to access.
         If you SampleFrom a bank of dictionaries that all contain x and y keys,
         and field is x, you will get one of the x values.
 
-        with_replacement: boolean, optional. Defaults to False. Invalid when
-        variable or not_variable is given. False is a shorthand
+        with_replacement: boolean, optional. Defaults to False. False is a shorthand
         for giving this SampleFrom a variable that is not used elsewhere in the
         experiment. Thus, False means this SampleFrom will not sample the same
         value as another SampleFrom on the same bank that has a variable,
@@ -87,13 +98,12 @@ class SampleFrom:
             self.variable = variable
             if not variable in self._variable_maps[bank]:
                 self._variable_maps[bank][variable] = self._id_generators[bank]._next_id()
-        elif not_variable != None:
+        if not_variable != None:
             self.not_variable = not_variable
             if not not_variable in self._variable_maps[bank]:
                 self._variable_maps[bank][not_variable] = self._id_generators[bank]._next_id()
-        else:
-            if with_replacement:
-                self.with_replacement = with_replacement
+        if with_replacement:
+            self.with_replacement = with_replacement
         if field != None:
             self.field = field
 
@@ -101,6 +111,7 @@ class SampleFrom:
         self.variable = int(self._id_generators[self.bank]._next_id())
 
     def _validate(self):
+        at_most_one(self, ['variable', 'not_variable', 'with_replacement'])
         # TODO (not)var or without_r consistently for a given bank
         # TODO enough in bank for all samples
         # TODO fields consistent in bank
@@ -113,6 +124,9 @@ class Component:
 
     # class variable
     _id_generator = None
+
+    def __init__(self):
+        raise ValueError, 'Component is an abstract class that should not be instantiated.'
 
     def _set_id(self, id_str = None):
         if id_str:
@@ -176,6 +190,9 @@ class Option(Component):
         For example, correct = 'hi.*' would mean that 'hi' and 'high' are both
         correct inputs.
 
+        run_if: RunIf, optional. If given, the RunIf's condition must be satisfied
+        for this option to display.
+
         tags: {string: string}, a dictionary for any metadata you want to
         associate with this Option. The keys of the dictionary will become
         columns in your output file. It will not be used in the experiment,
@@ -236,6 +253,9 @@ class Page(Component):
         right with the j key. If a list of characters, there must be as many
         characters as options. They will be mapped onto the options from left to
         right, as the options are displayed on the screen in shuffled order.
+
+        run_if: RunIf, optional. If given, runIf's condition must be satisfied for this
+        Page to display.
         '''
         self._set_id(id_str)
         self.text = text
@@ -277,7 +297,7 @@ class Page(Component):
         self._validate_keyboard()
 
 class Item(Component):
-    def __init__(self, pages = None, id_str = None, condition = None, tags = None, **kwargs):
+    def __init__(self, pages = None, id_str = None, condition = None, tags = None, run_if = None, **kwargs):
         '''
         Items are the questions and instructions of an experiment. Their order
         is randomized within their Blocks.  Often, an Item consists of one page
@@ -296,8 +316,6 @@ class Item(Component):
         their Pages in order. An Item that only displays one Page will create
         its Page automatically from its arguments.
 
-        **kwargs: optional keyword arguments, which can include:
-
         tags: {string: string}, a dictionary for any metadata you want to
         associate with this Item. The keys of the dictionary will become
         columns in your output file. It will not be used in the experiment,
@@ -307,6 +325,9 @@ class Item(Component):
         experimental manipulation. Used if this Item is in a block where
         pseudorandom is True, to keep Items with the same condition from
         appearing in a row. Can also be SampleFrom.
+
+        run_if: RunIf, optional. If given, this Item will only display if its
+        condition is satisfied.
 
         The following keyword arguments can only be included if there is no `pages`
         argument:
@@ -343,23 +364,21 @@ class Item(Component):
         right with the j key. If a list of characters, there must be as many
         characters as options. They will be mapped onto the options from left to
         right, as the options are displayed on the screen in shuffled order.
-
         '''
         self._set_id(id_str)
-        if pages:
+        if condition != None:
+            self.condition = condition
+        if tags != None:
+            self.tags = tags
+        if run_if != None:
+            self.run_if = run_if
+        if pages != None:
             self.pages = pages
-            if condition:
-                self.condition = condition
-            if tags:
-                self.tags = tags
             if kwargs:
-                raise ValueError, '''Items that have a `pages` argument cannot
-                    also have any of the following arguments:
-                    ''' + kwargs.keys()
+                raise ValueError, '''Cannot give an Item both pages and any of the following:
+                    {}'''.format(kwargs)
         else:
-            if condition:
-                self.condition = condition
-            self.pages = [Page(tags = tags, **kwargs)]
+            self._set_optional_args(**kwargs)
 
 class Block(Component):
     def __init__(self, pages = None, items = None, groups = None, blocks = None, id_str = None,
@@ -506,12 +525,7 @@ class Block(Component):
 
 
     def _validate_contents(self):
-        content_types = [attribute for attribute in
-                ['pages', 'groups', 'items', 'blocks'] if hasattr(self, attribute)]
-        if len(content_types) != 1:
-            print content_types
-            raise ValueError, '''Block must have exactly one of pages, groups, items,
-            and blocks.'''
+        exactly_one(self, ['pages', 'groups', 'items', 'blocks'])
 
     def _validate_pseudorandom(self):
         if hasattr(self, 'pseudorandom'):
@@ -617,4 +631,25 @@ class Experiment(Component):
         make_exp(filename)
         make_task(varname)
 
+def exactly_one(obj, attributes):
+    found = [attribute for attribute in attributes if hasattr(obj, attribute)]
+    if len(found) != 1:
+        raise ValueError, '''{} must have exactly one of the following attributes:
 
+{}
+
+but it has:
+
+{}.'''.format(obj, attributes, found)
+
+def at_most_one(obj, attributes):
+    found = [attribute for attribute in attributes if hasattr(obj, attribute)]
+    print found
+    if len(found) > 1:
+        raise ValueError, '''{} must have at most one of the following attributes:
+
+{}
+
+but it has:
+
+{}.'''.format(obj, attributes, found)

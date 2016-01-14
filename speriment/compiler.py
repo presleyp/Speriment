@@ -25,6 +25,46 @@ class ExperimentEncoder(json.JSONEncoder):
         del obj.treatments
         return obj
 
+    def compile_item(self, item):
+        page_attrs = ['text', 'options', 'feedback', 'correct', 'resources', 'ordered',
+                'exclusive', 'freetext', 'keyboard']
+        if not hasattr(item, 'pages'):
+            item.pages = [Page('')]
+            del item.pages[0].text
+            for attr in page_attrs:
+                if hasattr(item, attr):
+                    setattr(item.pages[0], attr, getattr(item, attr))
+                    delattr(item, attr)
+        return item
+
+    def compile_feedback(self, item):
+        '''Feedback is a string or Page to run either unconditionally after a Page,
+        or conditionally after an Option is chosen. Remove this variable and instantiate
+        the Page with a RunIf if needed.'''
+        new_pages = []
+        for (i, page) in enumerate(item.pages):
+            feedback_pages = []
+            if hasattr(page, 'feedback'):
+                page_feedback = page.feedback if isinstance(page.feedback, Page) else Page(page.feedback)
+                feedback_pages.append(page_feedback)
+                del page.feedback
+            if hasattr(page, 'options'):
+                for option in page.options:
+                    if hasattr(option, 'feedback'):
+                        option_feedback = None
+                        run_if = RunIf(page = page, option = option)
+                        if isinstance(option.feedback, Page):
+                            option_feedback = option.feedback
+                            option_feedback.run_if = run_if
+                        else:
+                            option_feedback = Page(option.feedback, run_if = run_if)
+                        feedback_pages.append(option_feedback)
+                        del option.feedback
+            new_pages.append(page)
+            new_pages += feedback_pages
+        item.pages = new_pages
+        return item
+
     def map_variables(self, obj):
         new_obj = copy.deepcopy(obj)
         mapping = SampleFrom._variable_maps[new_obj.bank]
@@ -41,6 +81,9 @@ class ExperimentEncoder(json.JSONEncoder):
         if isinstance(obj, Component):
             if hasattr(obj, 'treatments'):
                 obj = self.compile_treatments(obj)
+            if isinstance(obj, Item):
+                obj = self.compile_item(obj)
+                obj = self.compile_feedback(obj)
             obj._validate()
             # make keys follow JS conventions
             renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
@@ -60,4 +103,4 @@ class ExperimentEncoder(json.JSONEncoder):
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
-from components import Component, RunIf, SampleFrom
+from components import Component, Item, Page, RunIf, SampleFrom
