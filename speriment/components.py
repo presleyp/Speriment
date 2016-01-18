@@ -310,16 +310,30 @@ class Page(Component):
 
     def _validate_freetext(self):
         if hasattr(self, 'freetext') and self.freetext == True:
-            if len(self.options) > 1:
+            #TODO necessary?
+            if hasattr(self, 'options') and len(self.options) > 1:
                 raise ValueError, '''If freetext is true, the page has a text box
                 as its option, so there shouldn't be more than one option.'''
-            if hasattr(self.options[0], 'correct') and self.options[0].correct in [True, False]:
+            if hasattr(self, 'options') \
+                and hasattr(self.options[0], 'correct') \
+                and self.options[0].correct in [True, False]:
                 raise ValueError, '''A text box option should have a regular
                 expression rather than a boolean as its "correct" attribute.'''
             if hasattr(self, 'correct') and self.correct in [True, False]:
                 raise ValueError, '''A text box option should have a regular
                 expression rather than a boolean as its "correct" attribute.'''
-       #TODO reverse is true
+
+    def _validate_multiple_choice(self):
+        if hasattr(self, 'options'):
+            if hasattr(self, 'freetext') and self.freetext == False:
+                if hasattr(self, 'correct') and self.correct not in [True, False]:
+                    raise ValueError, '''A question with multiple choice options should
+                    have a boolean rather than a regular expression as its "correct" attribute.'''
+                option_correct = [getattr(option, 'correct') for option in self.options]
+                option_string = [correct for correct in option_correct if type(correct) == str]
+                if len(option_string) > 0:
+                    raise ValueError, '''A multiple choice option should have a boolean
+                    rather than a regular expression as its "correct" attribute.'''
 
     def _validate_keyboard(self):
         if hasattr(self, 'keyboard'): 
@@ -338,6 +352,8 @@ class Page(Component):
         self._validate_keyboard()
 
     def comp(self):
+        if hasattr(self, 'freetext') and not hasattr(self, 'options'):
+            self.options = [Option()]
         super(Page, self).comp()
         return self
 

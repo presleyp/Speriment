@@ -107,3 +107,10 @@ def test_at_most_one():
         s._validate()
     s2._validate()
     s3._validate()
+
+def test_auto_option():
+    with make_experiment(IDGenerator()):
+        p = Page('What is your name?', freetext = True)
+        e = Experiment(blocks = [Block(items = [Item(pages = [p])])])
+        ejson = json.loads(e.to_JSON())
+        assert len(ejson['blocks'][0]['items'][0]['pages'][0]['options']) == 1
