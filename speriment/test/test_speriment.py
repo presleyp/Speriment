@@ -1,5 +1,5 @@
 from speriment import *
-import json, pytest
+import json, pytest, copy
 
 def test_new():
     with make_experiment(IDGenerator()):

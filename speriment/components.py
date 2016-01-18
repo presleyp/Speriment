@@ -33,18 +33,31 @@ class RunIf:
         that Pages can display multiple times if they are in Blocks with a
         criterion.'''
         if item != None:
-            self.item_id = item.id_str
+            self.item = item
         if page != None:
-            self.page_id = page.id_str
+            self.page = page
         if option != None:
-            self.option_id = option.id_str
+            self.option = option
         elif regex != None:
             self.regex = regex
         if permutation != None:
             self.permutation = permutation
 
-    def validate(self):
+    def _validate(self):
         exactly_one(self, ['item', 'page', 'permutation'])
+
+    def comp(self):
+        if hasattr(self, 'page'):
+            self.pageID = self.page.id_str if self.page.id_str else self.page.id
+            del self.page
+        if hasattr(self, 'option'):
+            self.optionID = self.option.id_str if self.option.id_str else self.option.id
+            del self.option
+        if hasattr(self, 'item'):
+            page = self.item.pages[0]
+            self.pageID = page.id_str if page.id_str else page.id
+            del self.item
+        return self
 
 class SampleFrom:
     '''Stands in place of a value of an Item, Page, or Option and tells the program to
@@ -115,10 +128,28 @@ class SampleFrom:
         # TODO (not)var or without_r consistently for a given bank
         # TODO enough in bank for all samples
         # TODO fields consistent in bank
-        pass
 
+    def map_variables(self):
+        mapping = SampleFrom._variable_maps[self.bank]
+        if hasattr(self, 'variable'):
+            self.variable = int(mapping[self.variable])
+        elif hasattr(self, 'not_variable'):
+            self.not_variable = int(mapping[self.not_variable])
+        else:
+            if not hasattr(self, 'with_replacement'):
+                self._set_variable()
 
-class Component:
+    def comp(self):
+        self.map_variables()
+        if hasattr(self, 'bank'):
+           self.sampleFrom = self.bank
+           del self.bank
+        if hasattr(self, 'not_variable'):
+           self.notVariable = self.not_variable
+           del self.not_variable
+        return self
+
+class Component(object):
     '''This is the superclass of Option, Page, Block, and Experiment. You should
     not instantiate this class.'''
 
@@ -162,6 +193,14 @@ class Component:
         '''To be defined for each subtype.'''
         pass
 
+    def comp(self):
+        if hasattr(self, 'id_str'):
+            self.id = self.id_str
+            del self.id_str
+        if hasattr(self, 'run_if'):
+            self.runIf = self.run_if
+            del self.run_if
+        return self
 
 class Option(Component):
     def __init__(self, text = None, id_str = None, **kwargs):
@@ -206,6 +245,9 @@ class Option(Component):
             self.text = text
         self._set_optional_args(**kwargs)
 
+    def comp(self):
+        super(Option, self).comp()
+        return self
 
 class Page(Component):
     def __init__(self, text, options = None, id_str = None, **kwargs):
@@ -290,11 +332,14 @@ class Page(Component):
                     raise ValueError, '''Default keybindings only compatible with
                     pages with two options.'''
 
-
     def _validate(self):
         self._validate_resources()
         self._validate_freetext()
         self._validate_keyboard()
+
+    def comp(self):
+        super(Page, self).comp()
+        return self
 
 class Item(Component):
     def __init__(self, pages = None, id_str = None, condition = None, tags = None, run_if = None, **kwargs):
@@ -379,6 +424,51 @@ class Item(Component):
                     {}'''.format(kwargs)
         else:
             self._set_optional_args(**kwargs)
+
+    def comp(self):
+        self.compile_item()
+        self.compile_feedback()
+        super(Item, self).comp()
+        return self
+
+    def compile_item(self):
+        page_attrs = ['text', 'options', 'feedback', 'correct', 'resources', 'ordered',
+                'exclusive', 'freetext', 'keyboard']
+        if not hasattr(self, 'pages'):
+            self.pages = [Page('')]
+            del self.pages[0].text
+            for attr in page_attrs:
+                if hasattr(self, attr):
+                    setattr(self.pages[0], attr, getattr(self, attr))
+                    delattr(self, attr)
+
+    def compile_feedback(self):
+        '''Feedback is a string or Page to run either unconditionally after a Page,
+        or conditionally after an Option is chosen. Remove this variable and instantiate
+        the Page with a RunIf if needed.'''
+        new_pages = []
+        for (i, page) in enumerate(self.pages):
+            feedback_pages = []
+            if hasattr(page, 'feedback'):
+                page_feedback = page.feedback if isinstance(page.feedback, Page) else Page(page.feedback)
+                feedback_pages.append(page_feedback)
+                del page.feedback
+            if hasattr(page, 'options'):
+                for option in page.options:
+                    if hasattr(option, 'feedback'):
+                        option_feedback = None
+                        run_if = RunIf(page = page, option = option)
+                        if isinstance(option.feedback, Page):
+                            option_feedback = option.feedback
+                            option_feedback.run_if = run_if
+                        else:
+                            option_feedback = Page(option.feedback, run_if = run_if)
+                        feedback_pages.append(option_feedback)
+                        del option.feedback
+            new_pages.append(page)
+            new_pages += feedback_pages
+        self.pages = new_pages
+        return self
 
 class Block(Component):
     def __init__(self, pages = None, items = None, groups = None, blocks = None, id_str = None,
@@ -552,6 +642,23 @@ class Block(Component):
 
     def _validate_latin_square(self):
         pass
+
+    def comp(self):
+        if hasattr(self, 'treatments'):
+            self.compile_treatments()
+        if hasattr(self, 'latin_square'):
+            self.latinSquare = self.latin_square
+            del self.latin_square
+        super(Block, self).comp()
+        return self
+
+    def compile_treatments(self):
+        '''Treatments are lists of lists of blocks to run conditionally. Remove
+        this variable and add RunIf objects to those blocks.'''
+        for i, treatment in enumerate(self.treatments):
+            for block in treatment:
+                block.run_if = RunIf(permutation = i)
+        del self.treatments
 
 from compiler import ExperimentEncoder
 from utils import make_exp, make_task, IDGenerator
