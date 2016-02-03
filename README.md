@@ -66,7 +66,7 @@ Here are a few things Speriment can handle:
   the string to be sampled from a bank.
 
 ###How do I run an experiment?
-You'll still need to follow all of the [instructions for using PsiTurk](psiturk.readthedocs.org).
+You'll still need to follow all of the [instructions for using PsiTurk](https://psiturk.readthedocs.org).
 
 But this is what the workflow will look like in your terminal:
 
