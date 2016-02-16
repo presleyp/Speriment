@@ -33,7 +33,7 @@ materials2 = get_dicts('items2.csv', sep = '\t')
 
 ##### IDs #######
 
-# Every option, item, page, and block of your experiment needs an ID. There are two ways to get
+# Every option, page, item, and block of your experiment needs an ID. There are two ways to get
 # them:
 # 1. Use this "with" statement to generate them magically, and indent ALL
 # of your code about this experiment after this statement. Only unindent
@@ -48,6 +48,8 @@ with make_experiment(IDGenerator()):
 
     ###### Create experiment components. #####
 
+    # Items are the semantic units of experiments - the statements and questions -
+    # and Pages are the visual units.
     # Some Items only need to display one Page, and that Page only needs to display text.
     # As a shorthand, you can just pass the text directly to the Item.
     instructions = Item('Welcome to the experiment!')
