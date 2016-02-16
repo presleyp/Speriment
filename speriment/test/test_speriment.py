@@ -36,25 +36,28 @@ def test_compile_treatments():
 
 def test_item():
     with make_experiment(IDGenerator()):
-        p1 = Page(text = "hello")
-        p2 = Page(text = "world")
-        i1 = Item(pages = [p1, p2], condition = 'item_cond', tags = {'item_tag': 'has pages'})
-        i2 = Item(text = "hello", condition = 'item_cond', tags = {'item_tag': 'has text'})
-        b1 = Block(items = [i1, i2])
+        p1 = Page("hello")
+        p2 = Page("world")
+        i1 = Item([p1, p2], condition = 'item_cond', tags = {'item_tag': 'has pages'})
+        i2 = Item("just text", condition = 'item_cond')
+        i3 = Item(Page("single page"))
+        b1 = Block(items = [i1, i2, i3])
         exp = Experiment(blocks = [b1])
         json_exp = exp.to_JSON()
         compiled_exp = json.loads(json_exp)
         jb1 = compiled_exp['blocks'][0]
         ji1 = jb1['items'][0]
         ji2 = jb1['items'][1]
+        ji3 = jb1['items'][2]
         assert len(ji1['pages']) == 2
         assert len(ji2['pages']) == 1
+        assert len(ji3['pages']) == 1
         assert ji1['condition'] == 'item_cond'
+        assert ji1['tags']['item_tag'] == 'has pages'
         assert ji2['condition'] == 'item_cond'
         assert ji1['pages'][0]['text'] == 'hello'
-        assert ji2['pages'][0]['text'] == 'hello'
-        assert ji1['tags']['item_tag'] == 'has pages'
-        assert ji2['tags']['item_tag'] == 'has text'
+        assert ji2['pages'][0]['text'] == 'just text'
+        assert ji3['pages'][0]['text'] == 'single page'
 
 def test_feedback():
     with make_experiment(IDGenerator()):
@@ -62,8 +65,8 @@ def test_feedback():
                 options = [Option('a', feedback = 'a is correct'), Option('b', feedback = Page('b is incorrect'))])
         p2 = Page(text = "world", feedback = 'that was page 2')
         p3 = Page(text = "third", feedback = Page('that was page 3'))
-        i1 = Item(pages = [p1, p2, p3])
-        i2 = Item(text = "hello", feedback = 'that was the first page of item 2')
+        i1 = Item([p1, p2, p3])
+        i2 = Item(Page("hello", feedback = 'that was the first page of item 2'))
         b1 = Block(items = [i1, i2])
         exp = Experiment(blocks = [b1])
         json_exp = exp.to_JSON()
@@ -88,6 +91,8 @@ def test_feedback():
         assert ji2['pages'][1]['text'] == "that was the first page of item 2"
         assert 'runIf' not in ji2['pages'][1]
 
+def test_run_if():
+
 def test_exactly_one():
     with make_experiment(IDGenerator()):
         with pytest.raises(ValueError):
@@ -111,6 +116,6 @@ def test_at_most_one():
 def test_auto_option():
     with make_experiment(IDGenerator()):
         p = Page('What is your name?', freetext = True)
-        e = Experiment(blocks = [Block(items = [Item(pages = [p])])])
+        e = Experiment(blocks = [Block(items = [Item([p])])])
         ejson = json.loads(e.to_JSON())
         assert len(ejson['blocks'][0]['items'][0]['pages'][0]['options']) == 1

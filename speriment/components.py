@@ -45,6 +45,10 @@ class RunIf:
 
     def _validate(self):
         exactly_one(self, ['item', 'page', 'permutation'])
+        if hasattr(self, 'item'):
+            item_contents = self.item.contents if hasattr(self.item, 'contents') else self.item.pages
+            if not (type(item_contents) != list or len(item_contents) == 1):
+                raise ValueError, '''Cannot set RunIf by Item if Item has more than one Page.'''
 
     def comp(self):
         if hasattr(self, 'page'):
@@ -358,88 +362,36 @@ class Page(Component):
         return self
 
 class Item(Component):
-    def __init__(self, pages = None, id_str = None, condition = None, tags = None, run_if = None, **kwargs):
+    def __init__(self, contents, id_str = None, condition = None, tags = None, run_if = None, **kwargs):
         '''
-        Items are the questions and instructions of an experiment. Their order
-        is randomized within their Blocks.  Often, an Item consists of one page
-        or "view." In this case, pass in all properties of that view to the
-        Item.
-
-        It is also possible to create an Item that presents multiple
-        pages in order. In that case, create a Page object for each page and
-        pass a list of them to the Item as the `pages` argument. The Item can
-        have its own condition and tags separate of its pages.
+        contents: string, Page, or [Page]. Items contain one or more Pages and display
+        their Pages in order. If contents is a string, a Page will be made with that string
+        as its text.
 
         id_str: String, optional, an identifier for this item unique among all
         items in the experiment.
-
-        pages: [Page], optional. Items contain one or more Pages and display
-        their Pages in order. An Item that only displays one Page will create
-        its Page automatically from its arguments.
-
-        tags: {string: string}, a dictionary for any metadata you want to
-        associate with this Item. The keys of the dictionary will become
-        columns in your output file. It will not be used in the experiment,
-        but will be passed through to the data file.
 
         condition: string, the condition this Item belongs to in the
         experimental manipulation. Used if this Item is in a block where
         pseudorandom is True, to keep Items with the same condition from
         appearing in a row. Can also be SampleFrom.
 
+        tags: {string: string}, a dictionary for any metadata you want to
+        associate with this Item. The keys of the dictionary will become
+        columns in your output file. It will not be used in the experiment,
+        but will be passed through to the data file.
+
         run_if: RunIf, optional. If given, this Item will only display if its
         condition is satisfied.
-
-        The following keyword arguments can only be included if there is no `pages`
-        argument:
-
-        text: string or [string], the text to be displayed on the page. The
-        string or any string(s) in the list can be SampleFrom.
-
-        options: [Option], optional, the answer choices to be displayed.
-
-        feedback: string or Page (without options), the feedback to be displayed
-        after an answer is chosen. Can use SampleFrom to choose string.
-
-        correct: If freetext is False, a string representing the id_str of the
-        correct Option. If freetext is True, a string representing a regular
-        expression that a correct answer will match.
-
-        resources: [string], filenames of any images, audio, or video that
-        should display on the page. Any resource can be SampleFrom. Make sure
-        resources are inside your project directory.
-
-        ordered: boolean, whether the Options for this Item need to be kept in
-        the order in which they were given. If True, the Options may be reversed
-        but will not be shuffled.
-
-        exclusive: boolean, whether the participant can choose only one Option
-        as their response.
-
-        freetext: boolean, whether the Option is a text box rather than multiple
-        choice.
-
-        keyboard: boolean or [character], representing how Options are to be
-        selected. If False, they are selected with the mouse. If True and there
-        are exactly two Options, the left is selected with the f key and the
-        right with the j key. If a list of characters, there must be as many
-        characters as options. They will be mapped onto the options from left to
-        right, as the options are displayed on the screen in shuffled order.
         '''
         self._set_id(id_str)
+        self.contents = contents
         if condition != None:
             self.condition = condition
         if tags != None:
             self.tags = tags
         if run_if != None:
             self.run_if = run_if
-        if pages != None:
-            self.pages = pages
-            if kwargs:
-                raise ValueError, '''Cannot give an Item both pages and any of the following:
-                    {}'''.format(kwargs)
-        else:
-            self._set_optional_args(**kwargs)
 
     def comp(self):
         self.compile_item()
@@ -447,16 +399,21 @@ class Item(Component):
         super(Item, self).comp()
         return self
 
+    def _validate(self):
+        if not type(self.contents) == str and \
+            not (type(self.contents) == list and isinstance(self.contents[0], Page)) and \
+            not isinstance(self.contents, Page):
+                raise ValueError, '''Item must have a string, Page, or list of Pages as its first argument.'''
+
     def compile_item(self):
-        page_attrs = ['text', 'options', 'feedback', 'correct', 'resources', 'ordered',
-                'exclusive', 'freetext', 'keyboard']
-        if not hasattr(self, 'pages'):
-            self.pages = [Page('')]
-            del self.pages[0].text
-            for attr in page_attrs:
-                if hasattr(self, attr):
-                    setattr(self.pages[0], attr, getattr(self, attr))
-                    delattr(self, attr)
+        if type(self.contents) == str or isinstance(self.contents, SampleFrom):
+            self.pages = [Page(self.contents)]
+        elif type(self.contents) == list:
+            self.pages = self.contents
+        else:
+            self.pages = [self.contents]
+        del self.contents
+        return self
 
     def compile_feedback(self):
         '''Feedback is a string or Page to run either unconditionally after a Page,

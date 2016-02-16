@@ -14,17 +14,21 @@ from speriment import *
 # What is your favorite animal?,cat,dog,animate
 # What is your favorite color?,red,blue,inanimate
 
-# and items2.csv, which has a header row:
+# and items2.csv, which has a header row, and is tab-delimited:
 
 # Question,Option1,Option2,Condition
 # What is your favorite celebrity?,Jennifer Lawrence,Beyonce,animate
 # What is your favorite car?,VW bug,Ferrari,inanimate
 
-# This is how to read in items1.csv
+# get_rows is best for files without header rows
+# it stores each row as a list
 materials1 = get_rows('items1.csv')
 
-# This is how to read in items2.csv
-materials2 = get_dicts('items2.csv')
+# get_dicts is best for files with header rows
+# it stores each row as a dictionary with the column headers as keys
+# both get_rows and get_dicts have a sep argument, for separator,
+# which is passed to the csv package as the delimiter
+materials2 = get_dicts('items2.csv', sep = '\t')
 
 
 ##### IDs #######
@@ -44,7 +48,10 @@ with make_experiment(IDGenerator()):
 
     ###### Create experiment components. #####
 
-    instructions = Item(text = 'Welcome to the experiment!')
+    # Some Items only need to display one Page, and that Page only needs to display text.
+    # As a shorthand, you can just pass the text directly to the Item.
+    # The documentation for Page and Item constructors explains other things you can do.
+    instructions = Item('Welcome to the experiment!')
 
     # You can use a loop or list comprehension to construct your items.
 
@@ -55,17 +62,24 @@ with make_experiment(IDGenerator()):
     # freetext = True
 
     items1 = [Item(
-                   text = row[0], # after using get_rows, access cells with indices, starting from 0
-                   options = [Option(row[1]), Option(row[2])],
+                   Page(
+                       row[0], # after using get_rows, access cells with indices, starting from 0
+                       options = [Option(row[1]), Option(row[2])],
+                   ),
                    condition = row[3],
                ) for row in materials1]
 
     items2 = [Item(
-                   text = row['Question'], # after using get_dicts, access cells with column names
-                   options = [Option(row['Option1']), Option(row['Option2'])],
-                   exclusive = False,
+                   Page(
+                       row['Question'], # after using get_dicts, access cells with column names
+                       options = [Option(row['Option1']), Option(row['Option2'])],
+                       exclusive = False,
+                   ),
                    condition = row['Condition']
                ) for row in materials2]
+
+    # An example using a text box option
+    item3 = Item(Page('Any thoughts?', freetext = True))
 
     # Then make blocks. In this example I make one block for each of the lists of
     # items we've created. Blocks create ordering in the experiment. By default, Options
@@ -74,7 +88,7 @@ with make_experiment(IDGenerator()):
 
     block1 = Block(items = [instructions])
     block2 = Block(items = items1)
-    block3 = Block(items = items2)
+    block3 = Block(items = items2 + [item3])
 
     ###### Make an Experiment ######
 

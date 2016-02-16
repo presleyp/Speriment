@@ -15,46 +15,37 @@ the other half the time, they will appear in reverse order.
 ###Multi-page Items
 What if you want to separate the question and answers of an Item onto different pages?
 Or display parts of an item in a sequence, like in a self-paced reading study?
-Use Pages. In the Items above, one Page per Item is created for you behind the scenes.
+Instead of giving an Item one Page, you can give it a list of Pages. The Pages will run in
+order.
 
-    Item(text = 'a', options = opts)
-
-is syntactic sugar for
-
-    Item(pages = [Page(text = 'a', options = opts)]).
-
-So you can give an Item a list of Pages, and they will run in that order.
-
-    item_with_sequenced_pages = Item(pages = [
-        Page('This page will display first'),
-        Page('This one comes second'),
-        Page('These pages can take all of the arguments that Items can take, except conditions',
-            options = [Option()],
-            ordered = False),
+    item_with_sequenced_pages = Item(
+        [
+            Page('This page will display first'),
+            Page('This one comes second', options = opts1),
+            Page('Each Page will create its own row in the output file, so they
+                can have their own options.', options = opts2)
         ],
         condition = 'a')
 
 If you just want to display feedback after a question is answered, you can use
-the `feedback` argument on an Item or Page. It will create a Page and insert it
-right after the Page it was given to (or at the end of the Item). The feedback
-can be a string, which is syntactic sugar for a Page with only text, or a Page,
-which can have other arguments (but not options or option-related arguments,
-because feedback is just for providing information).
+the `feedback` argument on a Page. It will create a Page and insert it right
+after the Page it was given to. The feedback can be a string, which is
+shorthand for a Page with only text, or a Page, which can have other
+arguments (but not options or option-related arguments, because feedback is
+just for providing information).
 
-    item_with_feedback = Item(text = 'What is two times two?',
-        options = [Option()],
-        freetext = True,
-        feedback = 'four')
+    item_with_feedback = Item(
+        Page(
+          'What is two times two?',
+          freetext = True,
+          feedback = 'four'))
 
 is syntactic sugar for
 
-    item_with_feedback = Item(
-        pages = [
-            Page('What is two times two?',
-                options = [Option()],
-                freetext = True),
-            Page('four')
-            ])
+    item_with_feedback = Item([
+        Page('What is two times two?',
+            freetext = True),
+        Page('four')])
 
 
 ###Pseudorandomized Items
@@ -64,10 +55,10 @@ Give your items conditions, and make sure you have an equal number of items for 
 Then set pseudorandom to True in the enclosing block.
 
     pseudorandomized_block = Block(items = [
-        Item(text = 'one', condition = 'odd'),
-        Item(text = 'two', condition = 'even'),
-        Item(text = 'three', condition = 'odd'),
-        Item(text = 'four', condition = 'even')
+        Item('one', condition = 'odd'),
+        Item('two', condition = 'even'),
+        Item('three', condition = 'odd'),
+        Item('four', condition = 'even')
         ],
         pseudorandom = True)
 
@@ -128,11 +119,11 @@ to use a group in a block, wrap all Items inside groups, even if sometimes it's 
 
     block_with_random_selection = Block(groups = [
         [
-            Item(text = 'How favorably would you rate President Barack Obama?'),
-            Item(text = 'Barack Obama: Good president or best president?'),
-            Item(text = 'Barack Obama: Bad president or worst president?')
+            Item(Page('How favorably would you rate President Barack Obama?', options = opts)),
+            Item(Page('Barack Obama: Good president or best president?', options = opts)),
+            Item(Page('Barack Obama: Bad president or worst president?', options = opts))
         ],
-        [Item(text = 'This question only has one wording')],
+        [Item(Page('This question only has one wording', options = opts))],
     ]
 
 ###Latin Square
@@ -148,12 +139,12 @@ algorithm rather than choosing from groups randomly.
 
     block_with_latin_square = Block(groups = [
         [
-            Item(text = 'version 1 of item 1'),
-            Item(text = 'version 2 of item 1')
+            Item('version 1 of item 1'),
+            Item('version 2 of item 1')
         ],
         [
-            Item(text = 'version 1 of item 2'),
-            Item(text = 'version 2 of item 2')
+            Item('version 1 of item 2'),
+            Item('version 2 of item 2')
         ]],
         latin_square = True)
 
@@ -162,11 +153,14 @@ Options, Pages, Items, and Blocks can take a `run_if` argument, which is passed 
 The RunIf object contains a condition, and the component will only run if the condition is met.
 RunIf objects can take
 
-- a `page` and an `option`; in this case the condition is only satisfied if that option was chosen
-when that page displayed. If that page hasn't displayed yet, the condition is not satisfied.
-- a `page` and a `regex`; this is similar to the above, but for text options rather than multiple choice
-options. If the string given as `regex` is a regular expression and the answer to `page` matches that
-regular expression, the condition is satisfied.
+- a `page` (or an `item` if that Item has only one Page) and an `option`; in
+  this case the condition is only satisfied if that option was chosen when that
+  page displayed. If that page hasn't displayed yet, the condition is not
+  satisfied.
+- a `page` (or an `item` if that Item has only one Page) and a `regex`; this is
+  similar to the above, but for text options rather than multiple choice
+  options. If the string given as `regex` is a regular expression and the
+  answer to `page` matches that regular expression, the condition is satisfied.
 
 Let's look at some use cases.
 
@@ -178,56 +172,62 @@ if their native language is not Hindi.
 Note the two different ways of referring to an item or option in a RunIf.
 
     hindi_option = Option('Hindi')
-    language_item = Item(text = 'What is your native language?',
-            options = [Option('Hindi'), Option('Other')])
+    language_item = Item(
+        Page(
+            'What is your native language?',
+            options = [Option('Hindi'), Option('Other')]))
     intro_block = Block(items = [language_item])
-    hindi_block = Block(items = some_items,
+    hindi_block = Block(
+        items = some_items,
         run_if = RunIf(item = language_item, option = hindi_option))
-    other_block = Block(items = [
-        Item(text = "I'm sorry, this experiment is for Hindi speakers. Thank you for your time!")
+    other_block = Block(
+        items = [
+          Item("I'm sorry, this experiment is for Hindi speakers. Thank you for your time!")
         ],
-        run_if = RunIf(item = language_item, option = hindi_block.items.options[1])
+        run_if = RunIf(item = language_item, option = intro_block.items.pages[0].options[1])
     exp = Experiment(blocks = [intro_block, hindi_block, other_block])
 
 ####Make an item optional depending on an answer.
 This block only asks you for more information if you indicate that you have seen Star Wars.
 
-    star_wars_item = Item(text = 'Have you seen Star Wars?',
-        options = [Option('yes'), Option('no')])
+    star_wars_item = Item(
+        Page(
+            'Have you seen Star Wars?',
+            options = [Option('yes'), Option('no')]))
     block = Block(items = [
         star_wars_item,
-        Item(text = 'Who would win in a fight, Darth Vader or a honey badger?',
-            options = [Option('Darth Vader'), Option('Honey Badger')],
-            run_if = RunIf(item = star_wars_item, option = star_wars_item[0])
-            ),
-        ])
+        Item(
+            Page(
+                'Who would win in a fight, Darth Vader or a honey badger?',
+                options = [Option('Darth Vader'), Option('Honey Badger')]),
+            run_if = RunIf(item = star_wars_item, option = star_wars_item.pages.options[0]))])
 
 ####Give feedback depending on an answer.
 You may want to give feedback on a by-option basis, so that whatever the participant chooses,
 they get feedback about their response. There is a shortcut to writing this: add a `feedback`
 argument to each option (or to only some of them).
 
-You may want to read about Pages before using this feature, since it inserts
-extra Pages into an Item, so that they will run in the correct order.
-
-Note that `feedback` can be a string, which is sugar for a Page with only text,
+Note that `feedback` can be a string, which is shorthand for a Page with only text,
 or a Page, which can take other arguments. It cannot take options and
 option-related arguments though, since it's only made for giving feedback. This
 restriction doesn't apply if you use the long form with `run_if`.
 
-    item = Item(text = 'When is it okay to falsify your results?',
-        options = [
-            Option('Never', feedback = 'Correct!'),
-            Option("When I'm really worried about getting tenure", feedback =
-                Item(text = 'Hold on while I call your department')
-        ])
+    item = Item(
+        Page(
+            'When is it okay to falsify your results?',
+            options = [
+                Option('Never', feedback = 'Correct!'),
+                Option(
+                    "When I'm really worried about getting tenure",
+                    feedback = Page('Hold on while I call your department'))]))
 
-is syntactic sugar for
+is short for
 
-    question = Page('When is it okay to falsify your results?',
+    question = Page(
+        'When is it okay to falsify your results?',
         options = [Option('Never'),
                    Option("When I'm really worried about getting tenure")]),
-    item = Item(pages = [
+    item = Item([
         question,
         Page('Correct!',
             run_if = RunIf(page = question, option = question.options[0])),
@@ -251,7 +251,7 @@ and `block_b` will run whenever the counter is set to 2. The demographics block 
 
     exp = Experiment(blocks = [block_a, demographics, block_b], treatments = [block_a, block_b])
 
-This is actually syntactic sugar for a RunIf. The RunIf object that is automatically set for `block_a`
+This is actually shorthand for a RunIf. The RunIf object that is automatically set for `block_a`
 and `block_b` takes a `permutation` argument instead of a `page` and `option` argument; this refers
 to the counter. If you use the RunIf directly, you can make other Components (Pages, Items, and Options)
 depend on the counter, but this is not usually necessary.
@@ -262,26 +262,22 @@ learn or the effect of a training block on their performance in a testing block.
 can create training blocks with the use of a `criterion` argument on the block, which determines
 when the participant has passed and can move on from the block, a `cutoff` argument, so that the
 experiment doesn't go on forever if the participant doesn't learn, and `correct` arguments on the
-Items, Pages, or Options, telling Speriment when a response is correct.
+Pages or Options, telling Speriment when a response is correct.
 
 This block will repeat up to five times or until at least 50% of its questions
 with defined correct answers are answered correctly, whichever comes first. The
 50% is calculated over the 911 question, the Grant's tomb question, and the
 Hugh Grant question, because they are the pages with defined correct answers
-(we'll call these "gradeable questions").  You may want to read the section on
-Multi-Page Items to be clear on the role of Pages in Speriment; it's unlikely
-that you'll want to put two gradeable questions in one Item, but it is
-possible.
+(we'll call these "gradeable questions").
 
     training_block = Block(items = [
-        Item(text = "What's the number for 911?", options = [Option()], freetext = True, correct = '911'),
-        Item(text = "What is your favorite flavor?", options = [Option('vanilla'), Option('chocolate')]),
-        Item(pages = [
+        Item(Page("What's the number for 911?", options = [Option()], freetext = True, correct = '911')),
+        Item(Page("What is your favorite flavor?", options = [Option('vanilla'), Option('chocolate')])),
+        Item([
             Page("Who's buried in Grant's tomb?",
               options = [Option('Grant', correct = True), Option('Lee', correct = False)]),
             Page("Who's buried in Hugh Grant's tomb?",
-              options = [Option('Hugh Grant', correct = False), Option("No one, he's alive."), correct = True)])
-            ])
+              options = [Option('Hugh Grant', correct = False), Option("No one, he's alive.")], correct = True)])
         ], criterion = 0.5, cutoff = 5)
 
 You might want to give a long training block and see if participants catch on by the end.
@@ -294,7 +290,7 @@ Blocks that contain Blocks can have criteria and cutoffs. Just count gradeable
 questions as if they were flattened into one big block.
 
 ##Add Images, Sound, and Video
-To add images, sound files, or videos to an Item, Page, or Option, put their file names in a list
+To add images, sound files, or videos to a Page or Option, put their file names in a list
 and pass it to the `resources` argument of that component. Store the files in your project directory
 and write their filenames relative to the project directory.
 
@@ -306,12 +302,12 @@ For a two-option question, there is a default keyboard setting you can use, whic
 option that displays on the left (which option that is will vary randomly) and "j" to the option on the
 right. Spacebar is used to advance. To use this setting, just set `keyboard` to True.
 
-    item = Item(text = 'some text', options = opts, keyboard = True)
+    Page('some text', options = opts, keyboard = True)
 
 Otherwise, the `keyboard` argument can take a list of keys, which will be aligned with the options from
 left to right.
 
-    item = Item(text = 'some text', options = three_opts, keyboard = ['q', 'w', 'e'])
+    Page('some text', options = three_opts, keyboard = ['q', 'w', 'e'])
 
 On questions with a `keyboard` setting, objects in the page are not clickable.
 However, the spacebar can be used to advance regardless of the keyboard
@@ -330,14 +326,14 @@ You can't run a regression on the instructions of your experiment, so make it ea
 to get them out of the way later by removing all rows that have 'instructions' as the value of the
 column 'item_type'.
 
-    instruction_item = Item(text = 'something you should do', tags = {'item_type': 'instructions'})
-    question_item = Item(text = 'experimental question', options = opts, tags = {'item_type': 'experimental'})
+    instruction_item = Item('something you should do', tags = {'item_type': 'instructions'})
+    question_item = Item(Page('experimental question', options = opts), tags = {'item_type': 'experimental'})
 
 ###Facilitate coding of responses
 Your analysis will probably group Items by the type of response that was given, but how do you
 associate the type of the response with the response? Give each Option a tag.
 
-    question = Item(text = 'experimental question', options = [
+    question = Item(Page('experimental question', options = [
         Option('dog', tags = {'animate': True, 'mammal': True}),
         Option('frog', tags = {'animate': True, 'mammal': False}),
         Option('log', tags = {'animate': False, 'mammal': False})])
@@ -353,21 +349,21 @@ A Block or the Experiment, any number of layers above the SampleFrom object, mus
 contain a `bank` argument that lists all of the possible values that can be sampled.
 
     frankstein_item = Item(
-        text = SampleFrom('text_bank'),
-        condition = SampleFrom('letters'),
-        options = [
-            Option(SampleFrom('options')),
-            Option('this text will be the same every time')
-            ],
-        resources = [SampleFrom('image_bank')])
+        Page(
+            SampleFrom('text_bank'),
+            options = [
+                Option(SampleFrom('options')),
+                Option('this text will be the same every time')
+                ],
+            resources = [SampleFrom('image_bank')]),
+        condition = SampleFrom('letters'))
 
     block_with_banks = Block(items = [frankenstein_item],
         banks = {
             'text_bank': ['hi', 'hello', 'hey'],
             'letters': ['a', 'b', 'c'],
             'options': ['one', 'two'],
-            'image_bank': ['cats.jpg']
-            }
+            'image_bank': ['cats.jpg']})
 
 We can explore the arguments to SampleFrom via some use cases.
 
@@ -380,9 +376,9 @@ the same value will be sampled for that participant. A handy way to assign varia
 is to make a column in your materials that has the same value for related items and
 read in that cell, but it doesn't actually have to be meaningful.
 
-    item1 = Item(text = 'This is a blorg.', resources = [SampleFrom('images', variable = 1)])
-    item2 = Item(text = 'What a nice blorg.', resources = [SampleFrom('images', variable = 1)])
-    item3 = Item(text = 'This is a lage.', resources = [SampleFrom('images', variable = 2)])
+    item1 = Item(Page('This is a blorg.', resources = [SampleFrom('images', variable = 1)]))
+    item2 = Item(Page('What a nice blorg.', resources = [SampleFrom('images', variable = 1)]))
+    item3 = Item(Page('This is a lage.', resources = [SampleFrom('images', variable = 2)]))
     block = Block(items = [item1, item2, item3],
         banks = {'images': ['funny_drawing1.jpg', 'funny_drawing2.jpg']})
 
@@ -395,10 +391,10 @@ anything but the value that has been associated with that variable. By giving
 one SampleFrom a `variable` of 'a' and another a `not_variable` of 'a', you
 ensure that they will not choose the same value.
 
-    item1 = Item(text = 'some text', options = [
+    item1 = Item(Page('some text', options = [
         Option(SampleFrom('answers', variable = 'a'),
         Option(SampleFrom('answers', not_variable = 'a')
-        ])
+        ]))
     block = Block(items = [item1],
         banks = {'answers': ['one answer', 'another answer']})
 
@@ -409,10 +405,10 @@ True. This way, you could distribute just a few values randomly across many comp
 When you're not using this setting, make sure your bank has enough values for all of the
 times it's sampled from.
 
-    item1 = Item(text = SampleFrom('words', with_replacement = True))
-    item2 = Item(text = SampleFrom('words', with_replacement = True))
-    item3 = Item(text = SampleFrom('words', with_replacement = True))
-    item4 = Item(text = SampleFrom('words', with_replacement = True))
+    item1 = Item(SampleFrom('words', with_replacement = True))
+    item2 = Item(SampleFrom('words', with_replacement = True))
+    item3 = Item(SampleFrom('words', with_replacement = True))
+    item4 = Item(SampleFrom('words', with_replacement = True))
     block = Block(items = [item1, item2, item3, item4],
         banks = {'words': ['one', 'two']})
 
@@ -421,8 +417,9 @@ Banks don't have to be lists; they can also be dictionaries, with multiple
 fields. This is useful if you want to sample, say, text and an image, but the
 text and image need to be paired up properly (the same across items and participants).
 
-    item = Item(text = SampleFrom('animals', field = 'name'),
-        resources = [SampleFrom('animals', field = 'image')])
+    item = Item(Page(
+        SampleFrom('animals', field = 'name'),
+        resources = [SampleFrom('animals', field = 'image')]))
     block = Block(items = [item], banks = {'animals': [
         {'name': 'giraffe', 'image': 'giraffe.jpg'},
         {'name': 'elephant', 'image': 'elephant.jpg'}
