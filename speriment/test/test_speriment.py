@@ -92,6 +92,7 @@ def test_feedback():
         assert 'runIf' not in ji2['pages'][1]
 
 def test_run_if():
+    pass
 
 def test_exactly_one():
     with make_experiment(IDGenerator()):

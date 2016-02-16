@@ -50,11 +50,12 @@ test("shuffle banks", function(){
 });
 
 test("sampling without replacement", function(){
-    var jsonb = {id: 'b1', pages: [
-        {id: 'p1', text: {sampleFrom: 'ps', variable: 0}},
-        {id: 'p2', text: {sampleFrom: 'ps', variable: 1}},
-        {id: 'p3', text: {sampleFrom: 'ps', variable: 2}}],
-        banks: {'ps': ['one', 'two', 'three']}};
+    var jsonb = {id: 'b1',
+      items: [
+        {id: 'i1', pages: [{id: 'p1', text: {sampleFrom: 'ps', variable: 0}}]},
+        {id: 'i2', pages: [{id: 'p2', text: {sampleFrom: 'ps', variable: 1}}]},
+        {id: 'i3', pages: [{id: 'p3', text: {sampleFrom: 'ps', variable: 2}}]}],
+      banks: {'ps': ['one', 'two', 'three']}};
     var b = new InnerBlock(jsonb, fakeContainer);
     var pages = _.pluck(b.contents, 'contents');
     var texts = _.map(pages, function(pagelist){return pagelist[0].text;});
