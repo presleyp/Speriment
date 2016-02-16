@@ -50,7 +50,6 @@ with make_experiment(IDGenerator()):
 
     # Some Items only need to display one Page, and that Page only needs to display text.
     # As a shorthand, you can just pass the text directly to the Item.
-    # The documentation for Page and Item constructors explains other things you can do.
     instructions = Item('Welcome to the experiment!')
 
     # You can use a loop or list comprehension to construct your items.
@@ -81,6 +80,29 @@ with make_experiment(IDGenerator()):
     # An example using a text box option
     item3 = Item(Page('Any thoughts?', freetext = True))
 
+    # To put images, audio, or video on a page, first put the files somewhere in your "static"
+    # directory. You'll refer to the files relative to the top level of your project directory,
+    # so their filename will start with "static/". Here are two ways to get them into your script:
+
+    # Assuming you have an image for each Option1 entry (cat and red) in static/images,
+    # you can get their filenames like this:
+    images = ['static/images/' + row['Option1'] + '.jpg'
+              for row in materials2]
+
+    # Get the filenames of all mp3 files you put in static/audio:
+    audio = glob.glob('static/audio/*.mp3')
+
+    # Once you have the filenames, add resources to a Page or Option.
+    item4 = Item(
+        Page(
+            'Each option has a resource associated with it.',
+            options = [
+                Option('a', resources = ['static/images/cats.jpg']),
+                Option('b', resources = [images[0]])
+            ]
+        )
+    )
+
     # Then make blocks. In this example I make one block for each of the lists of
     # items we've created. Blocks create ordering in the experiment. By default, Options
     # are ordered randomly within their Item, Items are ordered randomly within their Block,
@@ -88,7 +110,7 @@ with make_experiment(IDGenerator()):
 
     block1 = Block(items = [instructions])
     block2 = Block(items = items1)
-    block3 = Block(items = items2 + [item3])
+    block3 = Block(items = items2 + [item3, item4])
 
     ###### Make an Experiment ######
 
