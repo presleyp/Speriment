@@ -14,6 +14,7 @@ class ResponseOption implements Viewable, Resettable{
     public tags;
     public resourceNames: string[];
     public resources: string[];
+    public element;
 
     constructor(jsonOption, public question: Question){
         jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null, resources: null});
@@ -21,7 +22,6 @@ class ResponseOption implements Viewable, Resettable{
         this.text = setText(jsonOption.text, this.question.block);
         this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.block);
         this.resourceNames = _.map(jsonOption.resources, (r) => {return setOrSample(r, this.question.block)});
-        this.resources = _.map(this.resourceNames, makeResource);
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         _.each(jsonOption.tags, (value, key) => {jsonOption.tags[key] = setOrSample(jsonOption.tags[key], this.question.block)});
         this.tags = jsonOption.tags;
@@ -79,6 +79,15 @@ class ResponseOption implements Viewable, Resettable{
         $(optionDiv).append(parts);
         return optionDiv;
     }
+
+    public enable(){
+        $(this.element).prop({disabled: false});
+    }
+
+    public disable(){
+        $(this.element).prop({disabled: true});
+    }
+
 }
 
 class RadioOption extends ResponseOption{
@@ -87,11 +96,12 @@ class RadioOption extends ResponseOption{
         $(label).attr("for", this.id);
         $(label).append(this.text);
 
-        var input = document.createElement("input");
-        $(input).attr({type: "radio", id: this.id, name: this.question.id});
-        $(input).change((m:MouseEvent) => {this.onChange();});
+        this.element = document.createElement("input");
+        $(this.element).attr({type: "radio", id: this.id, name: this.question.id});
+        $(this.element).change((m:MouseEvent) => {this.onChange();});
 
-        var optionParts = _.map(this.resources, this.wrapResource).concat([label, input]);
+        var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this.question));
+        var optionParts = _.map(resources, this.wrapResource).concat([label, this.element]);
         $(OPTIONS).append(this.wrapOption(optionParts));
     }
 
@@ -103,11 +113,12 @@ class CheckOption extends ResponseOption{
         $(label).attr("for", this.id);
         $(label).append(this.text);
 
-        var input = document.createElement("input");
-        $(input).attr({type: "checkbox", id: this.id, name: this.question.id});
-        $(input).change((m:MouseEvent) => {this.onChange();});
+        this.element = document.createElement("input");
+        $(this.element).attr({type: "checkbox", id: this.id, name: this.question.id});
+        $(this.element).change((m:MouseEvent) => {this.onChange();});
 
-        var optionParts = _.map(this.resources, this.wrapResource).concat([label, input]);
+        var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this.question));
+        var optionParts = _.map(resources, this.wrapResource).concat([label, this.element]);
         $(OPTIONS).append(this.wrapOption(optionParts));
     }
 }
@@ -124,16 +135,17 @@ class TextOption extends ResponseOption{
     }
 
     run(){
-        var input = document.createElement("input");
-        $(input).attr({type: "text", id: this.id, name: this.question.id});
-        var optionParts = _.map(this.resources, this.wrapResource).concat([input]);
+        this.element = document.createElement("input");
+        $(this.element).attr({type: "text", id: this.id, name: this.question.id});
+        var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this.question));
+        var optionParts = _.map(resources, this.wrapResource).concat([this.element]);
         $(OPTIONS).append(this.wrapOption(optionParts));
-        $(input).keypress((k:KeyboardEvent) => {
+        $(this.element).keypress((k:KeyboardEvent) => {
             // space shouldn't trigger clicking next
             k.stopPropagation();
             // this.onChange();
         });
-        $(input).focus();
+        $(this.element).focus();
         this.question.enableNext(); // currently text options don't require answers
     }
 
@@ -170,13 +182,16 @@ class DropDownOption extends ResponseOption{
     run(){//TODO changed OPTION+" select" to select, check if it broke
         //if select element exists, append to it, otherwise create it first
         if ($("select").length === 0){
-            var select = document.createElement("select");
+            this.element = document.createElement("select");
             if (!this.exclusive){
-                $(select).attr({multiple: "multiple", name: this.question.id});
+                $(this.element).attr({multiple: "multiple", name: this.question.id});
             }
-            $(select).change((m:MouseEvent) => {this.onChange();});
-            var optionParts = _.map(this.resources, this.wrapResource).concat([select]);
+            $(this.element).change((m:MouseEvent) => {this.onChange();});
+            var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this.question));
+            var optionParts = _.map(resources, this.wrapResource).concat([this.element]);
             $(OPTIONS).append(this.wrapOption(optionParts));
+            var defaultOption = document.createElement("option");
+            $(this.element).append(defaultOption);
         }
         var option = document.createElement("option");
         $(option).attr("id", this.id);
@@ -186,11 +201,10 @@ class DropDownOption extends ResponseOption{
 
     useKey(key: number){
         $(CONTINUE).hide();
-        var elem = '#' + this.id;
-        $(elem).prop('disabled', 'true');
+        $(this.element).prop('disabled', 'true');
         $(document).keypress((k: KeyboardEvent) => {
             if (k.which === key){
-                $(elem).prop('selected', (i, val) => {return !val});
+                $(this.element).prop('selected', (i, val) => {return !val});
                 this.onChange();
             }
         });

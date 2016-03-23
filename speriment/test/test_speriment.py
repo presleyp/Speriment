@@ -30,7 +30,27 @@ def test_compile_treatments():
         exp = Experiment(blocks = [outer])
         json_exp = exp.to_JSON()
         compiled_exp = json.loads(json_exp)
-        print compiled_exp
         assert compiled_exp['blocks'][0]['blocks'][0]['runIf']['permutation'] == 0
         assert compiled_exp['blocks'][0]['blocks'][1]['runIf']['permutation'] == 1
         assert compiled_exp['blocks'][0]['blocks'][2]['runIf']['permutation'] == 0
+
+def test_compile_resources():
+    with make_experiment(IDGenerator()):
+        p1 = Page('hi',
+                resources = [
+                    'cats.jpg',
+                    Resource('dogs.ogg', media_type = 'video', autoplay = True, controls = False),
+                    'elephants.mp4',
+                    SampleFrom('animals')])
+        exp = Experiment(
+                blocks = [
+                    Block(
+                        pages = [p1],
+                        banks = {'animals': ['giraffe.jpg']})])
+        json_exp = exp.to_JSON()
+        compiled_exp = json.loads(json_exp)
+        resources = compiled_exp['blocks'][0]['pages'][0]['resources']
+        assert resources[0] == {u'source': u'cats.jpg', u'mediaType': None, u'controls': True, u'autoplay': False}
+        assert resources[1] == {u'source': u'dogs.ogg', u'mediaType': u'video', u'controls': False, u'autoplay': True}
+        assert resources[2] == {u'source': u'elephants.mp4', u'mediaType': None, u'controls': True, u'autoplay': False}
+        assert resources[3] == {u'sampleFrom': u'animals', u'variable': 0}

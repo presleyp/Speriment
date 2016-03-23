@@ -13,6 +13,65 @@ test("sampleFromBank", function(){
     strictEqual(sampled, 'apple', 'sample from bank with variable and field');
 });
 
+test("setText", function(){
+  var block = {banks: {'bank1': ['a', 'b']}};
+  var text = 'hi';
+  strictEqual(setText(text, block), 'hi', 'simple text set correctly');
+
+  var sampleText = {sampleFrom: 'bank1'};
+  ok(_.contains(['a', 'b'], setText(sampleText, block)), 'sampled text set correctly');
+
+  var arrayText = ['hi', 'there'];
+  strictEqual(setText(arrayText, block), 'hithere', 'array text');
+
+  var sampleArray = [{sampleFrom: 'bank1'}, {sampleFrom: 'bank1'}];
+  ok(_.contains(['ab', 'ba', 'aa', 'bb'], setText(sampleArray, block)), 'sampled array');
+
+  var mixedArray = [{sampleFrom: 'bank1'}, ' is chosen randomly'];
+  ok(_.contains(['a is chosen randomly', 'b is chosen randomly'], setText(mixedArray, block)), 'mixed array');
+});
+
+test("sample resources", function(){
+    Experiment.addElements();
+    var jsonq = {'text': 'hi',
+        id: 'q1',
+        resources: [
+          {source: 'resource1.jpg', mediaType: null, controls: true},
+          {sampleFrom: 'resourcebank', variable: 0}],
+        options: [
+            {text: 'option1', id: 'o1', resources: [{sampleFrom: 'optionresource'}]}]};
+    var block = {
+      id: 'b',
+      pages: [jsonq],
+      banks:
+        {resourcebank: [{source: 'r2.mp3', mediaType: null, controls: false}],
+         optionresource: ['r3.mp3']}};
+
+    var b = new InnerBlock(block, fakeContainer);
+    b.run();
+
+    var image1 = new Image();
+    image1.src = 'resource1.jpg';
+    image1.alt = 'resource1.jpg';
+    ok($('div#resourceDiv img')[0].isEqualNode(image1), 'unsampled resource made correctly');
+
+    var audio1 = new Audio();
+    audio1.src = 'r2.mp3';
+    audio1.controls = false;
+    audio1.autoplay = true; // automatic when controls are off
+    audio1.preload = 'auto';
+    ok($('div#resourceDiv audio')[0].isEqualNode(audio1), 'sampled resource made correctly');
+
+    var audio2 = new Audio();
+    audio2.src = 'r3.mp3';
+    audio2.preload = 'auto';
+    audio2.controls = true;
+    ok($('div.response audio')[0].isEqualNode(audio2), 'sampled resource made correctly');
+
+    cleanUp();
+});
+
+
 test("getRow", function(){
     var prop = {sampleFrom: 'bank1'};
     var propV = {sampleFrom: 'bank1', variable: 1};

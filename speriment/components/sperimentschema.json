@@ -53,17 +53,29 @@
             "type": "string"
         },
 
+        "resource": {
+            "description": "Object with fields describing an image, audio, or video file and how it should behave.",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "source": {"type": "string"},
+                        "mediaType": {"type": ["null", "string"]},
+                        "autoplay": {"type": "boolean"},
+                        "controls": {"type": "boolean"}
+                    },
+                    "required": ["source"]
+                },
+                {"type": "string"},
+                {"$ref": "#/definitions/sampler"}
+            ]
+        },
+
         "resources": {
             "description": "Array of filenames of images, audio, or video to be displayed on the page.",
             "type": "array",
             "items": {
-                "description": "Filename for media. Must include extension. Can also be a sampler.",
-                "oneOf": [
-                    {
-                        "type": "string"
-                    },
-                    {"$ref": "#/definitions/sampler"}
-                ]
+                "$ref": "#/definitions/resource"
             }
         },
 
@@ -74,8 +86,13 @@
                 "sampleFrom": {
                     "description": "Name of the bank to sample the property from.",
                     "type": "string"
-                }
+                },
+                "variable": {"type": "number"},
+                "notVariable": {"type": "number"},
+                "field": {"type": "string"},
+                "withReplacement": {"type": "boolean"}
             },
+            "required": ["sampleFrom"],
             "additionalProperties": false
         },
 

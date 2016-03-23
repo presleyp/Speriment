@@ -1,5 +1,9 @@
 import json, copy
-# more imports at bottom
+from components.component import Component
+from components.run_if import RunIf
+from components.sample_from import SampleFrom
+from components.resource import Resource
+
 __all__ = []
 
 class ExperimentEncoder(json.JSONEncoder):
@@ -16,6 +20,18 @@ class ExperimentEncoder(json.JSONEncoder):
         else:
             return dictionary
 
+    def compile_resources(self, obj):
+        new_obj = copy.deepcopy(obj)
+        for i, resource in enumerate(obj.resources):
+            if type(resource) == str:
+                new_obj.resources[i] = Resource(resource)
+        for i, resource in enumerate(new_obj.resources):
+            if isinstance(resource, Resource):
+                resource.mediaType = resource.media_type
+                del resource.media_type
+                new_obj.resources[i] = resource.__dict__
+        return new_obj
+
     def compile_treatments(self, obj):
         '''Treatments are lists of lists of blocks to run conditionally. Remove
         this variable and add RunIf objects to those blocks.'''
@@ -25,22 +41,12 @@ class ExperimentEncoder(json.JSONEncoder):
         del obj.treatments
         return obj
 
-    def map_variables(self, obj):
-        new_obj = copy.deepcopy(obj)
-        mapping = SampleFrom._variable_maps[new_obj.bank]
-        if hasattr(new_obj, 'variable'):
-            new_obj.variable = int(mapping[new_obj.variable])
-        elif hasattr(new_obj, 'not_variable'):
-            new_obj.not_variable = int(mapping[new_obj.not_variable])
-        else:
-            if not hasattr(new_obj, 'with_replacement'):
-                new_obj._set_variable()
-        return new_obj
-
     def default(self, obj):
         if isinstance(obj, Component):
             if hasattr(obj, 'treatments'):
                 obj = self.compile_treatments(obj)
+            if hasattr(obj, 'resources'):
+                obj = self.compile_resources(obj)
             obj._validate()
             # make keys follow JS conventions
             renamed_ls = self.rename_key(obj.__dict__, 'latin_square', 'latinSquare')
@@ -52,12 +58,10 @@ class ExperimentEncoder(json.JSONEncoder):
             renamed_page = self.rename_key(renamed_option, 'page_id', 'pageID')
             return renamed_page
         if isinstance(obj, SampleFrom):
-            obj = self.map_variables(obj)
+            obj = obj.map_variables()
             obj._validate()
             renamed_sf = self.rename_key(obj.__dict__, 'bank', 'sampleFrom')
             renamed_nv = self.rename_key(renamed_sf, 'not_variable', 'notVariable')
             return renamed_nv
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
-
-from components import Component, RunIf, SampleFrom

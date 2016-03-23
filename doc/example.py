@@ -4,6 +4,7 @@ from speriment import *
 # complicated enough that you would have clashing variable names in your
 # namespace. But, you can always do "import speriment" and use names like
 # speriment.Block instead of Block.
+import glob
 
 ##### IDs #######
 
@@ -68,7 +69,7 @@ with make_experiment(IDGenerator()):
     # the animal question in block1
     animal_question = pages1[0]
     cat_condition = RunIf(page = animal_question, option = animal_question.options[0])
-    conditional_block = Block(pages = pages2, run_if = cat_condition)
+    conditional_block = Block(pages = [Page("Cat lovers rule")], run_if = cat_condition)
 
     ###### Make a Latin Square (groups, latin_square) #####
 
@@ -157,6 +158,36 @@ with make_experiment(IDGenerator()):
     # of it is not the same as the original. If it doesn't show, then
     # conditional_block will not show either.
 
+
+    ####### Add images, audio, and video #######
+
+    # To put images, audio, or video on a page, first put the files somewhere in your "static"
+    # directory. You'll refer to the files relative to the top level of your project directory,
+    # so their filename will start with "static/". Here are two ways to get them into your script:
+
+    # Assuming you have an image for each Option1 entry (cat and red) in static/images,
+    # you can get their filenames like this:
+    images = ['static/images/' + row[1] + '.jpg'
+              for row in items1]
+
+    # Get the filenames of all mp3 files you put in static/audio:
+    audio = glob.glob('static/audio/*.mp3')
+
+    # Once you have the filenames, add resources to a Page or Option.
+    image_page = Page(
+            'Each option has a resource associated with it.',
+            options = [
+                Option('a', resources = ['static/images/cat.jpg']),
+                Option('b', resources = [images[1]])
+            ]
+        )
+
+    audio_page = Page("What does the cat say?",
+            options = [Option('meow'), Option('woof')],
+            resources = [Resource(audio[0])])
+
+    resource_block = Block(pages = [image_page, audio_page])
+
     ####### Control the order of pages via blocks #######
 
     # That page will occur somewhere in block 4, but we don't know exactly where.
@@ -171,9 +202,12 @@ with make_experiment(IDGenerator()):
     # optional list of Options, Blocks take a list of Pages (or a list of lists of
     # Pages, or a list of Blocks), and Experiments take a list of Blocks.
 
-    experiment = Experiment([block_of_blocks,
-        #block1,
-        latin_square_block, conditional_block, sampling_block,
+    experiment = Experiment([
+        block_of_blocks,
+        latin_square_block,
+        conditional_block,
+        sampling_block,
+        resource_block,
         last_block])
 
     # You can generate the JSON just to look at it, for instance by printing this
