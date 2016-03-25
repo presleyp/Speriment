@@ -228,8 +228,10 @@ test("question display with dropdown", function(){
     var os = _.map(_.range(8), function(i){return {text: i.toString(), id: i.toString()};});
     var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: os}, {});
     q.run();
-    strictEqual($(".response *").length, 9, "did select and its options get appended?");
-    strictEqual($("option").length, 8, "did options get appended?");
+    // extra default option is appended
+    strictEqual($(".response *").length, 10, "did select and its options get appended?");
+    strictEqual($("option").length, 9, "did options get appended?");
+    strictEqual($("#defaultOption").length, 1, 'there should be a blank default option');
     strictEqual($(":button").length, 1, "should be a next button");
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
     strictEqual($("option:selected").length, 0);
@@ -242,6 +244,7 @@ test("question display with dropdown", function(){
     strictEqual($(":button").prop("disabled"), false, "next button should be enabled");
     strictEqual(q.options[0].selected(), true, "does option know it's selected?");
     strictEqual(q.options[1].selected(), false, "does option know it's not selected?");
+    strictEqual($("#defaultOption").prop("disabled"), true, "default option should be disabled now");
 
     $("option[id='"+id1+"']").prop("selected", false);
     $("option[id='"+id1+"']").trigger("change");

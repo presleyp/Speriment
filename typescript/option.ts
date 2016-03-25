@@ -191,7 +191,9 @@ class DropDownOption extends ResponseOption{
             var optionParts = _.map(resources, this.wrapResource).concat([this.element]);
             $(OPTIONS).append(this.wrapOption(optionParts));
             var defaultOption = document.createElement("option");
+            $(defaultOption).attr("id", "defaultOption");
             $(this.element).append(defaultOption);
+            $(this.element).change((e: Event) => {$("#defaultOption").prop({disabled: true})});
         }
         var option = document.createElement("option");
         $(option).attr("id", this.id);
