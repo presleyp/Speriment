@@ -1,6 +1,6 @@
 {
     "name": "speriment",
-    "version": "0.7.0",
+    "version": "0.8.0",
     "description": "Making experiments easier to express",
     "keywords": ["experiment", "Mechanical Turk", "linguistics", "psychology", "social science"],
     "bugs": "issues",
