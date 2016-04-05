@@ -1,7 +1,7 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='speriment',
-      version='0.7.0',
+      version='0.8.2',
       description='Making experiments easier to express',
       url='http://github.com/presleyp/speriment',
       author='Presley Pizzo',
@@ -11,8 +11,8 @@ setup(name='speriment',
           'Programming Language :: Python :: 2.7'
       ],
       keywords=['experiments psychology linguistics'],
-      packages=['speriment'],
-      package_data={'speriment': ['sperimentschema.json']},
+      packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+      package_data={'speriment.components': ['sperimentschema.json']},
       scripts=['bin/speriment-output'],
       install_requires=['jsonschema'],
       include_package_data=True,

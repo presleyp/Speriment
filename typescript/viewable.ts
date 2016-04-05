@@ -6,7 +6,7 @@
 interface Viewable {
     text;
     id: string;
-    resources;
+    resourceNames;
 
     wrapResource(resource: string): HTMLElement;
 }
@@ -32,23 +32,39 @@ function getFeedback(feedback, ident: string, item: Item): Statement{
     }
 }
 
-function makeResource(resource: string): string{ //TODO ogg can also be video, need to disambiguate
+function makeResource(resource, page): any { // TODO Resource enum
     var fileTypeMap = {'jpg': 'img', 'jpeg': 'img', 'png': 'img', 'pdf':
         'img', 'gif': 'img', 'mp3': 'audio', 'wav': 'audio', 'ogg': 'audio', 'mp4':
         'video', 'webm': 'video'};
-    var extension = resource.split('.').pop().toLowerCase();
-    var fileType = fileTypeMap[extension];
-    if (fileType === 'img') {
+    if (!_.has(resource, 'source')){ // if sampled string
+        resource = {source: resource, autoplay: false, controls: true};
+    }
+    if (!resource.mediaType) {
+        var extension = resource.source.split('.').pop().toLowerCase();
+        resource.mediaType = fileTypeMap[extension];
+    }
+    if (resource.mediaType === 'img') {
         var image = new Image();
-        image.src = resource;
-        return '<img src="' + resource + '" alt="' + resource + '">';
+        image.src = resource.source;
+        image.alt = resource.source;
+        return image;
     } else {
-        if (fileType == 'audio') {
-            var audio = new Audio();
-            audio.src = resource;
+        var res = (resource.mediaType == 'audio') ? new Audio() : document.createElement('video');
+        res.src = resource.source;
+        res.preload = 'auto'; // this is default but just in case
+        if (resource.autoplay){
+            res.autoplay = true;
         }
-        var mediaType = extension === 'mp3' ? 'audio/mpeg' : fileType + '/' + extension;
-        return '<' + fileType + ' controls><source src="' + resource + '" type="' + mediaType + '"></' + fileType + '>';
+        if (resource.controls){
+            res.controls = true;
+        } else {
+            res.autoplay = true; // can't play without at least one of controls and autoplay
+        }
+        if (resource.required){
+            page.waitForResource();
+            $(res).on('ended', (e: Event) => {page.ready()});
+        }
+        return res;
     }
 }
 

@@ -13,7 +13,6 @@ class Page implements Viewable, Resettable{
     public block: Block;
     public condition: string;
     public resourceNames: string[];
-    public resources: string[];
     public tags;
     public record: TrialRecord;
     public runIf: RunIf;
@@ -25,7 +24,6 @@ class Page implements Viewable, Resettable{
         this.text = setText(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
         this.resourceNames = _.map(jsonPage.resources, (r) => {return setOrSample(r, this.block)});
-        this.resources = _.map(this.resourceNames, makeResource);
         _.each(jsonPage.tags, (value, key) => {jsonPage.tags[key] = setOrSample(jsonPage.tags[key], this.block)});
         this.runIf = createRunIf(jsonPage.runIf);
         this.tags = jsonPage.tags;
@@ -68,7 +66,6 @@ class Page implements Viewable, Resettable{
         this.disableNext();
         $(OPTIONS).empty();
         $(PAGE).empty().append(this.text);
-        $(RESOURCES).empty().append(_.map(this.resources, this.wrapResource));
         $(CONTINUE).show();
     }
 
@@ -84,6 +81,9 @@ class Page implements Viewable, Resettable{
         this.record = this.record.reset();
     }
 
+    waitForResource(){}
+
+    ready(){}
 }
 
 class Question extends Page{
@@ -131,6 +131,8 @@ class Question extends Page{
         if (this.keyboard){
             _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
         }
+        var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this));
+        $(RESOURCES).empty().append(_.map(resources, this.wrapResource));
         this.record.setStartTime(new Date().getTime());
     }
 
@@ -186,20 +188,38 @@ class Question extends Page{
         this.record.addOptionData(optionOrder, optionTexts, optionResources, optionTags);
     }
 
+    waitForResource(){
+        _.each(this.options, (o) => {o.disable()});
+    }
+
+    ready(){
+        _.each(this.options, (o) => {o.enable()});
+    }
+
 }
 
 class Statement extends Page{
 
     public display(experimentRecord){
         super.display(experimentRecord);
-        this.record.setStartTime(new Date().getTime());
         this.enableNext();
+        var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this));
+        $(RESOURCES).empty().append(_.map(resources, this.wrapResource));
+        this.record.setStartTime(new Date().getTime());
     }
 
     public advance(experimentRecord){
         this.record.setEndTime(new Date().getTime());
         experimentRecord.addRecord(this.record);
         this.item.run(experimentRecord);
+    }
+
+    waitForResource(){
+        this.disableNext();
+    }
+
+    ready(){
+        this.enableNext();
     }
 
 }

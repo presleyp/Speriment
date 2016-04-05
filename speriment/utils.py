@@ -1,5 +1,6 @@
 import csv, itertools
-from components import Component
+from components.component import Component
+
 __all__ = ['get_rows', 'get_dicts', 'group_by_col', 'IDGenerator', 'make_experiment']
 
 def get_rows(csvfile, sep = ','):
@@ -54,6 +55,9 @@ class IDGenerator:
     def __init__(self, seed = -1):
         '''seed: optional, an integer to start making IDs at.'''
         self.current_id = seed
+
+    def _current(self):
+        return self.current_id
 
     def _next_id(self):
         '''Takes no arguments and returns a string, which is a new unique ID.'''
@@ -134,3 +138,26 @@ def make_exp(filename):
         new_contents = css_divider.join(contents)
     with open(exp_file, 'w') as expw:
         expw.write(new_contents)
+
+def exactly_one(obj, attributes):
+    found = [attribute for attribute in attributes if hasattr(obj, attribute)]
+    if len(found) != 1:
+        raise ValueError, '''{} must have exactly one of the following attributes:
+
+{}
+
+but it has:
+
+{}.'''.format(obj, attributes, found)
+
+def at_most_one(obj, attributes):
+    found = [attribute for attribute in attributes if hasattr(obj, attribute)]
+    print found
+    if len(found) > 1:
+        raise ValueError, '''{} must have at most one of the following attributes:
+
+{}
+
+but it has:
+
+{}.'''.format(obj, attributes, found)

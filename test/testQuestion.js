@@ -29,27 +29,29 @@ test("question initialization", function(){
 });
 
 test("page with sampling", function(){
-    var jsonq = {'text': {'sampleFrom': 'questions', variable: 1},
+    var jsonq = {'text': {sampleFrom: 'questions', variable: 1},
         id: 'q1',
-        condition: {'sampleFrom': 'conds', variable: 2},
-        resources: ['resource1.jpg', {sampleFrom: 'resourcebank', variable: 1}],
+        condition: {sampleFrom: 'conds', variable: 2},
         options: [
-            {text: {sampleFrom: 'optiontext', notVariable: 0}, id: 'o1', resources: [{sampleFrom: 'optionresource'}]},
+            {text: {sampleFrom: 'optiontext', notVariable: 0}, id: 'o1'},
             {text: 'option2', id: 'o2', feedback: {text: {sampleFrom: 'optionfeedback', notVariable: 0}}}]};
-    var block = {'id': 'b', 'banks': {'questions': ['one', 'two'], 'conds': ['a', 'b', 'c'], 'resourcebank': ['r1.mp3', 'r2.mp3'],
-    'optiontext': ['this', 'that'], 'optionfeedback': ['yes', 'no'], optionresource: ['r3.mp3']}};
+    var block = {
+      id: 'b',
+      banks:
+        {questions: ['one', 'two'],
+         conds: ['a', 'b', 'c'],
+         optiontext: ['this', 'that'],
+         optionfeedback: ['yes', 'no'],
+          optionresource: ['r3.mp3']}};
     var q = new Question(jsonq, {block: block});
     // bank shuffling is done at the block level; pages always use variables as indices
     strictEqual(q.text, 'two', 'text is last element of text bank');
     strictEqual(q.condition, 'c', 'condition is last element of condition bank');
-    strictEqual(q.resources[0], '<img src="resource1.jpg" alt="resource1.jpg">', 'unsampled resource made correctly');
-    strictEqual(q.resources[1], '<audio controls><source src="r2.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
     var o1 = q.options[0].id === 'o1' ? q.options[0] : q.options[1];
     var o2 = q.options[0].id == 'o1' ? q.options[1] : q.options[0];
     strictEqual(o1.text, 'that', 'option text sampled correctly');
-    strictEqual(o2.text, 'option2', 'unsampled option text intact');
     strictEqual(o2.feedback.text, 'no', 'option feedback sampled correctly');
-    strictEqual(o1.resources[0], '<audio controls><source src="r3.mp3" type="audio/mpeg"></audio>', 'sampled resource made correctly');
+    strictEqual(o2.text, 'option2', 'unsampled option text intact');
 });
 
 test("checkbox options", function(){
@@ -229,8 +231,10 @@ test("question display with dropdown", function(){
     var os = _.map(_.range(8), function(i){return {text: i.toString(), id: i.toString()};});
     var q = new Question({text: "Do I pass?", id: "q1", exclusive: false, options: os}, fakeItem);
     q.run();
-    strictEqual($(".response *").length, 9, "did select and its options get appended?");
-    strictEqual($("option").length, 8, "did options get appended?");
+    // extra default option is appended
+    strictEqual($(".response *").length, 10, "did select and its options get appended?");
+    strictEqual($("option").length, 9, "did options get appended?");
+    strictEqual($("#defaultOption").length, 1, 'there should be a blank default option');
     strictEqual($(":button").length, 1, "should be a next button");
     strictEqual($(":button").prop("disabled"), true, "next button should be disabled");
     strictEqual($("option:selected").length, 0);
@@ -243,6 +247,7 @@ test("question display with dropdown", function(){
     strictEqual($(":button").prop("disabled"), false, "next button should be enabled");
     strictEqual(q.options[0].selected(), true, "does option know it's selected?");
     strictEqual(q.options[1].selected(), false, "does option know it's not selected?");
+    strictEqual($("#defaultOption").prop("disabled"), true, "default option should be disabled now");
 
     $("option[id='"+id1+"']").prop("selected", false);
     $("option[id='"+id1+"']").trigger("change");

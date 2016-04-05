@@ -5,6 +5,7 @@
 # namespace. But, you can always do "import speriment" and use names like
 # speriment.Block instead of Block.
 from speriment import *
+import glob
 
 
 ####### Read in your materials #######
@@ -110,9 +111,66 @@ with make_experiment(IDGenerator()):
     # are ordered randomly within their Item, Items are ordered randomly within their Block,
     # and Blocks are kept in the order that you put them in the Experiment.
 
+    block1 = Block(pages = pages1)
+
+    ####### Copy and tweak components without messing up IDs ######
+
+    # Now I want to make another block just like block 1, and then just tweak it
+    # a little bit.
+    # The "new" method ensures they get separate IDs, which can be important for how
+    # the experiment runs. Do this whenever you copy an option, page, or block
+    # if you're using the "with" statement to make your IDs.
+
+    copied_block = block1.new()
+
+    # I just want block4 to have one more page. This page doesn't have options,
+    # which is fine; it'll just show some text.
+
+    copied_block.pages.append(Page('This is an extra page.'))
+
+    ####### Add images, audio, and video #######
+
+    # To put images, audio, or video on a page, first put the files somewhere in your "static"
+    # directory. You'll refer to the files relative to the top level of your project directory,
+    # so their filename will start with "static/". Here are two ways to get them into your script:
+
+    # Assuming you have an image for each Option1 entry (cat and red) in static/images,
+    # you can get their filenames like this:
+    images = ['static/images/' + row[1] + '.jpg'
+              for row in items1]
+
+    # Or, you can get the filenames from your directory, like all the mp3 files you put in static/audio:
+    audio = glob.glob('static/audio/*.mp3')
+
+    # Once you have the filenames, add resources to a Page or Option.
+    image_page = Page(
+            'Each option has a resource associated with it.',
+            options = [
+                Option('a', resources = ['static/images/cat.jpg']),
+                Option('b', resources = [images[1]])
+            ]
+        )
+
+    # resources can be put into Resource objects if you want to give them extra options.
+    # This one will play automatically when its page displays, not show controls so that
+    # participants can't fast forward through it, and require participants to let it finish
+    # before they can choose an option and advance.
+    audio_page = Page("What does the cat say?",
+            options = [Option('meow'), Option('woof')],
+            resources = [Resource(audio[0], autoplay = True, controls = False, required = True)])
+
+    resource_block = Block(items = Item([image_page, audio_page]))
+
+    # Blocks can contain other blocks.
+
     block1 = Block(items = [instructions])
     block2 = Block(items = items1)
-    block3 = Block(items = items2 + [item3, item4])
+    block3 = Block(
+            blocks = [
+                Block(items = items2 + [item3, item4]),
+                resource_block
+            ]
+        )
 
     ###### Make an Experiment ######
 

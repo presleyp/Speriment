@@ -120,3 +120,24 @@ def test_auto_option():
         e = Experiment(blocks = [Block(items = [Item([p])])])
         ejson = json.loads(e.to_JSON())
         assert len(ejson['blocks'][0]['items'][0]['pages'][0]['options']) == 1
+
+def test_compile_resources():
+    with make_experiment(IDGenerator()):
+        p1 = Page('hi',
+                resources = [
+                    'cats.jpg',
+                    Resource('dogs.ogg', media_type = 'video', autoplay = True, controls = False, required = True),
+                    'elephants.mp4',
+                    SampleFrom('animals')])
+        exp = Experiment(
+                blocks = [
+                    Block(
+                        items = Item([p1]),
+                        banks = {'animals': ['giraffe.jpg']})])
+        json_exp = exp.to_JSON()
+        compiled_exp = json.loads(json_exp)
+        resources = compiled_exp['blocks'][0]['items'][0]['pages'][0]['resources']
+        assert resources[0] == {u'source': u'cats.jpg', u'mediaType': None, u'controls': True, u'autoplay': False, u'required': False}
+        assert resources[1] == {u'source': u'dogs.ogg', u'mediaType': u'video', u'controls': False, u'autoplay': True, u'required': True}
+        assert resources[2] == {u'source': u'elephants.mp4', u'mediaType': None, u'controls': True, u'autoplay': False, u'required': False}
+        assert resources[3] == {u'sampleFrom': u'animals', u'variable': 0}
