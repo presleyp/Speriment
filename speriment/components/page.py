@@ -1,4 +1,5 @@
 from component import Component
+from option import Option
 
 class Page(Component):
     def __init__(self, text, options = None, id_str = None, **kwargs):
@@ -61,16 +62,22 @@ class Page(Component):
 
     def _validate_freetext(self):
         if hasattr(self, 'freetext') and self.freetext == True:
-            if len(self.options) > 1:
-                raise ValueError, '''If freetext is true, the page has a text box
-                as its option, so there shouldn't be more than one option.'''
-            if hasattr(self.options[0], 'correct') and self.options[0].correct in [True, False]:
-                raise ValueError, '''A text box option should have a regular
-                expression rather than a boolean as its "correct" attribute.'''
-            if hasattr(self, 'correct') and self.correct in [True, False]:
-                raise ValueError, '''A text box option should have a regular
-                expression rather than a boolean as its "correct" attribute.'''
-       #TODO reverse is true
+            if hasattr(self, 'options'):
+                if len(self.options) > 1:
+                    raise ValueError, '''If freetext is true, the page has a text box
+                    as its option, so there shouldn't be more than one option.'''
+                if hasattr(self.options[0], 'correct') and self.options[0].correct in [True, False]:
+                    raise ValueError, '''A text box option should have a regular
+                    expression rather than a boolean as its "correct" attribute.'''
+            if hasattr(self, 'correct'):
+                if self.correct in [True, False]:
+                    raise ValueError, '''A text box option should have a regular
+                    expression rather than a boolean as its "correct" attribute.'''
+        else:
+            if hasattr(self, 'correct'):
+                if self.correct not in [True, False]:
+                    raise ValueError, '''A non-text option should have a boolean as its
+                    "correct" attribute.'''
 
     def _validate_multiple_choice(self):
         if hasattr(self, 'options'):
@@ -94,7 +101,6 @@ class Page(Component):
                 if len(self.options) != 2:
                     raise ValueError, '''Default keybindings only compatible with
                     pages with two options.'''
-
 
     def _validate(self):
         self._validate_resources()

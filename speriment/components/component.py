@@ -1,6 +1,7 @@
 import copy
+from resource import Resource
 
-class Component:
+class Component(object):
     '''This is the superclass of Option, Page, Block, and Experiment. You should
     not instantiate this class.'''
 
@@ -40,9 +41,29 @@ class Component:
         for (key, value) in kwargs.iteritems():
             setattr(self, key, value)
 
+    def validate_banks(self):
+        if hasattr(self, 'banks'):
+            for bank in self.banks:
+                types = [type(bank_item) for bank_item in bank]
+                if len(set(types)) > 1:
+                    raise ValueError, '''Bank must be homogeneous.'''
+                if len(bank) == 0:
+                    raise ValueError, '''Bank is empty.'''
+                elif type(bank[0]) == dict:
+                    first_keys = bank[0].keys
+                    bank_keys = [bank_item.keys for bank_item in bank]
+                    if set(bank_keys) != set(first_keys):
+                        raise ValueError, '''All items in bank must have the same fields.'''
+
     def _validate(self):
         '''To be defined for each subtype.'''
         pass
+
+    def compile_resources(self):
+        if hasattr(self, 'resources'):
+            for i, resource in enumerate(self.resources):
+                if type(resource) == str:
+                    self.resources[i] = Resource(resource)
 
     def comp(self):
         if hasattr(self, 'id_str'):
@@ -51,4 +72,5 @@ class Component:
         if hasattr(self, 'run_if'):
             self.runIf = self.run_if
             del self.run_if
+        self.compile_resources()
         return self

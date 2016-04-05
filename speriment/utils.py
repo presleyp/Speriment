@@ -152,7 +152,6 @@ but it has:
 
 def at_most_one(obj, attributes):
     found = [attribute for attribute in attributes if hasattr(obj, attribute)]
-    print found
     if len(found) > 1:
         raise ValueError, '''{} must have at most one of the following attributes:
 

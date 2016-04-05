@@ -1,3 +1,5 @@
+from speriment.utils import exactly_one
+
 class RunIf:
     def __init__(self, item = None, page = None, option = None, regex = None, permutation =
             None):

@@ -1,4 +1,4 @@
-from speriment.utils import IDGenerator
+from speriment.utils import IDGenerator, at_most_one
 import copy
 
 class SampleFrom:
@@ -56,13 +56,12 @@ class SampleFrom:
             self.variable = variable
             if not variable in SampleFrom._variable_maps[bank]:
                 SampleFrom._variable_maps[bank][variable] = SampleFrom._id_generators[bank]._next_id()
-        elif not_variable != None:
+        if not_variable != None:
             self.not_variable = not_variable
             if not not_variable in SampleFrom._variable_maps[bank]:
                 SampleFrom._variable_maps[bank][not_variable] = SampleFrom._id_generators[bank]._next_id()
-        else:
-            if with_replacement:
-                self.with_replacement = with_replacement
+        if with_replacement:
+            self.with_replacement = with_replacement
         if field != None:
             self.field = field
 

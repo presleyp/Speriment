@@ -132,7 +132,7 @@ def test_compile_resources():
         exp = Experiment(
                 blocks = [
                     Block(
-                        items = Item([p1]),
+                        items = [Item([p1])],
                         banks = {'animals': ['giraffe.jpg']})])
         json_exp = exp.to_JSON()
         compiled_exp = json.loads(json_exp)
