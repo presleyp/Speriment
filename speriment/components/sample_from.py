@@ -66,16 +66,14 @@ class SampleFrom:
             self.field = field
 
     def map_variables(self):
-        new_obj = copy.deepcopy(self)
-        mapping = SampleFrom._variable_maps[new_obj.bank]
-        if hasattr(new_obj, 'variable'):
-            new_obj.variable = int(mapping[new_obj.variable])
-        elif hasattr(new_obj, 'not_variable'):
-            new_obj.not_variable = int(mapping[new_obj.not_variable])
+        mapping = SampleFrom._variable_maps[self.bank]
+        if hasattr(self, 'variable'):
+            self.variable = int(mapping[self.variable])
+        elif hasattr(self, 'not_variable'):
+            self.not_variable = int(mapping[self.not_variable])
         else:
-            if not hasattr(new_obj, 'with_replacement'):
-                new_obj.variable = int(SampleFrom._compile_time_generators[new_obj.bank]._next_id())
-        return new_obj
+            if not hasattr(self, 'with_replacement'):
+                self.variable = int(SampleFrom._compile_time_generators[self.bank]._next_id())
 
     def _validate(self):
         at_most_one(self, ['variable', 'not_variable', 'with_replacement'])

@@ -10,8 +10,7 @@ class ExperimentEncoder(json.JSONEncoder):
         obj._validate()
         new_obj = copy.deepcopy(obj)
         try:
-            new_obj.comp()
-            return new_obj.__dict__
+            return new_obj.comp().__dict__
         except:
             # Let the base class default method raise the TypeError
             return json.JSONEncoder.default(self, new_obj.__dict__)
