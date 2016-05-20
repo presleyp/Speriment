@@ -1,15 +1,12 @@
 /// <reference path="experiment.ts"/>
 /// <reference path="container.ts"/>
 /// <reference path="page.ts"/>
+/// <reference path="item.ts"/>
 /// <reference path="option.ts"/>
 /// <reference path="runif.ts"/>
+/// <reference path="resettable.ts"/>
 /// <reference path="../typings/jquery/jquery.d.ts" />
 /// <reference path="../typings/underscore/underscore.d.ts" />
-
-interface Resettable{
-    reset(): void;
-    run(experimentRecord: ExperimentRecord): void;
-}
 
 class Block implements Resettable{
     id: string;
@@ -30,20 +27,7 @@ class Block implements Resettable{
 
     constructor(jsonBlock, public container: Container){
         jsonBlock = _.defaults(jsonBlock, {runIf: null, banks: {}, criterion: null, cutoff: 1});
-        this.runIf = jsonBlock.runIf;
-        if (jsonBlock.runIf){
-            if (_.has(jsonBlock.runIf, 'optionID')){
-                this.runIf = new RunIfSelected(jsonBlock.runIf.pageID, jsonBlock.runIf.optionID);
-            } else if (_.has(jsonBlock.runIf, 'regex')){
-                this.runIf = new RunIfMatched(jsonBlock.runIf.pageID, jsonBlock.runIf.regex);
-            } else if (_.has(jsonBlock.runIf, 'permutation')){
-                this.runIf = new RunIfPermutation(jsonBlock.runIf.permutation);
-            } else {
-                this.runIf = new RunIf();
-            }
-        } else {
-            this.runIf = new RunIf();
-        }
+        this.runIf = createRunIf(jsonBlock.runIf);
         this.id = jsonBlock.id;
         this.criterion = jsonBlock.criterion;
         this.iteration = 1;
@@ -54,26 +38,17 @@ class Block implements Resettable{
     }
 
     run(experimentRecord: ExperimentRecord){
-        if (_.isEmpty(this.contents)){
-            if (this.shouldLoop(experimentRecord)){
-                this.reset();
-                this.runChild(experimentRecord);
-            } else {
-                this.container.run(experimentRecord);
-            }
+        var shouldRun = this.runIf.shouldRun(experimentRecord);
+        var shouldLoop = this.shouldLoop(experimentRecord);
+        var done = _.isEmpty(this.contents);
+        if (!shouldRun || done && !shouldLoop) {
+            this.container.run(experimentRecord);
         } else {
-            if (this.runIf.shouldRun(experimentRecord)){
-                this.runChild(experimentRecord);
-            } else {
-                this.container.run(experimentRecord);
+            if (done) {
+                this.reset();
             }
+            runChild(this.contents, this.oldContents, experimentRecord);
         }
-    }
-
-    runChild(experimentRecord: ExperimentRecord){
-        var nextChild = this.contents.shift();
-        this.oldContents.push(nextChild);
-        nextChild.run(experimentRecord);
     }
 
     // have to meet or exceed criterion to move on; otherwise you repeat this block
@@ -102,10 +77,10 @@ class Block implements Resettable{
     }
 
     reset(){
-        this.contents = this.oldContents;
-        this.oldContents = [];
         this.iteration += 1;
-        _.each(this.contents, (c) => {c.reset()});
+        var newContents = resetContents(this.contents, this.oldContents);
+        this.contents = newContents.contents;
+        this.oldContents = newContents.oldContents;
     }
 
 }
@@ -131,9 +106,9 @@ class OuterBlock extends Block implements Container{
 
 }
 
-// an InnerBlock can only contain Pages or groups of Pages
+// an InnerBlock contains Items, pages which will be wrapped in Items, or groups of Items
 class InnerBlock extends Block{
-    contents: Page[];
+    contents: Item[];
     private latinSquare: boolean;
     private pseudorandom: boolean;
 
@@ -143,100 +118,103 @@ class InnerBlock extends Block{
         this.latinSquare = jsonBlock.latinSquare;
         this.pseudorandom = jsonBlock.pseudorandom;
         if (jsonBlock.groups){
-            this.contents = this.choosePages(jsonBlock.groups, container.version);
-        } else {
-            this.contents = this.makePages(jsonBlock.pages);
+            this.contents = this.chooseItems(jsonBlock.groups, container.version);
+        } else if (jsonBlock.items) {
+            this.contents = this.makeItems(jsonBlock.items);
+        } else { //TODO inelegant solution
+            this.contents = this.makeItems(jsonBlock.pages);
         }
-        this.orderPages();
+        this.orderItems();
     }
 
     reset(){
         super.reset();
-        this.orderPages();
+        this.orderItems();
     }
 
-    private makePages(jsonPages): Page[] {
-        var pages = _.map<any,Page>(jsonPages, (p)=>{
-            if (p.options){
-                return new Question(p, this);
+    private chooseItems(groups, version): Item[] {
+        var chosen = this.latinSquare ? this.chooseLatinSquare(groups, version) : this.chooseRandom(groups);
+        return this.makeItems(chosen);
+    }
+
+    // If block or groups contains unwrapped pages, wrap them each in an Item
+    private makeItems(jsonItems): Item[] {
+        var items = _.map<any,Item>(jsonItems, (x) => {
+            if (_.has(x, 'text') || _.has(x, 'options')){
+                return new Item({pages: [x]}, this);
             } else {
-                return new Statement(p, this);
+                return new Item(x, this);
             }
         });
-        return pages;
+        return items;
     }
 
-    private choosePages(groups, version): Page[] {
-        var pages = this.latinSquare ? this.chooseLatinSquare(groups, version) : this.chooseRandom(groups);
-        return this.makePages(pages);
-    }
-
-    private orderPages(): void{
+    private orderItems(): void{
         if (this.pseudorandom){
             this.pseudorandomize();
         } else {
-            this.contents = _.shuffle<Page>(this.contents);
+            this.contents = _.shuffle<Item>(this.contents);
         }
     }
 
     private chooseLatinSquare(groups, version): any[]{
         var numConditions = groups[0].length;
         var lengths = _.pluck(groups, "length");
-        var pages = [];
+        var items = [];
         if (_.every(lengths, (l:number):boolean => {return l === lengths[0]})){
             for (var i = 0; i < groups.length; i++){
                 var cond = (i + version) % numConditions;
-                pages.push(groups[i][cond]);
+                items.push(groups[i][cond]);
             }
         } else {
             throw "Can't do Latin Square on groups of uneven sizes.";
         }
-        return pages;
+        return items;
     }
 
     private chooseRandom(groups): any[]{
-        var pages = _.map(groups, (g)=>{return _.sample(g)});
-        return pages;
+        var items = _.map(groups, (g)=>{return _.sample(g)});
+        return items;
     }
 
-    private swapInto(nextP: Page, pages: Page[]): Page[]{
-        var conds = _.pluck(pages, 'condition');
-        var cond = nextP.condition;
-        var swappable = _.map(_.range(pages.length), (i):boolean =>{
+    private swapInto(nextItem: Item, items: Item[]): Item[]{
+        var conds = _.pluck(items, 'condition');
+        var cond = nextItem.condition;
+        var swappable = _.map(_.range(items.length), (i):boolean =>{
             var firstIndex = (i === 0) ? 0 : i-1;
             return _.isEmpty(_.intersection(conds.slice(firstIndex, i+2), [cond]));
         });
         var swapTo = _.indexOf(swappable, true);
         if (swapTo > -1){
-            pages.push(pages[swapTo]);
-            pages[swapTo] = nextP;
-            return pages;
+            items.push(items[swapTo]);
+            items[swapTo] = nextItem;
+            return items;
         } else {
             throw "Pseudorandomization may not work if there are not an equal number of all conditions.";
         }
     }
 
     private pseudorandomize(): void{
-        if (_.any(this.contents, (page: Page) => {return _.isUndefined(page.condition);})){
+        if (_.any(this.contents, (item: Item) => {return _.isUndefined(item.condition);})){
             throw "Can't pseudorandomize if not all pages have a condition.";
         }
-        var pages: Page[] = [];
-        var remaining: Page[] = _.shuffle<Page>(this.contents);
-        pages.push(remaining.shift());
+        var items: Item[] = [];
+        var remaining: Item[] = _.shuffle<Item>(this.contents);
+        items.push(remaining.shift());
         _.each(_.range(remaining.length), (i) => {
             var conds = _.pluck(remaining, 'condition');
-            var cond = _.last(pages).condition;
+            var cond = _.last(items).condition;
             var addable = _.map(conds, (c)=>{
                 return c != cond;
             });
             var addFrom = _.indexOf(addable, true);
             if (addFrom > -1){
-                pages.push(remaining.splice(addFrom, 1)[0]);
+                items.push(remaining.splice(addFrom, 1)[0]);
             } else {
-                var nextP: Page = remaining.shift();
-                pages = this.swapInto(nextP, pages);
+                var nextItem: Item = remaining.shift();
+                items = this.swapInto(nextItem, items);
             }
         });
-        this.contents = pages;
+        this.contents = items;
     }
 }

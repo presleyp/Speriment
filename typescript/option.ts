@@ -14,20 +14,28 @@ class ResponseOption implements Viewable, Resettable{
     public tags;
     public resourceNames: string[];
     public resources: string[];
+    public runIf: RunIf;
     public element;
 
     constructor(jsonOption, public question: Question){
         jsonOption = _.defaults(jsonOption, {feedback: null, correct: null, tags: [], text: null, resources: null});
         this.id = jsonOption.id;
         this.text = setText(jsonOption.text, this.question.block);
-        this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.block);
+        this.feedback = getFeedback(jsonOption.feedback, this.id, this.question.item);
         this.resourceNames = _.map(jsonOption.resources, (r) => {return setOrSample(r, this.question.block)});
         this.correct = jsonOption.correct; // has to be specified as false in the input for radio/check/dropdown if it should count as wrong
         _.each(jsonOption.tags, (value, key) => {jsonOption.tags[key] = setOrSample(jsonOption.tags[key], this.question.block)});
+        this.runIf = createRunIf(jsonOption.runIf);
         this.tags = jsonOption.tags;
     }
 
-    public run(){}
+    public run(experimentRecord: ExperimentRecord){
+        if (this.runIf.shouldRun(experimentRecord)){
+            this.display();
+        }
+    }
+
+    public display(){}
 
     public getResponse(){
         return [this.id, this.text];
@@ -91,7 +99,7 @@ class ResponseOption implements Viewable, Resettable{
 }
 
 class RadioOption extends ResponseOption{
-    run(){
+    display(){
         var label = document.createElement("label");
         $(label).attr("for", this.id);
         $(label).append(this.text);
@@ -108,7 +116,7 @@ class RadioOption extends ResponseOption{
 }
 
 class CheckOption extends ResponseOption{
-    run(){
+    display(){
         var label = document.createElement("label");
         $(label).attr("for", this.id);
         $(label).append(this.text);
@@ -134,7 +142,7 @@ class TextOption extends ResponseOption{
         }
     }
 
-    run(){
+    display(){
         this.element = document.createElement("input");
         $(this.element).attr({type: "text", id: this.id, name: this.question.id});
         var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this.question));
@@ -179,7 +187,7 @@ class DropDownOption extends ResponseOption{
         this.exclusive = exclusive;
     }
 
-    run(){//TODO changed OPTION+" select" to select, check if it broke
+    display(){//TODO changed OPTION+" select" to select, check if it broke
         //if select element exists, append to it, otherwise create it first
         if ($("select").length === 0){
             this.element = document.createElement("select");

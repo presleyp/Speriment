@@ -10,23 +10,29 @@ class Page implements Viewable, Resettable{
     public static SPACEKEY = 32;
     public text: string;
     public id: string;
+    public block: Block;
     public condition: string;
     public resourceNames: string[];
     public tags;
     public record: TrialRecord;
+    public runIf: RunIf;
 
-    constructor(jsonPage, public block){
+    constructor(jsonPage, public item){
         jsonPage = _.defaults(jsonPage, {condition: null, resources: null, tags: []});
+        this.block = this.item.block;
         this.id = jsonPage.id;
         this.text = setText(jsonPage.text, this.block);
         this.condition = setOrSample(jsonPage.condition, this.block);
         this.resourceNames = _.map(jsonPage.resources, (r) => {return setOrSample(r, this.block)});
         _.each(jsonPage.tags, (value, key) => {jsonPage.tags[key] = setOrSample(jsonPage.tags[key], this.block)});
+        this.runIf = createRunIf(jsonPage.runIf);
         this.tags = jsonPage.tags;
         this.record = new TrialRecord(
                 this.id,
                 this.text,
                 this.condition,
+                this.item.id,
+                this.item.tags,
                 this.block.containerIDs,
                 this.tags,
                 this.resourceNames);
@@ -49,7 +55,7 @@ class Page implements Viewable, Resettable{
         return wrapper;
     }
 
-    public run(experimentRecord){
+    public display(experimentRecord){
         $(CONTINUE).off('click').click((m:MouseEvent) => {this.advance(experimentRecord)});
         $(document).off('keypress').keypress((k:KeyboardEvent) => {
             if (k.which === Page.SPACEKEY && !$(CONTINUE).prop('disabled')){
@@ -61,6 +67,14 @@ class Page implements Viewable, Resettable{
         $(OPTIONS).empty();
         $(PAGE).empty().append(this.text);
         $(CONTINUE).show();
+    }
+
+    public run(experimentRecord){
+        if (this.runIf.shouldRun(experimentRecord)){
+            this.display(experimentRecord);
+        } else {
+            this.item.run(experimentRecord);
+        }
     }
 
     reset(){
@@ -96,7 +110,7 @@ class Question extends Page{
             }
         }
         this.keyboard = jQuestion.keyboard;
-        this.feedback = getFeedback(jQuestion.feedback, this.id, block);
+        this.feedback = getFeedback(jQuestion.feedback, this.id, this.item);
         this.options = _.map(jQuestion.options, (o):ResponseOption => {
             if (jQuestion.options.length > Page.dropdownThreshold){
                 return new DropDownOption(o, this, this.exclusive);
@@ -111,9 +125,9 @@ class Question extends Page{
         this.orderOptions();
     }
 
-    public run(experimentRecord): void{
-        super.run(experimentRecord);
-        _.each(this.options, (o:ResponseOption):void => {o.run()});
+    public display(experimentRecord): void{
+        super.display(experimentRecord);
+        _.each(this.options, (o:ResponseOption):void => {o.run(experimentRecord)});
         if (this.keyboard){
             _.each(this.options, (o, i) => {o.useKey(this.keyboard[i].charCodeAt(0))});
         }
@@ -135,7 +149,7 @@ class Question extends Page{
         } else if (this.feedback){
             this.feedback.run(experimentRecord);
         } else {
-            this.block.run(experimentRecord);
+            this.item.run(experimentRecord);
         }
     }
 
@@ -186,8 +200,8 @@ class Question extends Page{
 
 class Statement extends Page{
 
-    public run(experimentRecord){
-        super.run(experimentRecord);
+    public display(experimentRecord){
+        super.display(experimentRecord);
         this.enableNext();
         var resources = _.map(this.resourceNames, (rn) => makeResource(rn, this));
         $(RESOURCES).empty().append(_.map(resources, this.wrapResource));
@@ -197,7 +211,7 @@ class Statement extends Page{
     public advance(experimentRecord){
         this.record.setEndTime(new Date().getTime());
         experimentRecord.addRecord(this.record);
-        this.block.run(experimentRecord);
+        this.item.run(experimentRecord);
     }
 
     waitForResource(){

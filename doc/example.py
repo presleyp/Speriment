@@ -1,118 +1,125 @@
 ##### Import the module ######
-from speriment import *
+
 # import * is generally bad practice, but Speriment scripts are unlikely to get
 # complicated enough that you would have clashing variable names in your
 # namespace. But, you can always do "import speriment" and use names like
 # speriment.Block instead of Block.
+from speriment import *
 import glob
+
+
+####### Read in your materials #######
+
+# Imagine you have two csv files, items1.csv, which looks like this:
+
+# What is your favorite animal?,cat,dog,animate
+# What is your favorite color?,red,blue,inanimate
+
+# and items2.csv, which has a header row, and is tab-delimited:
+
+# Question,Option1,Option2,Condition
+# What is your favorite celebrity?,Jennifer Lawrence,Beyonce,animate
+# What is your favorite car?,VW bug,Ferrari,inanimate
+
+# get_rows is best for files without header rows
+# it stores each row as a list
+materials1 = get_rows('items1.csv')
+
+# get_dicts is best for files with header rows
+# it stores each row as a dictionary with the column headers as keys
+# both get_rows and get_dicts have a sep argument, for separator,
+# which is passed to the csv package as the delimiter
+materials2 = get_dicts('items2.csv', sep = '\t')
+
 
 ##### IDs #######
 
-# Every option, page, and block of your experiment needs an ID. There are two ways to get
+# Every option, page, item, and block of your experiment needs an ID. There are two ways to get
 # them:
 # 1. Use this "with" statement to generate them magically, and indent ALL
 # of your code about this experiment after this statement. Only unindent
-# if you start writing code for a separate experiment.
-# 2. Put IDs in your spreadsheets and read them  and pass them in as arguments just like you
-# pass in other information, like: page1 = Page('hello', ID = row[0])
+# if you start writing code for a separate experiment. Then, if you want
+# to reuse a component you've already defined, make a copy with a new ID
+# by calling its `new` method:
+# item = Item(...)
+# reused_item = item.new()
+# 2. Put IDs in your spreadsheets and read them and pass them in as arguments just like you
+# pass in other information, like: item1 = Item('hello', ID = row[0])
 with make_experiment(IDGenerator()):
-
-    ####### Read in your materials #######
-
-    # Imagine you have two csv files, items1.csv, which looks like this:
-
-    # What is your favorite animal?,cat,dog,animate-condition
-    # What is your favorite color?,red,blue,inanimate-condition
-
-    # and items2.csv, which has a header row:
-
-    # Question,Option1,Option2,Condition
-    # What is your favorite celebrity?,Jennifer Lawrence,Jennifer Lawrence,animate-condition
-    # What is your favorite car?,VW bug,Ferrari,inanimate-condition
-
-    # This is how to read in items1.csv
-    items1 = get_rows('items1.csv')
-
-    # This is how to read in items2.csv
-    items2 = get_dicts('items2.csv')
 
     ###### Create experiment components. #####
 
-    # You can use a loop or list comprehension to make pages from your items.
+    # Items are the semantic units of experiments - the statements and questions -
+    # and Pages are the visual units.
+    # Some Items only need to display one Page, and that Page only needs to display text.
+    # As a shorthand, you can just pass the text directly to the Item.
+    instructions = Item('Welcome to the experiment!')
 
-    # after using get_rows, access cells with indices, starting from 0
-    # keyboard = True means disable the mouse and use the default keybindings, f
-    # for the left option and j for the right option
-    # spacebar is always available to move to the next question
-    pages1 = [Page(
-                   row[0],
-                   options = [Option(row[1]), Option(row[2])],
+    # You can use a loop or list comprehension to construct your items.
+
+    # The default kind of Option is a multiple choice radio button. Only one radio button
+    # can be selected at once. To allow multiple to be selected, give the Item the argument
+    # exclusive = False
+    # To make a text box instead of a multiple choice Option, give the Item the argument
+    # freetext = True
+
+    items1 = [Item(
+                   Page(
+                       row[0], # after using get_rows, access cells with indices, starting from 0
+                       options = [Option(row[1]), Option(row[2])],
+                   ),
                    condition = row[3],
-                   keyboard = True
-                   ) for row in items1]
+               ) for row in materials1]
 
-    # after using get_dicts, access cells with column names
-    pages2 = [Page(
-                   row['Question'],
-                   options = [Option(row['Option1']), Option(row['Option2'])],
+    items2 = [Item(
+                   Page(
+                       row['Question'], # after using get_dicts, access cells with column names
+                       options = [Option(row['Option1']), Option(row['Option2'])],
+                       exclusive = False,
+                   ),
                    condition = row['Condition']
-                   ) for row in items2]
+               ) for row in materials2]
+
+    # An example using a text box option
+    item3 = Item(Page('Any thoughts?', freetext = True))
+
+    # To put images, audio, or video on a page, first put the files somewhere in your "static"
+    # directory. You'll refer to the files relative to the top level of your project directory,
+    # so their filename will start with "static/". Here are two ways to get them into your script:
+
+    # Assuming you have an image for each Option1 entry (cat and red) in static/images,
+    # you can get their filenames like this:
+    images = ['static/images/' + row['Option1'] + '.jpg'
+              for row in materials2]
+
+    # Get the filenames of all mp3 files you put in static/audio:
+    audio = glob.glob('static/audio/*.mp3')
+
+    # Once you have the filenames, add resources to a Page or Option.
+    item4 = Item(
+        Page(
+            'Each option has a resource associated with it.',
+            options = [
+                Option('a', resources = ['static/images/cats.jpg']),
+                Option('b', resources = [images[0]])
+            ]
+        )
+    )
 
     # Then make blocks. In this example I make one block for each of the lists of
-    # pages we've created.
+    # items we've created. Blocks create ordering in the experiment. By default, Options
+    # are ordered randomly within their Item, Items are ordered randomly within their Block,
+    # and Blocks are kept in the order that you put them in the Experiment.
 
     block1 = Block(pages = pages1)
 
-    ###### Make blocks run conditionally (RunIf) #######
-
-    # I'll make the second block run only for those participants who answer "cat" to
-    # the animal question in block1
-    animal_question = pages1[0]
-    cat_condition = RunIf(page = animal_question, option = animal_question.options[0])
-    conditional_block = Block(pages = [Page("Cat lovers rule")], run_if = cat_condition)
-
-    ###### Make a Latin Square (groups, latin_square) #####
-
-    # Normally blocks have pages. Latin square blocks have groups, which are
-    # lists of pages.
-
-    page_1a = Page("1A")
-    page_1b = Page("1B")
-    page_2a = Page("2A")
-    page_2b = Page("2B")
-
-    latin_square_block = Block(groups = [[page_1a, page_1b], [page_2a,
-        page_2b]], latin_square = True)
-
-    # Now, half your participants will see page_1a and page_2b, and half will
-    # see page_1b and page_2a. The order of the pages will be shuffled as usual.
-
-    # If you use groups and latin_square is False, pages will be chosen from
-    # them randomly rather than according to a Latin Square.
-
-    ###### Create components differently across participants (SampleFrom) ######
-
-    # Let's make a block where the texts of pages are combined with the other
-    # data for the page differently across participants. We need to replace the text string
-    # in these pages with a SampleFrom object naming a bank, and put a bank with
-    # the possible text strings in a block that encloses all the pages that
-    # sample from that bank (or the entire experiment). It's very important to
-    # spell the name of the bank the same in all places, and to put enough
-    # strings in the bank that you won't run out, because each SampleFrom object
-    # will take a string that hasn't been used before for that participant.
-
-    sampled_pages = [Page(SampleFrom('bank1'), condition = row['Condition'])
-            for row in items2]
-    sampling_block = Block(pages = sampled_pages, banks = {'bank1': ['sampled1',
-        'sampled2']})
-
-    ####### Copy and tweak components without messing up IDs (new) ######
+    ####### Copy and tweak components without messing up IDs ######
 
     # Now I want to make another block just like block 1, and then just tweak it
     # a little bit.
     # The "new" method ensures they get separate IDs, which can be important for how
     # the experiment runs. Do this whenever you copy an option, page, or block
-    # if you're using the "with" statement.
+    # if you're using the "with" statement to make your IDs.
 
     copied_block = block1.new()
 
@@ -120,44 +127,6 @@ with make_experiment(IDGenerator()):
     # which is fine; it'll just show some text.
 
     copied_block.pages.append(Page('This is an extra page.'))
-
-    ####### Change order or choice of blocks across participants (exchangeable,
-    ####### counterbalance, treatments) #####
-
-    # So now block1 and copied_block are mostly the same. Maybe we want to show
-    # half the participants block1 and half copied_block, like this:
-
-    block_of_blocks = Block(blocks = [block1, copied_block], treatments =
-            [[block1], [copied_block]])
-
-    # This means that in treatment 1, block1 will show, and in treatment 2,
-    # copied_block will show. We could have put other blocks in these
-    # treatments, or had blocks in block_of_blocks that aren't in any treatments
-    # and thus show for all participants.
-
-    # They don't have to be adjacent or in the same larger block for this to work - we could
-    # have put the treatments argument on the entire Experiment.
-
-    # The same rules apply to the exchangeable argument and the counterbalance
-    # argument. If you want two or more blocks to switch places with each other
-    # across participants, you can do:
-
-    alternative_block_of_blocks = Block(blocks = [block1, copied_block],
-            counterbalance = [block1, copied_block])
-
-    # or the same with exchangeable instead of counterbalance. Exchangeable
-    # decides the order randomly. Counterbalance decides deterministically, so
-    # you'll get a more even distribution across participants. Counterbalance
-    # and treatments use the same variable to make decisions, so you probably
-    # don't want to use them in the same experiment. This variable is based on
-    # num_counters in config.txt, so make sure to set it if you use
-    # counterbalance or treatments.
-
-    # Note that if we use block_of_blocks in the experiment, the animal_question
-    # that conditional_block depends on might not ever show! The copied version
-    # of it is not the same as the original. If it doesn't show, then
-    # conditional_block will not show either.
-
 
     ####### Add images, audio, and video #######
 
@@ -170,7 +139,7 @@ with make_experiment(IDGenerator()):
     images = ['static/images/' + row[1] + '.jpg'
               for row in items1]
 
-    # Get the filenames of all mp3 files you put in static/audio:
+    # Or, you can get the filenames from your directory, like all the mp3 files you put in static/audio:
     audio = glob.glob('static/audio/*.mp3')
 
     # Once you have the filenames, add resources to a Page or Option.
@@ -182,33 +151,36 @@ with make_experiment(IDGenerator()):
             ]
         )
 
+    # resources can be put into Resource objects if you want to give them extra options.
+    # This one will play automatically when its page displays, not show controls so that
+    # participants can't fast forward through it, and require participants to let it finish
+    # before they can choose an option and advance.
     audio_page = Page("What does the cat say?",
             options = [Option('meow'), Option('woof')],
-            resources = [Resource(audio[0])])
+            resources = [Resource(audio[0], autoplay = True, controls = False, required = True)])
 
-    resource_block = Block(pages = [image_page, audio_page])
+    resource_block = Block(items = Item([image_page, audio_page]))
 
-    ####### Control the order of pages via blocks #######
+    # Blocks can contain other blocks.
 
-    # That page will occur somewhere in block 4, but we don't know exactly where.
-    # Blocks stay put unless they're exchangeable, but questions move around in
-    # their blocks. Here's a block with just one page so we know it'll come last.
-
-    last_block = Block(pages = [Page('Goodbye!')])
+    block1 = Block(items = [instructions])
+    block2 = Block(items = items1)
+    block3 = Block(
+            blocks = [
+                Block(items = items2 + [item3, item4]),
+                resource_block
+            ]
+        )
 
     ###### Make an Experiment ######
 
-    # Finally, wrap the Blocks in an Experiment. Remember that Pages take an
-    # optional list of Options, Blocks take a list of Pages (or a list of lists of
-    # Pages, or a list of Blocks), and Experiments take a list of Blocks.
+    # Finally, wrap the Blocks in an Experiment. Experiments can only take
+    # a list of blocks, so even if you don't want any sequential ordering in your experiment, you'd
+    # have to wrap your items in one Block just for show. Usually, there are
+    # introductory and ending instructions or questions you want to keep at the
+    # beginning or end of your experiment.
 
-    experiment = Experiment([
-        block_of_blocks,
-        latin_square_block,
-        conditional_block,
-        sampling_block,
-        resource_block,
-        last_block])
+    experiment = Experiment([block1, block2, block3])
 
     # You can generate the JSON just to look at it, for instance by printing this
     # variable. This step is optional.

@@ -1,4 +1,4 @@
-from speriment.utils import IDGenerator
+from speriment.utils import IDGenerator, at_most_one
 import copy
 
 class SampleFrom:
@@ -13,7 +13,10 @@ class SampleFrom:
 
     def __init__(self, bank, variable = None, not_variable = None, field = None,
             with_replacement = False):
-        '''bank: string, the name of an information bank to sample from. A
+        '''
+        At most one of variable, not_variable, and with_replacement can be given.
+
+        bank: string, the name of an information bank to sample from. A
         corresponding bank must be put in one of the Blocks containing this
         SampleFrom, or the Experiment.
 
@@ -53,30 +56,34 @@ class SampleFrom:
             self.variable = variable
             if not variable in SampleFrom._variable_maps[bank]:
                 SampleFrom._variable_maps[bank][variable] = SampleFrom._id_generators[bank]._next_id()
-        elif not_variable != None:
+        if not_variable != None:
             self.not_variable = not_variable
             if not not_variable in SampleFrom._variable_maps[bank]:
                 SampleFrom._variable_maps[bank][not_variable] = SampleFrom._id_generators[bank]._next_id()
-        else:
-            if with_replacement:
-                self.with_replacement = with_replacement
+        if with_replacement:
+            self.with_replacement = with_replacement
         if field != None:
             self.field = field
 
     def map_variables(self):
-        new_obj = copy.deepcopy(self)
-        mapping = SampleFrom._variable_maps[new_obj.bank]
-        if hasattr(new_obj, 'variable'):
-            new_obj.variable = int(mapping[new_obj.variable])
-        elif hasattr(new_obj, 'not_variable'):
-            new_obj.not_variable = int(mapping[new_obj.not_variable])
+        mapping = SampleFrom._variable_maps[self.bank]
+        if hasattr(self, 'variable'):
+            self.variable = int(mapping[self.variable])
+        elif hasattr(self, 'not_variable'):
+            self.not_variable = int(mapping[self.not_variable])
         else:
-            if not hasattr(new_obj, 'with_replacement'):
-                new_obj.variable = int(SampleFrom._compile_time_generators[new_obj.bank]._next_id())
-        return new_obj
+            if not hasattr(self, 'with_replacement'):
+                self.variable = int(SampleFrom._compile_time_generators[self.bank]._next_id())
 
     def _validate(self):
-        # TODO (not)var or without_r consistently for a given bank
-        # TODO enough in bank for all samples
-        # TODO fields consistent in bank
-        pass
+        at_most_one(self, ['variable', 'not_variable', 'with_replacement'])
+
+    def comp(self):
+        self.map_variables()
+        if hasattr(self, 'bank'):
+           self.sampleFrom = self.bank
+           del self.bank
+        if hasattr(self, 'not_variable'):
+           self.notVariable = self.not_variable
+           del self.not_variable
+        return self

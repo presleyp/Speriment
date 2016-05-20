@@ -1,16 +1,20 @@
 from component import Component
+from run_if import RunIf
 from collections import Counter
+from speriment.utils import exactly_one
 
 class Block(Component):
-    def __init__(self, pages = None, groups = None, blocks = None, id_str = None,
+    def __init__(self, pages = None, items = None, groups = None, blocks = None, id_str = None,
             exchangeable = [], counterbalance = [], treatments = [], latin_square = None, pseudorandom = None, **kwargs):
         '''
-        Exactly one of pages, groups, and blocks must be provided.
+        Exactly one of pages, groups, items, and blocks must be provided.
 
-        pages: [Page], the pages contained by this Block.
+        pages: [Page], the pages contained by this Block. They will be wrapped in Items automatically.
 
-        groups: [[Page]], the groups contained by this Block. One page from each
-        inner list of Pages will be displayed per participant.
+        items: [Item], the items contained by this Block. Any bare Page in this list will be automatically wrapped in an Item.
+
+        groups: [[Page]] or [[Item]], the groups contained by this Block. One Item from each
+        inner list of Items will be displayed per participant. Bare Pages will be wrapped in Items.
 
         blocks: [Block], the blocks contained by this Block.
 
@@ -98,6 +102,8 @@ class Block(Component):
         self._set_optional_args(**kwargs)
         if pages != None:
             self.pages = pages
+        if items != None:
+            self.items = items
         if groups != None:
             self.groups = groups
         if blocks != None:
@@ -140,13 +146,8 @@ class Block(Component):
             'counterbalance' to 'exchangeable' so the order will be decided
             randomly for each participant.'''
 
-
     def _validate_contents(self):
-        content_types = [attribute for attribute in
-                ['pages', 'groups', 'blocks'] if hasattr(self, attribute)]
-        if len(content_types) != 1:
-            raise ValueError, '''Block must have exactly one of pages, groups,
-            and blocks.'''
+        exactly_one(self, ['pages', 'groups', 'items', 'blocks'])
 
     def _validate_pseudorandom(self):
         if hasattr(self, 'pseudorandom'):
@@ -173,3 +174,20 @@ class Block(Component):
 
     def _validate_latin_square(self):
         pass
+
+    def comp(self):
+        if hasattr(self, 'treatments'):
+            self.compile_treatments()
+        if hasattr(self, 'latin_square'):
+            self.latinSquare = self.latin_square
+            del self.latin_square
+        super(Block, self).comp()
+        return self
+
+    def compile_treatments(self):
+        '''Treatments are lists of lists of blocks to run conditionally. Remove
+        this variable and add RunIf objects to those blocks.'''
+        for i, treatment in enumerate(self.treatments):
+            for block in treatment:
+                block.run_if = RunIf(permutation = i)
+        del self.treatments

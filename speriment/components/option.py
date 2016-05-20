@@ -27,6 +27,9 @@ class Option(Component):
         For example, correct = 'hi.*' would mean that 'hi' and 'high' are both
         correct inputs.
 
+        run_if: RunIf, optional. If given, the RunIf's condition must be satisfied
+        for this option to display.
+
         tags: {string: string}, a dictionary for any metadata you want to
         associate with this Option. The keys of the dictionary will become
         columns in your output file. It will not be used in the experiment,
@@ -39,3 +42,7 @@ class Option(Component):
         if text != None:
             self.text = text
         self._set_optional_args(**kwargs)
+
+    def comp(self):
+        super(Option, self).comp()
+        return self

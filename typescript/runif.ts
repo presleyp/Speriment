@@ -42,4 +42,20 @@ class RunIfPermutation extends RunIf{
     }
 }
 
-
+function createRunIf(jsonRunIf): RunIf{
+    var runIf;
+    if (jsonRunIf){
+        if (_.has(jsonRunIf, 'optionID')){
+            runIf = new RunIfSelected(jsonRunIf.pageID, jsonRunIf.optionID);
+        } else if (_.has(jsonRunIf, 'regex')){
+            runIf = new RunIfMatched(jsonRunIf.pageID, jsonRunIf.regex);
+        } else if (_.has(jsonRunIf, 'permutation')){
+            runIf = new RunIfPermutation(jsonRunIf.permutation);
+        } else {
+            runIf = new RunIf();
+        }
+    } else {
+        runIf = new RunIf();
+    }
+    return runIf;
+}
