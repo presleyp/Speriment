@@ -160,3 +160,9 @@ def at_most_one(obj, attributes):
 but it has:
 
 {}.'''.format(obj, attributes, found)
+
+def check_list(obj, attribute):
+    if hasattr(obj, attribute) and type(getattr(obj, attribute)) != list:
+        raise ValueError, '''{} in {} must be a list.'''.format(attribute, obj)
+
+

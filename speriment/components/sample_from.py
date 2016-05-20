@@ -77,10 +77,6 @@ class SampleFrom:
 
     def _validate(self):
         at_most_one(self, ['variable', 'not_variable', 'with_replacement'])
-        # TODO (not)var or without_r consistently for a given bank
-        # TODO enough in bank for all samples
-        # TODO fields consistent in bank
-        pass
 
     def comp(self):
         self.map_variables()

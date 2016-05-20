@@ -1,5 +1,6 @@
 from component import Component
 from option import Option
+from speriment.utils import check_list
 
 class Page(Component):
     def __init__(self, text, options = None, id_str = None, **kwargs):
@@ -60,6 +61,10 @@ class Page(Component):
     def _validate_resources(self):
         pass # check for supported filetypes
 
+    def _validate_lists(self):
+        check_list(self, 'options')
+        check_list(self, 'resources')
+
     def _validate_freetext(self):
         if hasattr(self, 'freetext') and self.freetext == True:
             if hasattr(self, 'options'):
@@ -92,7 +97,7 @@ class Page(Component):
                     rather than a regular expression as its "correct" attribute.'''
 
     def _validate_keyboard(self):
-        if hasattr(self, 'keyboard'): 
+        if hasattr(self, 'keyboard'):
             if type(self.keyboard) == list:
                 if len(self.keyboard) != len(self.options):
                     raise ValueError, '''List of keybindings must have as many
@@ -106,6 +111,8 @@ class Page(Component):
         self._validate_resources()
         self._validate_freetext()
         self._validate_keyboard()
+        self._validate_multiple_choice()
+        self._validate_lists()
 
     def comp(self):
         if hasattr(self, 'freetext') and not hasattr(self, 'options'):

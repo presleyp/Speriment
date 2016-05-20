@@ -91,9 +91,6 @@ def test_feedback():
         assert ji2['pages'][1]['text'] == "that was the first page of item 2"
         assert 'runIf' not in ji2['pages'][1]
 
-def test_run_if():
-    pass
-
 def test_exactly_one():
     with make_experiment(IDGenerator()):
         with pytest.raises(ValueError):
@@ -141,3 +138,23 @@ def test_compile_resources():
         assert resources[1] == {u'source': u'dogs.ogg', u'mediaType': u'video', u'controls': False, u'autoplay': True, u'required': True}
         assert resources[2] == {u'source': u'elephants.mp4', u'mediaType': None, u'controls': True, u'autoplay': False, u'required': False}
         assert resources[3] == {u'sampleFrom': u'animals', u'variable': 0}
+
+def test_block():
+    pass
+
+def test_check_list():
+    with make_experiment(IDGenerator()):
+        p1 = Page('hi', options = Option('hi'))
+        with pytest.raises(ValueError):
+            p1._validate()
+        p2 = Page('hi', resources = Resource('hi'))
+        with pytest.raises(ValueError):
+            p2._validate()
+
+def test_option():
+    pass
+
+def test_sample_from():
+    # SampleFrom can be: page text, page feedback text, option text, page resource source, option resource source, page tag, option tag, page correct, item condition
+    pass
+

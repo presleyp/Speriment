@@ -50,7 +50,37 @@ class Experiment(Component):
             self.treatments = treatments
 
     def _validate(self):
-        pass
+        if hasattr(self, 'banks'):
+            self.validate_banks()
+
+    def get_bank_samplers(self, samplers, bank):
+        return [sampler for sampler in samplers if sampler.bank == bank]
+
+    def validate_banks(self):
+        samplers = get_samplers(self)
+        for bank in self.banks:
+            bank_samplers = self.get_bank_samplers(samplers, bank)
+            any_replacement = True if any(s.with_replacement for s in samplers) else False
+            all_replacement = True if all(s.with_replacement for s in samplers) else False
+            num_samplers = len(samplers)
+            if num_samplers > len(bank) and not any_replacement:
+                raise ValueError('''{} does not have enough values to sample {} times without replacement.'''.format(bank_name, num_samplers))
+            if any_replacement and not all_replacement:
+                raise ValueError('''Some SampleFrom objects for bank {} are
+                    with replacement and some are without replacement. They
+                    must all sample the same way.'''.format(bank_name))
+            if any(type(val) == dict for val in bank):
+                if not all(type(val) == dict for val in bank):
+                    raise ValueError('''Values in {} must all be either strings or dictionaries'''.format(bank_name))
+                fields = bank[0].keys()
+                if not all(val.keys() == fields for val in bank):
+                    raise ValueError('''All values in {} must have the same fields'''.format(bank_name))
+                if not all(hasattr(sampler, field) for sampler in samplers):
+                    raise ValueError('''All SampleFrom objects sampling from {} must specify a field.'''.format(bank_name))
+                if not all(sampler.field in fields for sampler in samplers):
+                    for sampler in samplers:
+                        if sampler.field not in fields:
+                            raise ValueError('''Attempt to sample {} field from {}, which is not among its fields'''.format(sampler.field, bank_name))
 
     def _validate_json(self, json_object):
         contents = pkg_resources.resource_string(__name__, 'sperimentschema.json')
@@ -79,3 +109,9 @@ class Experiment(Component):
         self.to_file('./static/js/' + filename, varname)
         make_exp(filename)
         make_task(varname)
+
+def get_samplers(obj):
+    attrs = obj.__dict__
+    samplers = [attr for attr in attrs if isinstance(attr, SampleFrom)]
+    children = [attr.__dict__ for attr in attrs if hasattr(attr, '__dict__') and not isinstance(attr, SampleFrom)]
+    return samplers + [get_samplers(child) for child in children]
