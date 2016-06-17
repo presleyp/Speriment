@@ -19,6 +19,9 @@ def parse():
             to write experimental results to in csv format.''')
     parser.add_argument('-j', '--json', action = 'store_true', help = '''Write the output in JSON
     format.''')
+    parser.add_argument('-f', '--flatten', action = 'store_true', help = '''For cells that normally record lists of data,
+    record only one value (usually the one corresponding to the option that the respondent chose), resulting in a 2D data structure that is
+    easily imported into R as a dataframe.''')
     parser.add_argument('-e', '--exclude', nargs='*',
             default=[], help = '''Worker IDs of any participants whose data you don't
             want to write to the output file.''')
@@ -49,7 +52,7 @@ def retrieve(db_url, table_name, exclude = []):
             and participant['workerid'] not in exclude]
     return complete_participants
 
-def format_data(complete_participants):
+def format_data(complete_participants, flatten):
     # column PsiTurk saves your data to
     data_column_name = 'datastring'
     # JSON property Speriment tells PsiTurk to log trial data to
@@ -75,7 +78,29 @@ def format_data(complete_participants):
                 'ExperimentVersion': participant['codeversion']
                 })
             trials.append(trial['trialdata'])
+    result = flatten_data(trials) if flatten else trials
     return trials
+
+def flatten_data(trials):
+    flattened_trials = trials.drop('OptionOrder', 1)
+    replace = [
+          'SelectedID',
+          'SelectedPosition',
+          'SelectedText',
+          'Correct'
+          ]
+    for column in replace:
+      flattened_trials[column] = flattened_trials[column].apply(lambda x: x[0])
+    return rename_columns(flattened_trials)
+
+def rename_columns(trials):
+    new_trials = copy.deepcopy(trials)
+    new_trials['PageResource'] = new_trials.PageResources.apply(lambda x: x[0])
+    new_trials['BlockID'] = new_trials.BlockIDs.apply(lambda x: x[-1])
+    # these two must be applied after SelectedPosition is flattened
+    new_trials.OptionText = new_trials.apply(lambda row: row['OptionText'][row['SelectedPosition']], axis = 1)
+    new_trials.OptionResource = new_trials.apply(lambda row: row['OptionResources'][row['SelectedPosition']][0], axis = 1)
+    return new_trials
 
 def python_dataframe(trials, filename):
     data_frame = pd.DataFrame(trials)
@@ -89,14 +114,14 @@ def write_json(trials, filename):
 
 
 if __name__ == '__main__':
-    # usage: speriment-output filename exclude
     args = parse()
     filename = args.filename
     exclude = args.exclude
     json_output = args.json
+    flatten = args.flatten
     (db_url, table_name) = get_credentials()
     data = retrieve(db_url, table_name, exclude)
-    formatted = format_data(data)
+    formatted = format_data(data, flatten)
     if json_output:
         write_json(formatted, filename)
     else:
