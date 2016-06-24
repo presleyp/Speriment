@@ -90,8 +90,9 @@ def flatten_data(trials):
           'Correct'
           ]
     for column in replace:
-      flattened_trials[column] = flattened_trials[column].apply(lambda x: x[0])
-    return rename_columns(flattened_trials)
+        flattened_trials[column] = flattened_trials[column].apply(lambda x: x[0])
+    flattened_tags = flatten_option_tags(flattened_trials)
+    return rename_columns(flattened_tags)
 
 def rename_columns(trials):
     new_trials = copy.deepcopy(trials)
@@ -100,6 +101,17 @@ def rename_columns(trials):
     # these two must be applied after SelectedPosition is flattened
     new_trials.OptionText = new_trials.apply(lambda row: row['OptionText'][row['SelectedPosition']], axis = 1)
     new_trials.OptionResource = new_trials.apply(lambda row: row['OptionResources'][row['SelectedPosition']][0], axis = 1)
+    return new_trials
+
+def flatten_option_tags(trials):
+    tag_columns = new_trials[23:]
+    new_trials = copy.deepcopy(trials)
+    for column in tag_columns:
+        # must be applied after SelectedPosition is flattened
+        new_trials[column] = new_trials.apply(lambda row: row[column][row['SelectedPosition']]
+                if type(row[column]) == list
+                else row[column],
+                axis = 1)
     return new_trials
 
 def python_dataframe(trials, filename):

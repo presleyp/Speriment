@@ -42,8 +42,8 @@ Speriment records the following trial data and `speriment-output` gives it these
 
 Finally, it returns the tags you included in your Python script:
 - User-defined columns: There will then be a column for each page tag, item tag,
-  and option tag you supplied. Option tag values will be grouped by option and
-  given in the order in which the options were displayed.
+  and option tag you supplied. Option tag columns will be a list of the value of the
+  tag for each option, in the order in which the options displayed.
 
 PsiTurk provides information about the version of the experiment (which they
 call condition) that was used for the purpose of Latin squares, the worker ID,
@@ -76,6 +76,7 @@ that you can use to distinguish them from the other questions).
   the first selected option
 - SelectedText: the text of the first selected option
 - Correct: the correctness information for the first selected option
+- any option tag columns: the tag value corresponding to the first selected option
 
 The `speriment-output` command also takes a `-j` or `--json` option, which returns a JSON file rather
 than a Python one (this can be combined with the `-f` option), and finally an `-e` or `--exclude`
