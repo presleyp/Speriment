@@ -21,7 +21,7 @@ Speriment experiments are made by nesting Python objects.
 
 To get started, look at this [example script](https://github.com/presleyp/Speriment/blob/master/doc/example.py) to see the basics.
 
-Then you can look for the specific features you need [here](https://github.com/presleyp/Speriment/blob/master/doc/feature_example.md).
+Then you can look for the specific features you need [here](https://github.com/presleyp/Speriment/blob/master/doc/feature_examples.md).
 Features you may be interested in include:
 - counterbalancing
 - Latin Squares
