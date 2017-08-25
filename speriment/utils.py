@@ -120,7 +120,7 @@ def make_exp(filename):
     json_tag = '''\n\t\t<script src="/static/js/{0}" type="text/javascript">'''.format(filename)
     script_divider = '</script>'
     css_tag = '''\n\t<link rel=stylesheet href="/static/lib/node_modules/speriment/css/speriment.css"'''
-    css_divider = 'type="text/css">'
+    css_divider = 'type="text/css" />'
     new_contents = None
     with open(exp_file, 'r') as exp:
         exp_contents = exp.read()
