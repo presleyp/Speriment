@@ -1,8 +1,8 @@
-#Speriment
+# Speriment
 
-##Making experiments easier to express
+## Making experiments easier to express
 
-###What is Speriment?
+### What is Speriment?
 Speriment is a package, inspired by [SurveyMan](https://github.com/SurveyMan/SurveyMan), to help you write an online experiment for use with
 [PsiTurk](https://psiturk.org/). PsiTurk describes itself as a tape player - it can run any "tape",
 that is, JavaScript program, as an online experiment on Mechanical Turk. But
@@ -15,7 +15,7 @@ your experiment.
 It's currently in beta. It should work on any Unix machine but has only been
 tested on a Mac. Please add an Issue if you find any bugs.
 
-###Guides
+### Guides
 
 Speriment experiments are made by nesting Python objects.
 
@@ -37,7 +37,7 @@ For help with the syntax while writing your script, check out the API at [RawGit
 The workflow for installing and running Speriment is explained [here](https://github.com/presleyp/Speriment/blob/master/doc/workflow.md).
 A description of the output you'll analyze is given [here](https://github.com/presleyp/Speriment/blob/master/doc/analysis.md).
 
-###How do I contribute?
+### How do I contribute?
 
 Contributions are super welcome. But before you start coding, start an Issue or
 comment on an existing one. There are lots of new features to add, and we want to
