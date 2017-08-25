@@ -1,8 +1,8 @@
-#Features and Examples
+# Features and Examples
 
-##Changing Default Ordering of Components
+## Changing Default Ordering of Components
 
-###Ordered Options
+### Ordered Options
 By default, Options are displayed in random order on the page. The argument
 `ordered = True` tells the enclosing component that the options are on a scale.
 Half the time, they will appear in the order in which they are written here;
@@ -16,7 +16,7 @@ the other half the time, they will appear in reverse order.
         )
     )
 
-###Multi-page Items
+### Multi-page Items
 What if you want to separate the question and answers of an Item onto different pages?
 Or display parts of an item in a sequence, like in a self-paced reading study?
 Instead of giving an Item one Page, you can give it a list of Pages. The Pages will run in
@@ -58,7 +58,7 @@ is syntactic sugar for
     )
 
 
-###Pseudorandomized Items
+### Pseudorandomized Items
 Items are ordered randomly within their enclosing block by default. But what if the Items
 have conditions and you don't want two Items of the same condition to appear in a row?
 Give your items conditions, and make sure you have an equal number of items for each condition.
@@ -74,7 +74,7 @@ Then set pseudorandom to True in the enclosing block.
         pseudorandom = True
     )
 
-###Nested Blocks
+### Nested Blocks
 If you want more sequential ordering in your experiment, you can create Blocks of Blocks.
 Blocks can contain a list of Blocks, a list of groups of Items, or a list of Items. Items
 and groups of Items get reordered (randomly or pseudorandomly), but Blocks keep the order
@@ -93,7 +93,7 @@ you give them by default.
         ]
     )
 
-###Exchangeable or Counterbalanced Blocks
+### Exchangeable or Counterbalanced Blocks
 Blocks stay where you put them by default. To make them move, give their
 enclosing component (a Block or the Experiment) an `exchangeable` argument.
 This argument takes a list of Blocks that are allowed to switch places with
@@ -129,9 +129,9 @@ discouraged except when it is used only once in an Experiment, and without
         exchangeable = [demographics_block, feedback_block]
     )
 
-##Selecting Components to Run
+## Selecting Components to Run
 
-###Random selection of a version of an Item
+### Random selection of a version of an Item
 Say you have multiple ways of wording a question, and you want to randomly choose the wording
 so that it doesn't bias the overall results. Put the various versions of your Item in a group,
 which is just a list of Items. Blocks can take items or groups but not both, so once you've decided
@@ -148,7 +148,7 @@ to use a group in a block, wrap all Items inside groups, even if sometimes it's 
         ]
     )
 
-###Latin Square
+### Latin Square
 Sometimes you have multiple versions of each item, and you don't want to show a given
 participant more than one version of each item. A Latin Square distributes versions
 and items evenly across participants, making the result easier to analyze. In order to set
@@ -173,7 +173,7 @@ algorithm rather than choosing from groups randomly.
         latin_square = True
     )
 
-###Run Components conditionally
+### Run Components conditionally
 Options, Pages, Items, and Blocks can take a `run_if` argument, which is passed a RunIf object.
 The RunIf object contains a condition, and the component will only run if the condition is met.
 RunIf objects can take
@@ -189,7 +189,7 @@ RunIf objects can take
 
 Let's look at some use cases.
 
-####Choose between blocks depending on an answer.
+#### Choose between blocks depending on an answer.
 This experiment asks the participant their native language, and runs a block of questions in Hindi
 if their native language is Hindi, or runs a block telling them they don't qualify for the experiment
 if their native language is not Hindi.
@@ -216,7 +216,7 @@ Note the two different ways of referring to an item or option in a RunIf.
     )
     exp = Experiment(blocks = [intro_block, hindi_block, other_block])
 
-####Make an item optional depending on an answer.
+#### Make an item optional depending on an answer.
 This block only asks you for more information if you indicate that you have seen Star Wars.
 
     star_wars_item = Item(
@@ -238,7 +238,7 @@ This block only asks you for more information if you indicate that you have seen
         ]
     )
 
-####Give feedback depending on an answer.
+#### Give feedback depending on an answer.
 You may want to give feedback on a by-option basis, so that whatever the participant chooses,
 they get feedback about their response. There is a shortcut to writing this: add a `feedback`
 argument to each option (or to only some of them).
@@ -282,7 +282,7 @@ is short for
         ]
     )
 
-####Choose blocks depending on the participant.
+#### Choose blocks depending on the participant.
 You may want half of your participants to see one block and half to see another. You could
 do this with two different experiments, but it's also possible to program your experiment
 to handle it for you. PsiTurk sets a counter variable for each participant. This variable
@@ -303,7 +303,7 @@ and `block_b` takes a `permutation` argument instead of a `page` and `option` ar
 to the counter. If you use the RunIf directly, you can make other Components (Pages, Items, and Options)
 depend on the counter, but this is not usually necessary.
 
-##Training Loops
+## Training Loops
 Some experiments contain a training portion and measure the speed with which participants
 learn or the effect of a training block on their performance in a testing block. Speriment
 can create training blocks with the use of a `criterion` argument on the block, which determines
@@ -363,7 +363,7 @@ get at least the last five questions correct in order to advance.
 Blocks that contain Blocks can have criteria and cutoffs. Just count gradeable
 questions as if they were flattened into one big block.
 
-##Require the use of the keyboard for responding
+## Require the use of the keyboard for responding
 By default, participants choose Options with the mouse. If you want to study reaction times, the
 mouse is probably too slow and noisy; you'll want to have your participants use the keyboard.
 
@@ -382,7 +382,7 @@ On questions with a `keyboard` setting, objects in the page are not clickable.
 However, the spacebar can be used to advance regardless of the keyboard
 setting.
 
-##Attach information to a component for analysis purposes.
+## Attach information to a component for analysis purposes.
 Items, Pages, and Options can take a `tags` argument. This argument doesn't affect the way the
 experiment runs; it just follows the component through to the output data, making it easier
 for you to analyze the data. The `tags` argument takes a dictionary with strings as keys.
@@ -390,7 +390,7 @@ Each key that is ever used as a tag will be a column in the output file.
 
 Let's look at two helpful use cases.
 
-###Facilitate removal of non-analyzable pages
+### Facilitate removal of non-analyzable pages
 You can't run a regression on the instructions of your experiment, so make it easy for yourself
 to get them out of the way later by removing all rows that have 'instructions' as the value of the
 column 'item_type'.
@@ -398,7 +398,7 @@ column 'item_type'.
     instruction_item = Item('something you should do', tags = {'item_type': 'instructions'})
     question_item = Item(Page('experimental question', options = opts), tags = {'item_type': 'experimental'})
 
-###Facilitate coding of responses
+### Facilitate coding of responses
 Your analysis will probably group Items by the type of response that was given, but how do you
 associate the type of the response with the response? Give each Option a tag.
 
@@ -413,7 +413,7 @@ associate the type of the response with the response? Give each Option a tag.
         )
     )
 
-##Recombine Components On the Fly
+## Recombine Components On the Fly
 So far, we've seen how you can build components once, in your script, and then
 display or not display them. But it is also possible to build them during the
 experiment, so that different participants will see different combinations of
@@ -446,7 +446,7 @@ contain a `bank` argument that lists all of the possible values that can be samp
 
 We can explore the arguments to SampleFrom via some use cases.
 
-###Pair properties for the duration of the experiment
+### Pair properties for the duration of the experiment
 
 If you are, for instance, making up meanings for words, you may want the pairing of words with images
 to vary across participants, but stay constant throughout the experiment. The
@@ -478,7 +478,7 @@ read in that cell, but it doesn't actually have to be meaningful.
         banks = {'images': ['funny_drawing1.jpg', 'funny_drawing2.jpg']}
     )
 
-###Create a wrong answer
+### Create a wrong answer
 
 Imagine you want to sample the option texts in an item, and you need to make
 sure that the two options you sample aren't the same. The `not_variable`
@@ -501,7 +501,7 @@ ensure that they will not choose the same value.
         banks = {'answers': ['one answer', 'another answer']}
     )
 
-###Reuse values
+### Reuse values
 By default, Speriment will not sample the same value twice unless instructed to with
 the `variable` argument. To enable sampling with replacement, set `with_replacement` to
 True. This way, you could distribute just a few values randomly across many components.
@@ -517,7 +517,7 @@ times it's sampled from.
         banks = {'words': ['one', 'two']}
     )
 
-###Sample multiple related properties
+### Sample multiple related properties
 Banks don't have to be lists; they can also be dictionaries, with multiple
 fields. This is useful if you want to sample, say, text and an image, but the
 text and image need to be paired up properly (the same across items and participants).

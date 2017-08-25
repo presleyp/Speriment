@@ -1,4 +1,4 @@
-###How do I run an experiment?
+### How do I run an experiment?
 You'll still need to follow all of the [instructions for using PsiTurk](psiturk.readthedocs.org).
 
 But this is what the workflow will look like in your terminal:
@@ -12,7 +12,7 @@ if multiple participants try to submit data at once. See the PsiTurk documentati
     `sudo pip install speriment`
 
 2. Make a project directory for this experiment. In this case I'm calling it `myproject`.
-    
+
     `psiturk-setup-example`
 
     `mv psiturk-example/ myproject/`
@@ -31,39 +31,39 @@ materials. Put the csv file and the Python script in `myproject` (or whatever
 you called the directory).
 
 5. Install the JavaScript component of Speriment.
-    
+
     `cd ~/myproject/static/lib`
-   
+
     `npm install speriment`
 
 6. Run your Python script. It's important to do this after installing Speriment. If you accidentally do it in the wrong order, you can always rerun the script.
-    
+
     `cd ~/myproject`
-    
+
     `python myscript`
 
 7. Enter the PsiTurk shell. If you're using a MySQL database, start its server first with `mysql.server start`.
-    
+
     `psiturk`
 
 8. In the PsiTurk shell, turn on the server and, if you're using a tunnel, open a tunnel.
 
     `server on`
-    
+
     `tunnel open`
 
 9. Debug your experiment in your browser.
-    
+
     `debug`
 
 10. Try out your experiment in the Mechanical Turk Sandbox. This command will ask you questions and then give you two links; follow the Sandbox link.
-    
+
     `hit create`
 
 11. When you're ready, switch to live mode and make a HIT to put on the real Mechanical Turk.
-    
+
     `mode`
-    
+
     `hit create`
 
     The PsiTurk shell also has other useful commands, so check out its documentation.
